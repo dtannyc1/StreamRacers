@@ -22,7 +22,7 @@ vehicleImageURL.addEventListener("change", e => {
 
 vehicleUploadButton.addEventListener("click", e => {
     e.preventDefault();
-
+    console.log('image uploading...')
     fetch("https://api.imgur.com/3/image", {
         method: "POST",
         headers: {
@@ -31,7 +31,10 @@ vehicleUploadButton.addEventListener("click", e => {
         },
         body: vehicleImageFormData
     }).then(data => data.json()).then(data => {
+        console.log('success!');
         img.src = data.data.link
         racer.vehicleURL = data.data.link;
+    }).catch(err => {
+        console.log(err);
     })
 })
