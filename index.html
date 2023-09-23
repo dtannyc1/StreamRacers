@@ -13,13 +13,17 @@
                 <h1>Stream Racers Vehicle Upload</h1>
             </div>
             <div class="main">
-                <canvas class="main-canvas"></canvas>
+                <img id="main-image"></img>
                 <form action="" id="vehicleForm">
                     <label>Username: </label>
-                    <input type="text" id="username" value="" placeholder="username"/> <br/>
+                    <input type="text" id="username" value="" placeholder="username"/>
+                    <br/>
 
                     <label>Vehicle Image: </label>
-                    <input type="file" id="vehicleImage"> <br/>
+                    <input type="file" id="vehicleImage">
+                    <button type="button" id="vehicleUpload">Upload Image</button>
+                    <br/>
+
                     <button type="submit">Submit!</button>
                 </form>
             </div>
