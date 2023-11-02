@@ -5,6 +5,10 @@ let broadcasterChannelId = "";
 let raceStartTime = Date.now();
 let setupDuration = 5;
 let raceDuration = 30;
+let totalRoadHeight = 95;
+let winner;
+let finishX;
+
 //let key = "";
 
 let canvas = document.getElementById("maincanvas");
@@ -17,6 +21,58 @@ let cameraTime = 0;
 let defaultDrawings = {};
 let backgrounds = [[],[],[]];
 let foregrounds = [];
+let sortedRacers = [];
+
+function loadAssets() {
+	defaultDrawings.vehicle = new Image();
+  	defaultDrawings.vehicle.src = "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&raw=1";
+
+  	defaultDrawings.wheel1 = new Image();
+  	defaultDrawings.wheel1.src = "https://www.dropbox.com/scl/fi/6xqc3i22e9tudpbau8co3/default_wheel1.svg?rlkey=wvprdn16gvssjt0zoaedmv55s&raw=1";
+
+    defaultDrawings.wheel2 = new Image();
+  	defaultDrawings.wheel2.src = "https://www.dropbox.com/scl/fi/3p1k8pq5f8by1hxxmg8dp/default_wheel2.svg?rlkey=rq7s836y1qrl51kwvas8dnq96&raw=1";
+
+  	defaultDrawings.avatar = new Image();
+  	defaultDrawings.avatar.src = "https://images.vexels.com/media/users/3/236404/isolated/lists/972cb1b1bfe5506f43c5b824766d0205-semi-flat-smiloing-poop-emoji.png";
+
+  	defaultDrawings.startLine = new Image();
+  	defaultDrawings.startLine.src = "https://www.dropbox.com/scl/fi/bnou8ckx2enjsn1ntox5d/start_line.png?rlkey=jvibcvg72fxet75n5gu21bo4n&raw=1";
+
+  	defaultDrawings.finishLine = new Image();
+  	defaultDrawings.finishLine.src = "https://www.dropbox.com/scl/fi/vrbqretom1k4qm9pyx4w2/finish_line.png?rlkey=z2fvdtmitr4vhzsiy9sf19d6b&raw=1";
+
+  	defaultDrawings.backgrounds = [[],[],[]];
+  	defaultDrawings.foregrounds = [];
+
+  	let mountain = {img: new Image(), DIM: [800/2, 500/2]};
+  	mountain.img.src = "https://www.dropbox.com/scl/fi/yeygg4k2sy2sum5g18dsp/mountains.png?rlkey=nibv2s6ewbmxbo35p2wn9m0qm&raw=1";
+  	defaultDrawings.backgrounds[0].push(mountain);
+
+  	let barbies = {img: new Image(), DIM: [800/2.5,500/2.5]};
+  	barbies.img.src = "https://www.dropbox.com/scl/fi/qil9bpr86tc9crdef3nuh/barnies_restobar_grill.png?rlkey=tdqq0u666ayq77xhus0vcdypo&raw=1";
+  	defaultDrawings.backgrounds[2].push(barbies);
+
+  	let tree1 = {img: new Image(), DIM: [500/2.5,500/2.5]};
+  	tree1.img.src = "https://www.dropbox.com/scl/fi/rsqpqpv0mel94vq7yd9lv/tree1.png?rlkey=wfsqqgbz1k3aev977it6gm19s&raw=1";
+  	defaultDrawings.backgrounds[2].push(tree1);
+  	defaultDrawings.foregrounds.push(tree1);
+
+  	let tree2 = {img: new Image(), DIM: [500/2.5,500/2.5]};
+  	tree2.img.src = "https://www.dropbox.com/scl/fi/4o8bjpt42vp7by6bi2i1l/tree2.png?rlkey=p0auz5elxsrn2n2ja357m8ohs&raw=1";
+  	defaultDrawings.backgrounds[2].push(tree2);
+  	defaultDrawings.foregrounds.push(tree2);
+
+  	let rock = {img: new Image(), DIM: [500/5,500/5]};
+  	rock.img.src = "https://www.dropbox.com/scl/fi/wedf2wf50e8dfpgt65wir/rock.png?rlkey=59l6o5ibfuie6y2m3wu137dfv&raw=1";
+  	defaultDrawings.backgrounds[2].push(rock);
+  	defaultDrawings.foregrounds.push(rock);
+
+  	let appleTree = {img: new Image(), DIM: [500/2.5,500/2.5]};
+  	appleTree.img.src = "https://www.dropbox.com/scl/fi/0lop56qnil503u1fp9h43/apple_tree.png?rlkey=rkcdlj91xzvz7q8musz8lw9pw&raw=1";
+  	defaultDrawings.backgrounds[1].push(appleTree);
+  	defaultDrawings.backgrounds[2].push(appleTree);
+};
 
 const options = {
   method: 'GET',
@@ -31,9 +87,38 @@ function draw() {
   	drawBackground();
   	drawRacers();
   	drawForeground();
+
+  	if (winner) {
+      	displayWinner();
+    };
+};
+
+function displayWinner(){
+  	ctx.font = "30px Arial";
+  	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.fillText("Winner is", canvas.width/2, canvas.height/2 - 15);
+	ctx.fillText(winner, canvas.width/2, canvas.height/2 + 15);
 };
 
 function drawBackground() {
+  	// draw road
+  	let numDiv = 10;
+  	ctx.fillStyle = "black";
+  	ctx.beginPath();
+  	ctx.rect(0,1080-25-totalRoadHeight*(numDiv+1)/numDiv,1920,totalRoadHeight+totalRoadHeight*2/numDiv);
+  	ctx.fill();
+  	ctx.closePath();
+  	for (let i=0; i < numDiv; i++){
+        ctx.fillStyle = "hsl(" + Math.floor((i*360/numDiv)).toString() + ",100%,50%)";
+      	ctx.strokeStyle = "hsl(" + Math.floor((i*360/numDiv)).toString() + ",100%,50%)";
+        //ctx.beginPath();
+        ctx.fillRect(0,1080-25-totalRoadHeight*(numDiv-i)/numDiv,1920,totalRoadHeight/numDiv);
+      	ctx.strokeRect(0,1080-25-totalRoadHeight*(numDiv-i)/numDiv,1920,totalRoadHeight/numDiv);
+        //ctx.fill();
+        //ctx.closePath();
+    }
+
   	ctx.translate(...cameraLoc);
 
   	// draw moving background w/ some parallax
@@ -42,6 +127,27 @@ function drawBackground() {
           	ctx.drawImage(img.img, ...img.XY, ...img.DIM);
         }
     }
+
+
+  	// draw start line if relevant
+  	if (readying || Date.now() - raceStartTime < 1000 * (setupDuration + 2)) {
+        //ctx.fillStyle = "black";
+        //ctx.beginPath();
+        //ctx.rect(0,880,5,200); // replace w/ image of start line
+        //ctx.fill();
+        //ctx.closePath();
+      	ctx.drawImage(defaultDrawings.startLine, -100, 890, 200, 200);
+    };
+
+  	// draw finish line if relevant
+  	if (finishX) {
+        //ctx.fillStyle = "black";
+        //ctx.beginPath();
+        //ctx.rect(0,880,5,200); // replace w/ image of start line
+        //ctx.fill();
+        //ctx.closePath();
+      	ctx.drawImage(defaultDrawings.finishLine, finishX-100, 890, 200, 200);
+    };
 
   	// reset everything
   	ctx.resetTransform();
@@ -55,24 +161,13 @@ function drawForeground() {
       	ctx.drawImage(img.img, ...img.XY, ...img.DIM);
     }
 
-  	// draw start line if relevant
-  	if (readying || Date.now() - raceStartTime < 1000 * (setupDuration + 2)) {
-        //ctx.fillStyle = "black";
-        //ctx.beginPath();
-        //ctx.rect(0,880,5,200); // replace w/ image of start line
-        //ctx.fill();
-        //ctx.closePath();
-      	ctx.drawImage(defaultDrawings.startLine, -100, 900, 200, 200);
-    };
-
-  	// draw finish line if relevant
-
   	// reset everything
   	ctx.resetTransform();
 };
 
 function drawRacers() {
-  	for (let racer of Object.values(racers)){
+  	for (let name of sortedRacers){
+      	racer = racers[name];
       	// draw vehicle
       	//tmpctx.clearRect(0,0,tmpcanvas.width,tmpcanvas.height);
       	//tmpctx.translate(...cameraLoc);
@@ -140,7 +235,7 @@ window.addEventListener('onEventReceived', function (obj) {
       	//console.log(event);
 
       	if (readying && (event.data.text.startsWith("!join") || event.data.text.startsWith("!start"))) {
-            addRacer(event.data.displayName, null, event.data.displayColor)
+            addRacer(event.data.displayName, event.data.displayColor)
         } else{
          	if (isModerator(event.data.badges)) {
              	if (event.data.text.startsWith("!checkracestatus")){
@@ -156,8 +251,7 @@ window.addEventListener('onEventReceived', function (obj) {
                       	raceStartTime = Date.now();
                       	sendMessageInChat("Race started!");
                     } else if (event.data.text.startsWith("!resetrace")) {
-                     	racers = ({});
-                      	cameraLoc = [canvas.width, 0];
+                     	resetRace();
                       	sendMessageInChat("Race reset");
                     } else {
                      	console.log(event.data.text);
@@ -202,18 +296,11 @@ window.addEventListener('onWidgetLoad', function (obj) {
 
       	// throw in random background assets
       	for (let j = 0; j < 3; j++) {
-          for (let i = 0; i < 7; i++) {
-              let choice = defaultDrawings.backgrounds[j][Math.floor(Math.random()*(defaultDrawings.backgrounds[j].length-1))];
-              let back = {};
-              back.img = choice.img;
-              back.DIM = choice.DIM;
-              back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0],
-                         930-(2-j)*50-back.DIM[1]];
-              // avoid overlaps?
-              backgrounds[j].push(back);
+          for (let i = 0; i < 4-j+Math.random()*10; i++) {
+              addBackgroundItem(j, true);
           }
         }
-      	console.log(backgrounds)
+      	//console.log(backgrounds)
 
       	// throw in random foreground assets
 
@@ -223,102 +310,96 @@ window.addEventListener('onWidgetLoad', function (obj) {
 
 });
 
-function loadAssets() {
-	defaultDrawings.vehicle = new Image();
-  	defaultDrawings.vehicle.src = "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&raw=1";
+function addBackgroundItem(layer, drawAnywhere){
+  	let choice = defaultDrawings.backgrounds[layer][Math.floor(Math.random()*(defaultDrawings.backgrounds[layer].length-1))];
+    let back = {};
+    back.img = choice.img;
+    back.DIM = choice.DIM;
+  	if (drawAnywhere){
+      	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0],
+                 	950-(2-layer)*10-back.DIM[1]];
+    } else {
+      	// add item off canvas
+      	back.XY = [canvas.width - cameraLoc[0] + Math.random()*canvas.width/4,
+                 	950-(2-layer)*10-back.DIM[1]];
+    }
+    // avoid overlaps?
+    backgrounds[layer].push(back);
+}
 
-  	defaultDrawings.wheel1 = new Image();
-  	defaultDrawings.wheel1.src = "https://www.dropbox.com/scl/fi/6xqc3i22e9tudpbau8co3/default_wheel1.svg?rlkey=wvprdn16gvssjt0zoaedmv55s&raw=1";
+async function addRacer(name, displayColor) {
+  	if (!racers[name]){
+        let racer = ({});
+        racer.displayColor = displayColor || "#FFFFFF";
+        racer.name = name; // or event.data.nick
+        let url = "https://api.streamelements.com/kappa/v2/channels/" + name;
+        await fetch(url, {
+                method: "GET",
+                headers: {
+                  Accept: "application/json",
+                  charset: "utf-8",
+                  Authorization: "Bearer undefined"
+                }})
+                .then(res => {
+                //console.log(res);
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    return null;
+                }
+            })
+            .then(data => {
+                //console.log(data);
 
-    defaultDrawings.wheel2 = new Image();
-  	defaultDrawings.wheel2.src = "https://www.dropbox.com/scl/fi/3p1k8pq5f8by1hxxmg8dp/default_wheel2.svg?rlkey=rq7s836y1qrl51kwvas8dnq96&raw=1";
+                // avatar
+                racer.avatar = new Image();
+                racer.avatar.src = data?.avatar || defaultDrawings.avatar;
+                racer.avatarTL = [-135,-125];
+                racer.avatarDIM = [50, 50];
 
-  	defaultDrawings.avatar = new Image();
-  	defaultDrawings.avatar.src = "https://images.vexels.com/media/users/3/236404/isolated/lists/972cb1b1bfe5506f43c5b824766d0205-semi-flat-smiloing-poop-emoji.png";
+                // vehicle main // 800x350
+                racer.vehicle = defaultDrawings.vehicle;
+                //racer.vehicle.src = "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&raw=1";
+                racer.vehicle.style = {filter: "hue-rotate(60deg)"};
+                racer.vehicleTL = [-200, -175];
+                racer.vehicleDIM = [200, 200];
+                racer.vehicleCR = [-150, -60]; // center of rotation
 
-  	defaultDrawings.startLine = new Image();
-  	defaultDrawings.startLine.src = "https://www.dropbox.com/scl/fi/bnou8ckx2enjsn1ntox5d/start_line.png?rlkey=jvibcvg72fxet75n5gu21bo4n&raw=1";
+                racer.wheel1 = defaultDrawings.wheel1;
+                //racer.wheel1.src = "https://www.dropbox.com/scl/fi/6xqc3i22e9tudpbau8co3/default_wheel1.svg?rlkey=wvprdn16gvssjt0zoaedmv55s&raw=1";
+                racer.wheel1TL = [-200, -135];
+                racer.wheel1DIM = [481/2.5, 301/2.5];
+                racer.wheel1CR = [-150,-37];
+                racer.wheel1Theta = Math.PI / 6;
+                racer.wheel1Radius = 50/2.5;
 
-  	defaultDrawings.finishLine = new Image();
-  	defaultDrawings.finishLine.src = "https://www.dropbox.com/scl/fi/vrbqretom1k4qm9pyx4w2/finish_line.png?rlkey=z2fvdtmitr4vhzsiy9sf19d6b&raw=1";
+                racer.wheel2 = defaultDrawings.wheel2;
+                //racer.wheel2.src = "https://www.dropbox.com/scl/fi/3p1k8pq5f8by1hxxmg8dp/default_wheel2.svg?rlkey=rq7s836y1qrl51kwvas8dnq96&raw=1";
+                racer.wheel2TL = [-196, -135];
+                racer.wheel2DIM = [481/2.5, 301/2.5];
+                racer.wheel2CR = [-58,-37];
+                racer.wheel2Theta = Math.PI / 6;
+                racer.wheel2Radius = 50/2.5;
 
-  	defaultDrawings.backgrounds = [[],[],[]];
-  	defaultDrawings.foregrounds = [];
+                // racer location
+                racer.XY = [-1920 - Math.random()*1920/2, 1070 - Math.random()*totalRoadHeight];
+                racer.vel = [200,0]; // px/sec
+                racer.acc = [1,0];
+                racer.textCEN = [-100, -50];
+                racer.time = Date.now();
 
-  	let mountain = {img: new Image(), DIM: [800/2, 500/2]};
-  	mountain.img.src = "https://www.dropbox.com/scl/fi/yeygg4k2sy2sum5g18dsp/mountains.png?rlkey=nibv2s6ewbmxbo35p2wn9m0qm&raw=1";
-  	defaultDrawings.backgrounds[0].push(mountain);
-  	defaultDrawings.backgrounds[1].push(mountain);
-
-  	let barbies = {img: new Image(), DIM: [800/2.5,500/2.5]};
-  	barbies.img.src = "https://www.dropbox.com/scl/fi/qil9bpr86tc9crdef3nuh/barnies_restobar_grill.png?rlkey=tdqq0u666ayq77xhus0vcdypo&raw=1";
-  	defaultDrawings.backgrounds[2].push(barbies);
-};
-
-async function addRacer(name, channel, displayColor) {
-  	let racer = ({});
-    racer.displayColor = displayColor || "#FFFFFF";
-    racer.name = name; // or event.data.nick
-  	channel ||= name;
-    let url = "https://api.streamelements.com/kappa/v2/channels/" + channel;
-    await fetch(url, {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-              charset: "utf-8",
-              Authorization: "Bearer undefined"
-            }})
-            .then(res => {
-            //console.log(res);
-            if (res.ok) {
-              	return res.json();
-            } else {
-              	return null;
-            }
-      	})
-        .then(data => {
-            //console.log(data);
-
-      		// avatar
-            racer.avatar = new Image();
-            racer.avatar.src = data?.avatar || defaultDrawings.avatar;
-            racer.avatarTL = [-135,-125];
-      		racer.avatarDIM = [50, 50];
-
-      		// vehicle main // 800x350
-      		racer.vehicle = defaultDrawings.vehicle;
-      		//racer.vehicle.src = "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&raw=1";
-      		racer.vehicle.style = {filter: "hue-rotate(60deg)"};
-      		racer.vehicleTL = [-200, -175];
-      		racer.vehicleDIM = [200, 200];
-      		racer.vehicleCR = [-150, -60]; // center of rotation
-
-      		racer.wheel1 = defaultDrawings.wheel1;
-      		//racer.wheel1.src = "https://www.dropbox.com/scl/fi/6xqc3i22e9tudpbau8co3/default_wheel1.svg?rlkey=wvprdn16gvssjt0zoaedmv55s&raw=1";
-      		racer.wheel1TL = [-200, -135];
-      		racer.wheel1DIM = [481/2.5, 301/2.5];
-      		racer.wheel1CR = [-150,-37];
-      		racer.wheel1Theta = Math.PI / 6;
-      		racer.wheel1Radius = 50/2.5;
-
-      		racer.wheel2 = defaultDrawings.wheel2;
-      		//racer.wheel2.src = "https://www.dropbox.com/scl/fi/3p1k8pq5f8by1hxxmg8dp/default_wheel2.svg?rlkey=rq7s836y1qrl51kwvas8dnq96&raw=1";
-      		racer.wheel2TL = [-196, -135];
-      		racer.wheel2DIM = [481/2.5, 301/2.5];
-      		racer.wheel2CR = [-58,-37];
-      		racer.wheel2Theta = Math.PI / 6;
-      		racer.wheel2Radius = 50/2.5;
-
-      		// racer location
-            racer.XY = [-1920 - Math.random()*1920/2, 1080];
-      		racer.vel = [200,0]; // px/sec
-      		racer.acc = [10,0];
-      		racer.textCEN = [-100, -50];
-      		racer.time = Date.now();
-
-            racers[racer["name"]] = racer;
-            console.log(racer["name"] + " joined the race!")
-      	})
+                if (!racers[racer["name"]]){
+                    racers[racer["name"]] = racer;
+                    sortedRacers.push(racer["name"]);
+                    let j = sortedRacers.length-1;
+                    while (j > 0 & racers[sortedRacers[j]]?.XY[1] < racers[sortedRacers[j-1]]?.XY[1]){
+						[sortedRacers[j], sortedRacers[j-1]] = [sortedRacers[j-1], sortedRacers[j]];
+                      	j--;
+                    }
+                    console.log(racer["name"] + " joined the race!")
+                }
+    		})
+	}
 };
 
 function sendMessageInChat(message) {
@@ -344,6 +425,14 @@ function sendMessageInChat(message) {
       .catch(err => {
       console.log(err)
     })
+};
+
+function resetRace() {
+  	winner = null;
+  	finishX = null;
+  	racers = ({});
+    cameraLoc = [canvas.width*0.75, 0];
+  	readying = false;
 };
 
 function isModerator(badgesArray) {
@@ -394,10 +483,11 @@ function updateRacers() {
           	updateBackground(dX);
         } else {
           	let maxXPos = 0;
+          	let maxXVel = 0;
           	for (let racer of Object.values(racers)) {
               	// update
-              	racer.vel[0] += (Math.random()-0.5)*2*racer.acc[0];
-                racer.vel[1] += (Math.random()-0.5)*2*racer.acc[1];
+              	racer.vel[0] += (Math.random())*racer.acc[0];
+                racer.vel[1] += (Math.random())*racer.acc[1];
 
               	if (racer.vel[0] < 0) { racer.vel[0] = 0; }
 
@@ -412,32 +502,50 @@ function updateRacers() {
 
               	if (racer.XY[0] > maxXPos){
                  	maxXPos = racer.XY[0];
+                  	maxXVel = racer.vel[0];
+                }
+
+              	if (finishX && !winner && racer.XY[0] > finishX) {
+                  	winner = racer.name;
                 }
             }
-          	let newCameraLocX = -maxXPos + 300 + (canvas.width-300)*(curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000);
+          	let newCameraLocX = -maxXPos + 300 + (canvas.width-300-200)*(curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000);
           	let dX = newCameraLocX - cameraLoc[0];
           	cameraLoc[0] = newCameraLocX;
           	updateBackground(dX);
+
+          	if (!finishX && (raceDuration + setupDuration) * 1000 - (curTime - raceStartTime) < 5000) {
+                finishX = canvas.width - cameraLoc[0] + 5*maxXVel - 800;
+              	console.log(maxXVel, finishX);
+            }
         }
     }
 
   	draw();
 
-  	if (Object.keys(racers).length > 0 && (curTime - raceStartTime < (raceDuration + setupDuration) * 1000 || readying)) {
+  	if (Object.keys(racers).length > 0 && (!winner || curTime - raceStartTime < (raceDuration + setupDuration) * 1000 || readying)) {
    		requestAnimationFrame(updateRacers);
-  }
+  	}
 };
 
 function updateBackground(dX) {
   	// parallax effect here
-  	for (let img of backgrounds[0]){
-     	img.XY[0] -= dX*0.9;
+  	for (let j = 0; j < backgrounds.length; j++){
+        let rem = [];
+        for (let i=0; i < backgrounds[j].length; i++){
+            let img = backgrounds[j][i];
+            img.XY[0] -= dX*(0.6-0.3*j);
 
-      	// remove img if off canvas on left side
-    }
- 	 for (let img of backgrounds[1]){
-     	img.XY[0] -= dX*0.4;
-    }
+            // remove img if off canvas on left side
+            if (img.XY[0] + cameraLoc[0] < -500){
+                rem.push(i);
+            }
+        }
+        while (rem.length){
+			backgrounds[j].splice(rem.pop(),1);
 
-  	// if certain time has passed since last added background asset, consider adding a new one
+          	// add a new one
+          	addBackgroundItem(j);
+        }
+    }
 };
