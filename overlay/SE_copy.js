@@ -15,7 +15,9 @@ let canvas = document.getElementById("maincanvas");
 let ctx = canvas.getContext("2d");
 //let tmpcanvas = document.getElementById("tmpcanvas");
 //let tmpctx = tmpcanvas.getContext("2d");
-let testRacers = ["BorisTheFrenchCat", "TheComplements", "joplaysviolin", "kathadora", "Tripwire_1001"];
+let testRacers = ["BorisTheFrenchCat", "TheComplements", "joplaysviolin", "kathadora", "Tripwire_1001",
+                 "mermaidroadie", "treecicle", "asapaints", "cashmerefeline", "CookiesNChampagne",
+                 "lady__katie__", "mybones121"];
 let cameraLoc = [canvas.width*0.75, 0];
 let cameraTime = 0;
 let defaultDrawings = {};
@@ -128,24 +130,13 @@ function drawBackground() {
         }
     }
 
-
   	// draw start line if relevant
-  	if (readying || Date.now() - raceStartTime < 1000 * (setupDuration + 2)) {
-        //ctx.fillStyle = "black";
-        //ctx.beginPath();
-        //ctx.rect(0,880,5,200); // replace w/ image of start line
-        //ctx.fill();
-        //ctx.closePath();
+  	if (readying || -100 + cameraLoc[0] > -500 ) {
       	ctx.drawImage(defaultDrawings.startLine, -100, 880, 200, 200);
     };
 
   	// draw finish line if relevant
   	if (finishX) {
-        //ctx.fillStyle = "black";
-        //ctx.beginPath();
-        //ctx.rect(0,880,5,200); // replace w/ image of start line
-        //ctx.fill();
-        //ctx.closePath();
       	ctx.drawImage(defaultDrawings.finishLine, finishX-100, 890, 200, 200);
     };
 
@@ -185,7 +176,10 @@ function drawRacers() {
             ctx.translate(...cameraLoc);
 
             // translate to actual XY position of racer
-          	if (racer.XY) ctx.translate(...racer.XY);
+          	if (racer.XY) {
+              	ctx.translate(...racer.XY);
+              	ctx.translate((racer.XY[1] - (1070 - totalRoadHeight/2)),0);
+            }
 
             // draw avatar in a circle
             ctx.save()
@@ -194,7 +188,7 @@ function drawRacers() {
             //ctx.strokeStyle = '#2465D3' // optional outline around avatars
             //ctx.stroke()
             ctx.clip()
-            if (racer.avatar) ctx.drawImage(racer.avatar, ...racer.avatarTL, ...racer.avatarDIM);
+            if (racer.avatar.src) ctx.drawImage(racer.avatar, ...racer.avatarTL, ...racer.avatarDIM);
             ctx.closePath();
             ctx.restore();
 
@@ -207,7 +201,7 @@ function drawRacers() {
                 ctx.translate(...racer.wheel1CR); // translate to center of rotation for wheel 1
                 ctx.rotate(racer.wheel1Theta);	// rotate
                 ctx.translate(-racer.wheel1CR[0],-racer.wheel1CR[1]); // undo translation
-                ctx.drawImage(racer.wheel1, ...racer.wheel1TL, ...racer.wheel1DIM); // draw wheel 1
+                if (racer.wheel1) ctx.drawImage(racer.wheel1, ...racer.wheel1TL, ...racer.wheel1DIM); // draw wheel 1
                 ctx.translate(...racer.wheel1CR); // translate back
                 ctx.rotate(-racer.wheel1Theta); // undo rotation
                 ctx.translate(-racer.wheel1CR[0],-racer.wheel1CR[1]); // undo translation back
@@ -216,7 +210,7 @@ function drawRacers() {
                 ctx.translate(...racer.wheel2CR);
                 ctx.rotate(-racer.wheel2Theta);
                 ctx.translate(-racer.wheel2CR[0],-racer.wheel2CR[1]);
-                ctx.drawImage(racer.wheel2, ...racer.wheel2TL, ...racer.wheel2DIM);
+                if (racer.wheel2) ctx.drawImage(racer.wheel2, ...racer.wheel2TL, ...racer.wheel2DIM);
             }
 
             // reset before drawing next
@@ -304,9 +298,11 @@ window.addEventListener('onWidgetLoad', function (obj) {
               addBackgroundItem(j, true);
           }
         }
-      	//console.log(backgrounds)
 
       	// throw in random foreground assets
+      	for (let i = 0; i < 4+Math.random()*10; i++) {
+              addForegroundItem(true);
+        }
 
       	readying = true;
       	requestAnimationFrame(updateRacers);
@@ -330,6 +326,32 @@ function addBackgroundItem(layer, drawAnywhere){
     }
     // avoid overlaps?
     backgrounds[layer].push(back);
+}
+
+function addForegroundItem(drawAnywhere){
+  	let choice = defaultDrawings.foregrounds[Math.floor(Math.random()*(defaultDrawings.foregrounds.length-1))];
+    let back = {};
+    back.img = choice.img;
+    back.DIM = choice.DIM;
+  	if (drawAnywhere){
+      	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0],
+                 	1070-back.DIM[1]];
+    } else {
+      	// add item off canvas
+      	back.XY = [canvas.width - cameraLoc[0] + Math.random()*canvas.width/4,
+                 	1070-back.DIM[1]];
+    }
+    // avoid overlaps?
+  	// never hide start or finish line
+  	if (back.XY[0] > -200 && back.XY[0] < 100){
+     	back.XY[0] += 300;
+    }
+  	if (finishX) {
+     	if (back.XY[0] - finishX > -200 && back.XY[0] - finishX < 100){
+         	back.XY[0] += 300;
+        }
+    }
+    foregrounds.push(back);
 }
 
 async function addRacer(name, displayColor) {
@@ -358,8 +380,12 @@ async function addRacer(name, displayColor) {
                 //console.log(data);
 
                 // avatar
-                racer.avatar = new Image();
-                racer.avatar.src = data?.avatar || defaultDrawings.avatar;
+                if (data?.avatar) {
+                	racer.avatar = new Image();
+                    racer.avatar.src = data.avatar;
+                } else {
+                    racer.avatar = defaultDrawings.avatar;
+                }
                 racer.avatarTL = [-135,-125];
                 racer.avatarDIM = [50, 50];
 
@@ -390,7 +416,7 @@ async function addRacer(name, displayColor) {
                 // racer location
                 racer.XY = [-1920 - Math.random()*1920/2, 1070 - Math.random()*totalRoadHeight];
                 racer.vel = [200,0]; // px/sec
-                racer.acc = [1,0];
+                racer.acc = [6,0];
                 racer.textCEN = [-100, -50];
                 racer.time = Date.now();
 
@@ -498,8 +524,8 @@ function updateRacers() {
           	let maxXVel = 0;
           	for (let racer of Object.values(racers)) {
               	// update
-              	racer.vel[0] += (Math.random())*racer.acc[0];
-                racer.vel[1] += (Math.random())*racer.acc[1];
+              	racer.vel[0] += (Math.random()-1/3)*racer.acc[0];
+                racer.vel[1] += (Math.random()-1/3)*racer.acc[1];
 
               	if (racer.vel[0] < 0) { racer.vel[0] = 0; }
 
@@ -557,7 +583,27 @@ function updateBackground(dX) {
 			backgrounds[j].splice(rem.pop(),1);
 
           	// add a new one
-          	addBackgroundItem(j);
+          	for (let i = 0; i < (Math.random()-1/3)*3; i++){
+          		addBackgroundItem(j);
+            }
         }
+    }
+
+  	let rem = [];
+    for (let i=0; i < foregrounds.length; i++){
+      let img = foregrounds[i];
+
+      // remove img if off canvas on left side
+      if (img.XY[0] + cameraLoc[0] < -500){
+        rem.push(i);
+      }
+    }
+    while (rem.length){
+      foregrounds.splice(rem.pop(),1);
+
+      // add a new one
+      for (let i = 0; i < (Math.random()-1/3)*3; i++){
+      	addForegroundItem();
+      }
     }
 };
