@@ -1,5 +1,5 @@
 let racers = ({});
-let readying = true;
+let readying;
 let broadcaster = "";
 let broadcasterChannelId = "";
 let raceStartTime = Date.now();
@@ -15,7 +15,7 @@ let canvas = document.getElementById("maincanvas");
 let ctx = canvas.getContext("2d");
 //let tmpcanvas = document.getElementById("tmpcanvas");
 //let tmpctx = tmpcanvas.getContext("2d");
-let testRacers = ["thecomplements","joplaysviolin", "AndyTheFrenchy"];
+let testRacers = ["BorisTheFrenchCat", "TheComplements", "joplaysviolin", "kathadora", "Tripwire_1001"];
 let cameraLoc = [canvas.width*0.75, 0];
 let cameraTime = 0;
 let defaultDrawings = {};
@@ -136,7 +136,7 @@ function drawBackground() {
         //ctx.rect(0,880,5,200); // replace w/ image of start line
         //ctx.fill();
         //ctx.closePath();
-      	ctx.drawImage(defaultDrawings.startLine, -100, 890, 200, 200);
+      	ctx.drawImage(defaultDrawings.startLine, -100, 880, 200, 200);
     };
 
   	// draw finish line if relevant
@@ -181,47 +181,51 @@ function drawRacers() {
       	//tmpctx.resetTransform();
 
       	// translate by camera
-      	ctx.translate(...cameraLoc);
+      	if (racer){
+            ctx.translate(...cameraLoc);
 
-      	// translate to actual XY position of racer
-      	ctx.translate(...racer.XY);
+            // translate to actual XY position of racer
+          	if (racer.XY) ctx.translate(...racer.XY);
 
-      	// draw avatar in a circle
-      	ctx.save()
-        ctx.beginPath()
-        ctx.arc(...racer.avatarTL.map((val, ii) => val+racer.avatarDIM[ii]/2), racer.avatarDIM[0]/2, 0, Math.PI * 2, false)
-        //ctx.strokeStyle = '#2465D3' // optional outline around avatars
-        //ctx.stroke()
-        ctx.clip()
-  		ctx.drawImage(racer.avatar, ...racer.avatarTL, ...racer.avatarDIM);
-      	ctx.closePath();
-      	ctx.restore();
+            // draw avatar in a circle
+            ctx.save()
+            ctx.beginPath()
+            ctx.arc(...racer.avatarTL.map((val, ii) => val+racer.avatarDIM[ii]/2), racer.avatarDIM[0]/2, 0, Math.PI * 2, false)
+            //ctx.strokeStyle = '#2465D3' // optional outline around avatars
+            //ctx.stroke()
+            ctx.clip()
+            if (racer.avatar) ctx.drawImage(racer.avatar, ...racer.avatarTL, ...racer.avatarDIM);
+            ctx.closePath();
+            ctx.restore();
 
-      	// draw vehicle
-      	ctx.fillStyle = "blue";
-      	ctx.drawImage(racer.vehicle, ...racer.vehicleTL, ...racer.vehicleDIM);
+            // draw vehicle
+            ctx.fillStyle = "blue";
+            if (racer.vehicle) {
+                ctx.drawImage(racer.vehicle, ...racer.vehicleTL, ...racer.vehicleDIM);
 
-      	// draw wheel 1
-      	ctx.translate(...racer.wheel1CR); // translate to center of rotation for wheel 1
-      	ctx.rotate(racer.wheel1Theta);	// rotate
-      	ctx.translate(-racer.wheel1CR[0],-racer.wheel1CR[1]); // undo translation
-      	ctx.drawImage(racer.wheel1, ...racer.wheel1TL, ...racer.wheel1DIM); // draw wheel 1
-        ctx.translate(...racer.wheel1CR); // translate back
-      	ctx.rotate(-racer.wheel1Theta); // undo rotation
-      	ctx.translate(-racer.wheel1CR[0],-racer.wheel1CR[1]); // undo translation back
+                // draw wheel 1
+                ctx.translate(...racer.wheel1CR); // translate to center of rotation for wheel 1
+                ctx.rotate(racer.wheel1Theta);	// rotate
+                ctx.translate(-racer.wheel1CR[0],-racer.wheel1CR[1]); // undo translation
+                ctx.drawImage(racer.wheel1, ...racer.wheel1TL, ...racer.wheel1DIM); // draw wheel 1
+                ctx.translate(...racer.wheel1CR); // translate back
+                ctx.rotate(-racer.wheel1Theta); // undo rotation
+                ctx.translate(-racer.wheel1CR[0],-racer.wheel1CR[1]); // undo translation back
 
-      	// draw wheel 2
-      	ctx.translate(...racer.wheel2CR);
-      	ctx.rotate(-racer.wheel2Theta);
-      	ctx.translate(-racer.wheel2CR[0],-racer.wheel2CR[1]);
-      	ctx.drawImage(racer.wheel2, ...racer.wheel2TL, ...racer.wheel2DIM);
+                // draw wheel 2
+                ctx.translate(...racer.wheel2CR);
+                ctx.rotate(-racer.wheel2Theta);
+                ctx.translate(-racer.wheel2CR[0],-racer.wheel2CR[1]);
+                ctx.drawImage(racer.wheel2, ...racer.wheel2TL, ...racer.wheel2DIM);
+            }
 
-      	// reset before drawing next
-      	ctx.resetTransform();
+            // reset before drawing next
+            ctx.resetTransform();
+        }
     }
 }
 
-window.addEventListener('onEventReceived', function (obj) {
+window.addEventListener('onEventReceived', async function (obj) {
     if (!obj.detail.event) {
       return;
     }
@@ -235,7 +239,7 @@ window.addEventListener('onEventReceived', function (obj) {
       	//console.log(event);
 
       	if (readying && (event.data.text.startsWith("!join") || event.data.text.startsWith("!start"))) {
-            addRacer(event.data.displayName, event.data.displayColor)
+            await addRacer(event.data.displayName, event.data.displayColor)
         } else{
          	if (isModerator(event.data.badges)) {
              	if (event.data.text.startsWith("!checkracestatus")){
@@ -304,6 +308,7 @@ window.addEventListener('onWidgetLoad', function (obj) {
 
       	// throw in random foreground assets
 
+      	readying = true;
       	requestAnimationFrame(updateRacers);
     })
 
@@ -329,6 +334,7 @@ function addBackgroundItem(layer, drawAnywhere){
 
 async function addRacer(name, displayColor) {
   	if (!racers[name]){
+      	try{
         let racer = ({});
         racer.displayColor = displayColor || "#FFFFFF";
         racer.name = name; // or event.data.nick
@@ -399,6 +405,12 @@ async function addRacer(name, displayColor) {
                     console.log(racer["name"] + " joined the race!")
                 }
     		})
+            .catch((err) => {
+            	console.error(err);
+            })
+    	} catch (err) {
+        	console.error(err);
+        }
 	}
 };
 
