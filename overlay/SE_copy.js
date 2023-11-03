@@ -2,7 +2,7 @@ let racers = ({});
 let readying;
 let broadcaster = "";
 let broadcasterChannelId = "";
-let raceStartTime = Date.now();
+let raceStartTime;
 let setupDuration = 5;
 let raceDuration = 30;
 let totalRoadHeight = 95;
@@ -15,15 +15,20 @@ let canvas = document.getElementById("maincanvas");
 let ctx = canvas.getContext("2d");
 //let tmpcanvas = document.getElementById("tmpcanvas");
 //let tmpctx = tmpcanvas.getContext("2d");
-let testRacers = ["BorisTheFrenchCat", "TheComplements", "joplaysviolin", "kathadora", "Tripwire_1001",
-                 "mermaidroadie", "treecicle", "asapaints", "cashmerefeline", "CookiesNChampagne",
-                 "lady__katie__", "mybones121"];
+let testRacers = ["apocalypse_squirrel", "asixel", "boristhefrenchcat", "cafesparrow", "charlysmomm",
+                  "drhahn_qc", "medinamind", "neiluj04", "pencils45", "pyobum", "thecomplements", "thesolid7"];
 let cameraLoc = [canvas.width*0.75, 0];
 let cameraTime = 0;
 let defaultDrawings = {};
 let backgrounds = [[],[],[]];
 let foregrounds = [];
 let sortedRacers = [];
+
+var myFont = new FontFace('Oswald', 'url(https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Oswald&display=swap)');
+
+myFont.load().then((font) => {
+  	document.fonts.add(font);
+});
 
 function loadAssets() {
 	defaultDrawings.vehicle = new Image();
@@ -96,11 +101,20 @@ function draw() {
 };
 
 function displayWinner(){
-  	ctx.font = "30px Arial";
+  	ctx.font = "60px Oswald";
   	ctx.fillStyle = "white";
+  	ctx.strokeStyle = "black";
+  	ctx.lineWidth = 2;
 	ctx.textAlign = "center";
-	ctx.fillText("Winner is", canvas.width/2, canvas.height/2 - 15);
-	ctx.fillText(winner, canvas.width/2, canvas.height/2 + 15);
+  	let textPos = racers[winner].XY.slice();
+  	textPos[0] += racers[winner].vehicleTL[0] + racers[winner].vehicleDIM[0]/2;
+  	textPos[1] += racers[winner].avatarTL[1] - 50;
+  	ctx.translate(...cameraLoc);
+	ctx.fillText("Winner is", textPos[0], textPos[1] - 30);
+	ctx.fillText(winner, textPos[0], textPos[1] + 30);
+	ctx.strokeText("Winner is", textPos[0], textPos[1] - 30);
+	ctx.strokeText(winner, textPos[0], textPos[1] + 30);
+  	ctx.resetTransform();
 };
 
 function drawBackground() {
@@ -123,10 +137,11 @@ function drawBackground() {
 
   	ctx.translate(...cameraLoc);
 
-  	// draw moving background w/ some parallax
-  	for (let arr of backgrounds){
+  	// draw background images, images further back are slightly larger
+  	for (let i = 0; i < backgrounds.length; i++){
+      	let arr = backgrounds[i]
       	for (let img of arr) {
-          	ctx.drawImage(img.img, ...img.XY, ...img.DIM);
+          	ctx.drawImage(img.img, ...img.XY, img.DIM[0]+10*(2-i), img.DIM[1]+10*(2-i));
         }
     }
 
@@ -146,14 +161,15 @@ function drawBackground() {
 
 function drawForeground() {
   	ctx.translate(...cameraLoc);
-
-  	// draw moving foreground, moving at same speed as camera
+  	ctx.globalAlpha = 0.75; // make foreground somewhat transparent
+  	// draw foreground images
   	for (let img of foregrounds) {
       	ctx.drawImage(img.img, ...img.XY, ...img.DIM);
     }
 
   	// reset everything
   	ctx.resetTransform();
+  	ctx.globalAlpha = 1;
 };
 
 function drawRacers() {
@@ -245,14 +261,16 @@ window.addEventListener('onEventReceived', async function (obj) {
                      	readying = true;
                       	sendMessageInChat("Race entries open, !join to enter");
                     } else if (event.data.text.startsWith("!go")){
-                     	readying = false;
-                      	raceStartTime = Date.now();
-                      	sendMessageInChat("Race started!");
+                      	if (sortedRacers.length > 0){
+                          readying = false;
+                          raceStartTime = Date.now();
+                          sendMessageInChat("Race started!");
+                        }
                     } else if (event.data.text.startsWith("!resetrace")) {
                      	resetRace();
                       	sendMessageInChat("Race reset");
                     } else {
-                     	console.log(event.data.text);
+                     	//console.log(event.data.text);
                     }
                 }
             }
@@ -318,11 +336,11 @@ function addBackgroundItem(layer, drawAnywhere){
     back.DIM = choice.DIM;
   	if (drawAnywhere){
       	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0],
-                 	950-(2-layer)*10-back.DIM[1]];
+                 	960-(2-layer)*10-back.DIM[1]];
     } else {
       	// add item off canvas
       	back.XY = [canvas.width - cameraLoc[0] + Math.random()*canvas.width/4,
-                 	950-(2-layer)*10-back.DIM[1]];
+                 	960-(2-layer)*10-back.DIM[1]];
     }
     // avoid overlaps?
     backgrounds[layer].push(back);
@@ -386,8 +404,8 @@ async function addRacer(name, displayColor) {
                 } else {
                     racer.avatar = defaultDrawings.avatar;
                 }
-                racer.avatarTL = [-135,-125];
-                racer.avatarDIM = [50, 50];
+                racer.avatarTL = [-150,-145];
+                racer.avatarDIM = [80, 80];
 
                 // vehicle main // 800x350
                 racer.vehicle = defaultDrawings.vehicle;
@@ -469,8 +487,11 @@ function resetRace() {
   	winner = null;
   	finishX = null;
   	racers = ({});
+	sortedRacers = [];
+  	raceStartTime = null;
     cameraLoc = [canvas.width*0.75, 0];
-  	readying = false;
+  	readying = true;
+  	requestAnimationFrame(updateRacers);
 };
 
 function isModerator(badgesArray) {
@@ -561,9 +582,11 @@ function updateRacers() {
 
   	draw();
 
-  	if (Object.keys(racers).length > 0 && (!winner || curTime - raceStartTime < (raceDuration + setupDuration) * 1000 || readying)) {
+  	if (curTime - raceStartTime < (raceDuration + setupDuration) * 1000 || readying) {
    		requestAnimationFrame(updateRacers);
-  	}
+  	} else if (raceStartTime && !winner){
+      	requestAnimationFrame(updateRacers);
+    }
 };
 
 function updateBackground(dX) {
