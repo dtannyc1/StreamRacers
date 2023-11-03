@@ -23,8 +23,9 @@ let defaultDrawings = {};
 let backgrounds = [[],[],[]];
 let foregrounds = [];
 let sortedRacers = [];
+let leaderboard = [];
 
-var myFont = new FontFace('Oswald', 'url(https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Oswald&display=swap)');
+var myFont = new FontFace('Oswald', 'url(https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap)');
 
 myFont.load().then((font) => {
   	document.fonts.add(font);
@@ -105,10 +106,20 @@ function displayWinner(){
   	ctx.fillStyle = "white";
   	ctx.strokeStyle = "black";
   	ctx.lineWidth = 2;
-	ctx.textAlign = "center";
   	let textPos = racers[winner].XY.slice();
   	textPos[0] += racers[winner].vehicleTL[0] + racers[winner].vehicleDIM[0]/2;
   	textPos[1] += racers[winner].avatarTL[1] - 50;
+
+  	// show leaderboard
+  	ctx.textAlign = "left";
+  	ctx.fillText("Leaderboard", 50, 100);
+  	for (let i = 0; i < leaderboard.length; i++){
+     	ctx.fillText(i+1 + ". " + leaderboard[i], 50, 100 + 60*(i+1));
+      	if (i+1 === 10) break;
+    }
+
+  	// show winner
+	ctx.textAlign = "center";
   	ctx.translate(...cameraLoc);
 	ctx.fillText("Winner is", textPos[0], textPos[1] - 30);
 	ctx.fillText(winner, textPos[0], textPos[1] + 30);
@@ -488,6 +499,7 @@ function resetRace() {
   	finishX = null;
   	racers = ({});
 	sortedRacers = [];
+	leaderboard = [];
   	raceStartTime = null;
     cameraLoc = [canvas.width*0.75, 0];
   	readying = true;
@@ -543,6 +555,7 @@ function updateRacers() {
         } else {
           	let maxXPos = 0;
           	let maxXVel = 0;
+          	let finishers = [];
           	for (let racer of Object.values(racers)) {
               	// update
               	racer.vel[0] += (Math.random()-1/3)*racer.acc[0];
@@ -557,18 +570,35 @@ function updateRacers() {
 
                 racer.XY[0] += racer.vel[0]*(curTime - racer.time)/1000;
                 racer.XY[1] += racer.vel[1]*(curTime - racer.time)/1000;
-                racer.time = curTime;
 
               	if (racer.XY[0] > maxXPos){
                  	maxXPos = racer.XY[0];
                   	maxXVel = racer.vel[0];
                 }
 
-              	if (finishX && !winner && racer.XY[0] > finishX) {
-                  	winner = racer.name;
+              	if (finishX && racer.XY[0] > finishX && racer.XY[0] - racer.vel[0]*(curTime - racer.time)/1000 <= finishX) {
+                  	finishers.push(racer.name);
+                  	//console.log(racer.name);
                 }
+
+                racer.time = curTime;
             }
-          	let newCameraLocX = -maxXPos + 300 + (canvas.width-300-200)*(curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000);
+          	// add finishers to leaderboard
+          	if (finishers.length > 0) {
+              	leaderboard = leaderboard.concat(finishers.sort((a,b) => {
+                    let aX = racers[a].XY[0];
+                    let bX = racers[b].XY[0];
+                    if (aX < bX) return -1;
+                    if (aX > bX) return 1;
+                    return 0;
+            	}));
+              	//console.log(leaderboard)
+              	if (!winner) winner = leaderboard[0];
+            }
+
+          	let newCameraLocX = winner ?
+                -maxXPos + 300 + (canvas.width-300-200)*Math.min(1, (curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000)) :
+                -maxXPos + 300 + (canvas.width-300-200)*(curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000);
           	let dX = newCameraLocX - cameraLoc[0];
           	cameraLoc[0] = newCameraLocX;
           	updateBackground(dX);
@@ -584,8 +614,10 @@ function updateRacers() {
 
   	if (curTime - raceStartTime < (raceDuration + setupDuration) * 1000 || readying) {
    		requestAnimationFrame(updateRacers);
-  	} else if (raceStartTime && !winner){
+  	} else if (raceStartTime && (leaderboard.length < sortedRacers.length || finishX + cameraLoc[0] > -500)){
       	requestAnimationFrame(updateRacers);
+    } else {
+     	console.log(leaderboard)
     }
 };
 
