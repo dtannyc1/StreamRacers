@@ -1,4 +1,4 @@
-let racers = ({});
+
 let readying;
 let broadcaster = "";
 let broadcasterChannelId = "";
@@ -9,27 +9,27 @@ let totalRoadHeight = 95;
 let winner;
 let finishX;
 
-//let key = "";
-
-let canvas = document.getElementById("maincanvas");
-let ctx = canvas.getContext("2d");
-//let tmpcanvas = document.getElementById("tmpcanvas");
-//let tmpctx = tmpcanvas.getContext("2d");
 let testRacers = ["apocalypse_squirrel", "asixel", "boristhefrenchcat", "cafesparrow", "charlysmomm",
                   "drhahn_qc", "medinamind", "neiluj04", "pencils45", "pyobum", "thecomplements", "thesolid7"];
-let cameraLoc = [canvas.width*0.75, 0];
-let cameraTime = 0;
+//let testRacers = [];
+
 let defaultDrawings = {};
+let racers = ({});
+let canvas = document.getElementById("maincanvas");
+let ctx = canvas.getContext("2d");
+let cameraLoc = [canvas.width*0.75, 0];
 let backgrounds = [[],[],[]];
 let foregrounds = [];
 let sortedRacers = [];
 let leaderboard = [];
 
-var myFont = new FontFace('Oswald', 'url(https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap)');
+//// load custom font
+//const myFont = new FontFace('Oswald Custom',
+//                          'url(https://fonts.gstatic.com/s/oswald/v53/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZosUJiZTaR.woff2)');
+//document.fonts.add(myFont);
+//myFont.load();
 
-myFont.load().then((font) => {
-  	document.fonts.add(font);
-});
+let clientID, clientSecret, accessToken;
 
 function loadAssets() {
 	defaultDrawings.vehicle = new Image();
@@ -270,16 +270,16 @@ window.addEventListener('onEventReceived', async function (obj) {
               	if (isBroadcaster(event.data.badges)) {
                  	if (event.data.text.startsWith("!startrace")){
                      	readying = true;
-                      	sendMessageInChat("Race entries open, !join to enter");
+                      	//sendMessageInChat("Race entries open, !join to enter");
                     } else if (event.data.text.startsWith("!go")){
                       	if (sortedRacers.length > 0){
                           readying = false;
                           raceStartTime = Date.now();
-                          sendMessageInChat("Race started!");
+                          //sendMessageInChat("Race started!");
                         }
                     } else if (event.data.text.startsWith("!resetrace")) {
                      	resetRace();
-                      	sendMessageInChat("Race reset");
+                      	//sendMessageInChat("Race reset");
                     } else {
                      	//console.log(event.data.text);
                     }
@@ -289,53 +289,65 @@ window.addEventListener('onEventReceived', async function (obj) {
     }
 });
 
-window.addEventListener('onWidgetLoad', function (obj) {
+window.addEventListener('onWidgetLoad', async function (obj) {
   	broadcaster = obj.detail.channel.username;
   	let fieldData = obj.detail.fieldData;
   	raceDuration = fieldData.race_duration;
+  	clientID = fieldData.client_id;
+  	clientSecret = fieldData.client_secret;
   	options.headers.Authorization = 'Bearer ' + fieldData.JWT_TOKEN;
 
   	loadAssets();
 
-  	let url = "https://api.streamelements.com/kappa/v2/channels/" + broadcaster;
-    fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        charset: "utf-8",
-        Authorization: "Bearer undefined"
-      }})
-      .then(res => {
-        //console.log(res);
-        if (res.ok) {
-          return res.json();
-        }
-      })
-      .then(data => {
-        //console.log(data);
-      	broadcasterChannelId = data._id;
-      	console.log("Broadcaster info loaded");
-      })
-  	.then(async function () {
-      	for (let racer of testRacers) {
-      		await addRacer(racer);
-        }
-
-      	// throw in random background assets
-      	for (let j = 0; j < 3; j++) {
-          for (let i = 0; i < 4-j+Math.random()*10; i++) {
-              addBackgroundItem(j, true);
-          }
-        }
-
-      	// throw in random foreground assets
-      	for (let i = 0; i < 4+Math.random()*10; i++) {
-              addForegroundItem(true);
-        }
-
-      	readying = true;
-      	requestAnimationFrame(updateRacers);
+  	// get auth token?
+  	let twitchURL = 'https://id.twitch.tv/oauth2/token';
+  	fetch(twitchURL, {
+      	method: "POST",
+      	headers: {
+         	'Content-Type': 'application/x-www-form-urlencoded'
+        },
+      	body: 'client_id='+clientID+"&client_secret="+clientSecret+"&grant_type=client_credentials"
     })
+  	.then(res => {
+      	if (res.ok){
+         	return res.json();
+        } else {
+         	return null;
+        }
+    })
+  	.then(data => {
+      	accessToken = data.access_token;
+
+        let url = "https://api.streamelements.com/kappa/v2/channels/" + broadcaster;
+        return fetch(url, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            charset: "utf-8",
+            Authorization: "Bearer undefined"
+          }})
+    })
+  	.then(res => {
+            //console.log(res);
+            if (res.ok) {
+              return res.json();
+            }
+          })
+          .then(data => {
+            //console.log(data);
+            broadcasterChannelId = data._id;
+            console.log("Broadcaster info loaded");
+          })
+        .then(async function () {
+            for (let racer of testRacers) {
+                await addRacer(racer);
+            }
+
+            resetBackgroundArt();
+
+            readying = true;
+            requestAnimationFrame(updateRacers);
+        })
 
 
 });
@@ -389,29 +401,43 @@ async function addRacer(name, displayColor) {
         let racer = ({});
         racer.displayColor = displayColor || "#FFFFFF";
         racer.name = name; // or event.data.nick
-        let url = "https://api.streamelements.com/kappa/v2/channels/" + name;
-        await fetch(url, {
+        //let url = "https://api.streamelements.com/kappa/v2/channels/" + name;
+        //await fetch(url, {
+        //        method: "GET",
+        //        headers: {
+        //          Accept: "application/json",
+        //          charset: "utf-8",
+        //          Authorization: "Bearer undefined"
+        //        }})
+        //        .then(res => {
+        //        //console.log(res);
+        //        if (res.ok) {
+        //            return res.json();
+        //        } else {
+        //            return null;
+        //        }
+        //    })
+
+        let url = "https://api.twitch.tv/helix/users?login=" + name;
+       	await fetch(url, {
                 method: "GET",
                 headers: {
                   Accept: "application/json",
-                  charset: "utf-8",
-                  Authorization: "Bearer undefined"
+                  'Client-Id': clientID,
+                  Authorization: "Bearer " + accessToken
                 }})
                 .then(res => {
-                //console.log(res);
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    return null;
-                }
-            })
+                    if (res.ok) {
+                        return res.json();
+                    } else {
+                        return null;
+                    }
+                })
             .then(data => {
-                //console.log(data);
-
                 // avatar
-                if (data?.avatar) {
+                if (data && data.data && data.data[0] && data.data[0].profile_image_url) {
                 	racer.avatar = new Image();
-                    racer.avatar.src = data.avatar;
+                    racer.avatar.src = data.data[0].profile_image_url;
                 } else {
                     racer.avatar = defaultDrawings.avatar;
                 }
@@ -461,10 +487,10 @@ async function addRacer(name, displayColor) {
                 }
     		})
             .catch((err) => {
-            	console.error(err);
+            	console.log(err);
             })
     	} catch (err) {
-        	console.error(err);
+        	console.log(err);
         }
 	}
 };
@@ -503,7 +529,25 @@ function resetRace() {
   	raceStartTime = null;
     cameraLoc = [canvas.width*0.75, 0];
   	readying = true;
+  	resetBackgroundArt();
   	requestAnimationFrame(updateRacers);
+};
+
+function resetBackgroundArt() {
+  	backgrounds = [[],[],[]];
+  	foregrounds = [];
+
+  	// throw in random background assets
+    for (let j = 0; j < 3; j++) {
+      for (let i = 0; i < 4-j+Math.random()*10; i++) {
+        addBackgroundItem(j, true);
+      }
+    }
+
+    // throw in random foreground assets
+    for (let i = 0; i < 4+Math.random()*10; i++) {
+      addForegroundItem(true);
+    }
 };
 
 function isModerator(badgesArray) {
