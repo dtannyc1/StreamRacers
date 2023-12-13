@@ -1,0 +1,32 @@
+{
+  "race_duration": {
+     "type": "number",
+      "label": "Race Duration (s)",
+      "value": 30,
+      "group": "Race Parameters"
+  },
+"JWT_TOKEN": {
+      "type": "text",
+      "label": "JWT Token",
+      "value": "",
+      "group": "App Secrets (don't show stream)"
+  },
+  "client_id": {
+      "type": "text",
+      "label": "Client ID",
+      "value": "",
+      "group": "App Secrets (don't show stream)"
+  },
+  "client_secret": {
+      "type": "text",
+      "label": "Client Secret",
+      "value": "",
+      "group": "App Secrets (don't show stream)"
+  },
+  "jebaited_token": {
+      "type": "text",
+      "label": "Jebaited BotMsg Token",
+      "value": "",
+      "group": "App Secrets (don't show stream)"
+  }
+}

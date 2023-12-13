@@ -1,4 +1,7 @@
 
+let testing = false;
+let autostart = false;
+
 let readying;
 let broadcaster = "";
 let broadcasterChannelId = "";
@@ -9,9 +12,12 @@ let totalRoadHeight = 95;
 let winner;
 let finishX;
 
-let testRacers = ["apocalypse_squirrel", "asixel", "boristhefrenchcat", "cafesparrow", "charlysmomm",
-                  "drhahn_qc", "medinamind", "neiluj04", "pencils45", "pyobum", "thecomplements", "thesolid7"];
-//let testRacers = [];
+let testRacers = [];
+if (testing){
+  testRacers = ["apocalypse_squirrel", "boristhefrenchcat", "charlysmomm",
+                    "medinamind", "neiluj04", "pyobum", "thecomplements",
+                   "andythefrenchy", "thesolid7", "pencils45"];
+}
 
 let defaultDrawings = {};
 let racers = ({});
@@ -22,6 +28,13 @@ let backgrounds = [[],[],[]];
 let foregrounds = [];
 let sortedRacers = [];
 let leaderboard = [];
+let standings = [];
+let prevStandingsUpdateTime = 0;
+let standingsUpdateDur = 0.5; // time in seconds between live standings updates
+let stopRace = false;
+let isUpdatingRacers = true;
+let finishingVel = 1000;
+let hidden = false;
 
 //// load custom font
 //const myFont = new FontFace('Oswald Custom',
@@ -29,17 +42,28 @@ let leaderboard = [];
 //document.fonts.add(myFont);
 //myFont.load();
 
-let clientID, clientSecret, accessToken;
+let clientID, clientSecret, accessToken, jebaitedToken;
+
+let backupButton = document.getElementById("startbutton")
+backupButton.addEventListener("click", function() {
+  	console.log('click start detected')
+	if (sortedRacers.length > 0){
+        readying = false;
+        raceStartTime = Date.now();
+        prevStandingsUpdateTime = raceStartTime;
+        sendMessageInChat("Race started!");
+    }
+});
 
 function loadAssets() {
 	defaultDrawings.vehicle = new Image();
   	defaultDrawings.vehicle.src = "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&raw=1";
 
   	defaultDrawings.wheel1 = new Image();
-  	defaultDrawings.wheel1.src = "https://www.dropbox.com/scl/fi/6xqc3i22e9tudpbau8co3/default_wheel1.svg?rlkey=wvprdn16gvssjt0zoaedmv55s&raw=1";
+  	defaultDrawings.wheel1.src = "https://www.dropbox.com/scl/fi/h40xha1db6oqsa7n5nibi/default_wheel1.png?rlkey=xtolfaiwu6fsj3w7f23jyt6h8&raw=1";
 
     defaultDrawings.wheel2 = new Image();
-  	defaultDrawings.wheel2.src = "https://www.dropbox.com/scl/fi/3p1k8pq5f8by1hxxmg8dp/default_wheel2.svg?rlkey=rq7s836y1qrl51kwvas8dnq96&raw=1";
+  	defaultDrawings.wheel2.src = "https://www.dropbox.com/scl/fi/avrdy5jpr2ky0xfo5h6bz/default_wheel2.png?rlkey=msdi1tkjhoot006z1n0cuic5u&raw=1";
 
   	defaultDrawings.avatar = new Image();
   	defaultDrawings.avatar.src = "https://images.vexels.com/media/users/3/236404/isolated/lists/972cb1b1bfe5506f43c5b824766d0205-semi-flat-smiloing-poop-emoji.png";
@@ -53,33 +77,72 @@ function loadAssets() {
   	defaultDrawings.backgrounds = [[],[],[]];
   	defaultDrawings.foregrounds = [];
 
-  	let mountain = {img: new Image(), DIM: [800/2, 500/2]};
+  	let mountain = {img: new Image(), DIM: [800, 500], scale: 1/2};
   	mountain.img.src = "https://www.dropbox.com/scl/fi/yeygg4k2sy2sum5g18dsp/mountains.png?rlkey=nibv2s6ewbmxbo35p2wn9m0qm&raw=1";
   	defaultDrawings.backgrounds[0].push(mountain);
 
-  	let barbies = {img: new Image(), DIM: [800/2.5,500/2.5]};
+  	let clouds = {img: new Image(), DIM: [564,516], scale: 1/3};
+  	clouds.img.src = "https://www.dropbox.com/scl/fi/nw5qrer7q70z61vzcy2q3/DoTheGayCloud.MatMan.png?rlkey=a8rfof98i3lxqeih908c9k0wy&raw=1";
+  	defaultDrawings.backgrounds[0].push(clouds);
+
+  	let fan = {img: new Image(), DIM: [628,728], scale: 1/3};
+  	fan.img.src = "https://www.dropbox.com/scl/fi/i9einckdxllcblbakhxdp/Moulin3.png?rlkey=9q3myaqxpd62l7adszb9w6jae&raw=1";
+  	defaultDrawings.backgrounds[0].push({...fan});
+  	fan.scale = 1/4;
+  	defaultDrawings.backgrounds[1].push({...fan});
+
+  	let sign = {img: new Image(), DIM: [1100,800], scale: 1/3};
+  	sign.img.src = "https://www.dropbox.com/scl/fi/eydk5ey2uf8s5hfn1p9jb/better_call_asixel.png?rlkey=iaznxl8qfzwftdgvexacteoth&raw=1";
+  	defaultDrawings.backgrounds[2].push(sign);
+
+  	let barbies = {img: new Image(), DIM: [800,500], scale: 1/1.5};
   	barbies.img.src = "https://www.dropbox.com/scl/fi/qil9bpr86tc9crdef3nuh/barnies_restobar_grill.png?rlkey=tdqq0u666ayq77xhus0vcdypo&raw=1";
   	defaultDrawings.backgrounds[2].push(barbies);
 
-  	let tree1 = {img: new Image(), DIM: [500/2.5,500/2.5]};
+  	let tree1 = {img: new Image(), DIM: [500,500], scale: 1/2};
   	tree1.img.src = "https://www.dropbox.com/scl/fi/rsqpqpv0mel94vq7yd9lv/tree1.png?rlkey=wfsqqgbz1k3aev977it6gm19s&raw=1";
-  	defaultDrawings.backgrounds[2].push(tree1);
-  	defaultDrawings.foregrounds.push(tree1);
+  	defaultDrawings.backgrounds[0].push({...tree1});
+  	tree1.scale = 1/2.3;
+  	defaultDrawings.backgrounds[1].push({...tree1});
+  	tree1.scale = 1/2.6;
+  	defaultDrawings.backgrounds[2].push({...tree1});
+  	defaultDrawings.foregrounds.push({...tree1});
 
-  	let tree2 = {img: new Image(), DIM: [500/2.5,500/2.5]};
+  	let tree2 = {img: new Image(), DIM: [500,500], scale: 1/2.3};
   	tree2.img.src = "https://www.dropbox.com/scl/fi/4o8bjpt42vp7by6bi2i1l/tree2.png?rlkey=p0auz5elxsrn2n2ja357m8ohs&raw=1";
-  	defaultDrawings.backgrounds[2].push(tree2);
-  	defaultDrawings.foregrounds.push(tree2);
+  	defaultDrawings.backgrounds[1].push({...tree2});
+  	tree2.scale = 1/2.6;
+  	defaultDrawings.backgrounds[2].push({...tree2});
+  	defaultDrawings.foregrounds.push({...tree2});
 
-  	let rock = {img: new Image(), DIM: [500/5,500/5]};
+  	let bush = {img: new Image(), DIM: [500,500], scale: 1/4};
+  	bush.img.src = "https://www.dropbox.com/scl/fi/4pv0w2xh32xmuffgkdb8n/bush.png?rlkey=hnbnnbpdcnp596qolz91f8jvn&raw=1";
+  	defaultDrawings.backgrounds[1].push({...bush});
+  	bush.scale = 1/5;
+  	defaultDrawings.backgrounds[2].push(bush);
+  	defaultDrawings.foregrounds.push(bush);
+
+  	let rock = {img: new Image(), DIM: [500,500], scale: 1/5};
   	rock.img.src = "https://www.dropbox.com/scl/fi/wedf2wf50e8dfpgt65wir/rock.png?rlkey=59l6o5ibfuie6y2m3wu137dfv&raw=1";
   	defaultDrawings.backgrounds[2].push(rock);
   	defaultDrawings.foregrounds.push(rock);
 
-  	let appleTree = {img: new Image(), DIM: [500/2.5,500/2.5]};
+  	let appleTree = {img: new Image(), DIM: [500,500], scale: 1/2.5};
   	appleTree.img.src = "https://www.dropbox.com/scl/fi/0lop56qnil503u1fp9h43/apple_tree.png?rlkey=rkcdlj91xzvz7q8musz8lw9pw&raw=1";
   	defaultDrawings.backgrounds[1].push(appleTree);
   	defaultDrawings.backgrounds[2].push(appleTree);
+
+  	let rainbow = {img: new Image(), DIM: [500,500], scale: 1};
+  	rainbow.img.src = "https://www.dropbox.com/scl/fi/x0zfus1zohj9a26n6kde3/rainbow.png?rlkey=2zorp76sgnadj8lga7arfgbux&raw=1";
+  	defaultDrawings.backgrounds[0].push(rainbow);
+
+  	let mall = {img: new Image(), DIM: [1440,810], scale: 1/3};
+  	mall.img.src = "https://www.dropbox.com/scl/fi/7zugsmvnqcx2bexl1iehs/DestroyTheMall.MatMan.png.png?rlkey=m7ou7box49px8b8xz5dhnwcz6&raw=1";
+  	defaultDrawings.backgrounds[2].push(mall);
+
+  	let stands = {img: new Image(), DIM: [1100,800], scale: 1/1.75};
+  	stands.img.src = "https://www.dropbox.com/scl/fi/oentkgnkqv04nyv3fvomu/stands.png?rlkey=pbjarhgbnpg7oemn3xu6ytacg&raw=1";
+  	defaultDrawings.stands = stands;
 };
 
 const options = {
@@ -92,40 +155,65 @@ const options = {
 function draw() {
   	ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  	drawBackground();
-  	drawRacers();
-  	drawForeground();
+  	if (!hidden){
+        displayWinner();
+        drawBackground();
+        drawRacers();
+        drawForeground();
 
-  	if (winner) {
-      	displayWinner();
-    };
+        //if (winner) {
+        //};
+    }
 };
 
 function displayWinner(){
-  	ctx.font = "60px Oswald";
+  	ctx.font = "32px Oswald";
+  	//ctx.font = "23px Oswald";
+  	ctx.letterSpacing = "1.5px";
   	ctx.fillStyle = "white";
   	ctx.strokeStyle = "black";
   	ctx.lineWidth = 2;
-  	let textPos = racers[winner].XY.slice();
-  	textPos[0] += racers[winner].vehicleTL[0] + racers[winner].vehicleDIM[0]/2;
-  	textPos[1] += racers[winner].avatarTL[1] - 50;
+  	let topLeftCorner = [1450, 360];
+    //let topLeftCorner = [1450, 42];
 
-  	// show leaderboard
-  	ctx.textAlign = "left";
-  	ctx.fillText("Leaderboard", 50, 100);
-  	for (let i = 0; i < leaderboard.length; i++){
-     	ctx.fillText(i+1 + ". " + leaderboard[i], 50, 100 + 60*(i+1));
-      	if (i+1 === 10) break;
+  	// draw black box
+  	if (standings.length){
+        ctx.fillStyle = "rgba(0,0,0,1.0)";
+        ctx.beginPath();
+        ctx.roundRect(topLeftCorner[0]-25, topLeftCorner[1]-42, 480,400, 30)
+      	//ctx.roundRect(topLeftCorner[0]-25, topLeftCorner[1]-42, 480,318, 30)
+        ctx.fill();
+        ctx.closePath();
     }
 
-  	// show winner
-	ctx.textAlign = "center";
-  	ctx.translate(...cameraLoc);
-	ctx.fillText("Winner is", textPos[0], textPos[1] - 30);
-	ctx.fillText(winner, textPos[0], textPos[1] + 30);
-	ctx.strokeText("Winner is", textPos[0], textPos[1] - 30);
-	ctx.strokeText(winner, textPos[0], textPos[1] + 30);
-  	ctx.resetTransform();
+  	ctx.fillStyle = "white";
+
+  	if (winner){
+      	// show standings
+        ctx.textAlign = "left";
+        ctx.fillText("Leaderboard", ...topLeftCorner);
+        for (let i = 0; i < standings.length; i++){
+            if (leaderboard.length <= i) ctx.fillText(i+1 + ". " + standings[i], topLeftCorner[0], topLeftCorner[1] + 34*(i+1));
+            if (i+1 === 10) break;
+        }
+
+        // show leaderboard
+  		ctx.fillStyle = "cyan";
+        ctx.textAlign = "left";
+        for (let i = 0; i < leaderboard.length; i++){
+            ctx.fillText(i+1 + ". " + leaderboard[i], topLeftCorner[0], topLeftCorner[1] + 34*(i+1));
+            if (i+1 === 10) break;
+        }
+        ctx.resetTransform();
+    } else {
+     	// show standings
+        ctx.textAlign = "left";
+        if (standings.length) ctx.fillText("Leaderboard", topLeftCorner[0], topLeftCorner[1]);
+        for (let i = 0; i < standings.length; i++){
+            ctx.fillText(i+1 + ". " + standings[i], topLeftCorner[0], topLeftCorner[1] + 34*(i+1));
+            if (i+1 === 10) break;
+        }
+    }
 };
 
 function drawBackground() {
@@ -152,7 +240,7 @@ function drawBackground() {
   	for (let i = 0; i < backgrounds.length; i++){
       	let arr = backgrounds[i]
       	for (let img of arr) {
-          	ctx.drawImage(img.img, ...img.XY, img.DIM[0]+10*(2-i), img.DIM[1]+10*(2-i));
+          	ctx.drawImage(img.img, ...img.XY, img.DIM[0]*img.scale, img.DIM[1]*img.scale+10*(2-i));
         }
     }
 
@@ -163,7 +251,13 @@ function drawBackground() {
 
   	// draw finish line if relevant
   	if (finishX) {
-      	ctx.drawImage(defaultDrawings.finishLine, finishX-100, 890, 200, 200);
+      	ctx.drawImage(defaultDrawings.finishLine, finishX-100, 880, 200, 200);
+
+      	let img = defaultDrawings.stands;
+      	let y = 960-img.DIM[1]*img.scale
+      	//ctx.drawImage(img.img, finishX-650, y, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
+      	ctx.drawImage(img.img, finishX, y, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
+
     };
 
   	// reset everything
@@ -172,10 +266,10 @@ function drawBackground() {
 
 function drawForeground() {
   	ctx.translate(...cameraLoc);
-  	ctx.globalAlpha = 0.75; // make foreground somewhat transparent
+  	ctx.globalAlpha = 1; // make foreground somewhat transparent
   	// draw foreground images
   	for (let img of foregrounds) {
-      	ctx.drawImage(img.img, ...img.XY, ...img.DIM);
+      	ctx.drawImage(img.img, ...img.XY, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
     }
 
   	// reset everything
@@ -207,6 +301,7 @@ function drawRacers() {
               	ctx.translate(...racer.XY);
               	ctx.translate((racer.XY[1] - (1070 - totalRoadHeight/2)),0);
             }
+
 
             // draw avatar in a circle
             ctx.save()
@@ -258,28 +353,41 @@ window.addEventListener('onEventReceived', async function (obj) {
 
     if (listener === 'message') {
       	//console.log(event);
+      	let message = event.data.text.toLowerCase();
 
-      	if (readying && (event.data.text.startsWith("!join") || event.data.text.startsWith("!start"))) {
+      	if (readying && (message.startsWith("!join") || message.startsWith("!start"))) {
             await addRacer(event.data.displayName, event.data.displayColor)
         } else{
          	if (isModerator(event.data.badges)) {
-             	if (event.data.text.startsWith("!checkracestatus")){
+             	if (message.startsWith("!checkracestatus")){
                   	console.log(racers);
-                  	requestAnimationFrame(updateRacers);
+                  	//requestAnimationFrame(updateRacers);
+                } else if (message.startsWith("!showrace")){
+                 	hidden = false;
+                } else if (message.startsWith("!hiderace")){
+                 	if (!hidden && (stopRace)){
+                     	hidden = true;
+                      	resetRace(); // also reset the race
+                    }
+                } else if (message.startsWith("!reset")) {
+                  	if (stopRace){
+                      resetRace();
+                      sendMessageInChat("Race reset");
+                    }
                 }
               	if (isBroadcaster(event.data.badges)) {
-                 	if (event.data.text.startsWith("!startrace")){
+                 	if (message.startsWith("!setuprace")){
                      	readying = true;
                       	//sendMessageInChat("Race entries open, !join to enter");
-                    } else if (event.data.text.startsWith("!go")){
+                    } else if (message.startsWith("!go")){
                       	if (sortedRacers.length > 0){
                           readying = false;
                           raceStartTime = Date.now();
-                          //sendMessageInChat("Race started!");
+                          prevStandingsUpdateTime = raceStartTime;
+                          sendMessageInChat("Race started!");
                         }
-                    } else if (event.data.text.startsWith("!resetrace")) {
-                     	resetRace();
-                      	//sendMessageInChat("Race reset");
+                    } else if (event.data.text.startsWith("!resetSEStore")){
+                      	resetSEStore();
                     } else {
                      	//console.log(event.data.text);
                     }
@@ -295,6 +403,7 @@ window.addEventListener('onWidgetLoad', async function (obj) {
   	raceDuration = fieldData.race_duration;
   	clientID = fieldData.client_id;
   	clientSecret = fieldData.client_secret;
+  	jebaitedToken = fieldData.jebaited_token;
   	options.headers.Authorization = 'Bearer ' + fieldData.JWT_TOKEN;
 
   	loadAssets();
@@ -348,39 +457,65 @@ window.addEventListener('onWidgetLoad', async function (obj) {
             readying = true;
             requestAnimationFrame(updateRacers);
         })
+  		.then(() => {
+      		if (testing && autostart){
+              readying = false;
+              raceStartTime = Date.now();
+              prevStandingsUpdateTime = raceStartTime;
+              //clearTodaysWinners();
+            }
+    	})
 
 
 });
 
 function addBackgroundItem(layer, drawAnywhere){
-  	let choice = defaultDrawings.backgrounds[layer][Math.floor(Math.random()*(defaultDrawings.backgrounds[layer].length-1))];
+  	let choice = defaultDrawings.backgrounds[layer][Math.floor(Math.random()*(defaultDrawings.backgrounds[layer].length))];
     let back = {};
     back.img = choice.img;
     back.DIM = choice.DIM;
+  	back.scale = choice.scale;
   	if (drawAnywhere){
-      	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0],
-                 	960-(2-layer)*10-back.DIM[1]];
+      	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0]*back.scale,
+                 	951-(2-layer)*10-back.DIM[1]*back.scale];
     } else {
       	// add item off canvas
       	back.XY = [canvas.width - cameraLoc[0] + Math.random()*canvas.width/4,
-                 	960-(2-layer)*10-back.DIM[1]];
+                 	951-(2-layer)*10-back.DIM[1]*back.scale];
     }
-    // avoid overlaps?
+
+  	let overlapping = true;
+  	while (overlapping){
+     	overlapping = false;
+      	for (let img of backgrounds[layer]){
+         	if (back.XY[0] > img.XY[0] && back.XY[0] < img.XY[0]+img.DIM[0]*img.scale){
+             	back.XY[0] += img.DIM[0]*img.scale;
+              	overlapping = true;
+              	break;
+            } else if (img.XY[0] > back.XY[0] && img.XY[0] < back.XY[0]+back.DIM[0]*back.scale){
+             	back.XY[0] += img.DIM[0]*img.scale;
+              	overlapping = true;
+              	break;
+            }
+        }
+    }
+
     backgrounds[layer].push(back);
 }
 
 function addForegroundItem(drawAnywhere){
-  	let choice = defaultDrawings.foregrounds[Math.floor(Math.random()*(defaultDrawings.foregrounds.length-1))];
+  	let choice = defaultDrawings.foregrounds[Math.floor(Math.random()*(defaultDrawings.foregrounds.length))];
     let back = {};
     back.img = choice.img;
     back.DIM = choice.DIM;
+  	back.scale = choice.scale;
   	if (drawAnywhere){
-      	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0],
-                 	1070-back.DIM[1]];
+      	back.XY = [-canvas.width*0.75 + Math.random()*canvas.width*2 - back.DIM[0]*back.scale,
+                 	1070-back.DIM[1]*back.scale];
     } else {
       	// add item off canvas
       	back.XY = [canvas.width - cameraLoc[0] + Math.random()*canvas.width/4,
-                 	1070-back.DIM[1]];
+                 	1070-back.DIM[1]*back.scale];
     }
     // avoid overlaps?
   	// never hide start or finish line
@@ -392,6 +527,23 @@ function addForegroundItem(drawAnywhere){
          	back.XY[0] += 300;
         }
     }
+
+  	let overlapping = true;
+  	while (overlapping){
+     	overlapping = false;
+      	for (let img of foregrounds){
+         	if (back.XY[0] > img.XY[0] && back.XY[0] < img.XY[0]+img.DIM[0]*img.scale){
+             	back.XY[0] += img.DIM[0]*img.scale;
+              	overlapping = true;
+              	break;
+            } else if (img.XY[0] > back.XY[0] && img.XY[0] < back.XY[0]+back.DIM[0]*back.scale){
+             	back.XY[0] += img.DIM[0]*img.scale;
+              	overlapping = true;
+              	break;
+            }
+        }
+    }
+
     foregrounds.push(back);
 }
 
@@ -496,28 +648,31 @@ async function addRacer(name, displayColor) {
 };
 
 function sendMessageInChat(message) {
-  	fetch("https://api.streamelements.com/kappa/v2/bot/"+broadcasterChannelId+"/say", {
-      method: "POST",
-      headers: {
-        "Accept": 'application/json; charset=utf-8',
-        "Authorization": options["headers"]["Authorization"],
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "message": message
-      })
-    })
-      .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-    })
-      .then(data => {
-      //console.log(data)
-    })
-      .catch(err => {
-      console.log(err)
-    })
+  	//fetch("https://api.streamelements.com/kappa/v2/bot/"+broadcasterChannelId+"/say", {
+    //  method: "POST",
+    //  headers: {
+    //    "Accept": 'application/json; charset=utf-8',
+    //    "Authorization": options["headers"]["Authorization"],
+    //    "Content-Type": "application/json"
+    //  },
+    //  body: JSON.stringify({
+    //    "message": message
+    //  })
+    //})
+    //  .then(res => {
+    //  if (res.ok) {
+    //    return res.json();
+    //  }
+    //})
+    //  .then(data => {
+    //  //console.log(data)
+    //})
+    //  .catch(err => {
+    //  console.log(err)
+    //})
+
+    const encodedMessage = encodeURIComponent(message);
+  	fetch(`https://api.jebaited.net/botMsg/${jebaitedToken}/${encodedMessage}`)
 };
 
 function resetRace() {
@@ -526,11 +681,15 @@ function resetRace() {
   	racers = ({});
 	sortedRacers = [];
 	leaderboard = [];
+	standings = [];
+	prevStandingsUpdateTime = 0;
   	raceStartTime = null;
     cameraLoc = [canvas.width*0.75, 0];
   	readying = true;
+  	finishingVel = 1000;
+  	stopRace = false;
   	resetBackgroundArt();
-  	requestAnimationFrame(updateRacers);
+  	if (!isUpdatingRacers) requestAnimationFrame(updateRacers);
 };
 
 function resetBackgroundArt() {
@@ -539,15 +698,19 @@ function resetBackgroundArt() {
 
   	// throw in random background assets
     for (let j = 0; j < 3; j++) {
-      for (let i = 0; i < 4-j+Math.random()*10; i++) {
+      for (let i = 0; i < 2-j+Math.random()*2; i++) {
         addBackgroundItem(j, true);
       }
     }
 
     // throw in random foreground assets
-    for (let i = 0; i < 4+Math.random()*10; i++) {
+    for (let i = 0; i < 2+Math.random()*2; i++) {
       addForegroundItem(true);
     }
+};
+
+function resetSEStore() {
+  	SE_API.store.set('StreamRacersLeaderboardData', {});
 };
 
 function isModerator(badgesArray) {
@@ -600,12 +763,14 @@ function updateRacers() {
           	let maxXPos = 0;
           	let maxXVel = 0;
           	let finishers = [];
+          	stopRace = true;
           	for (let racer of Object.values(racers)) {
               	// update
               	racer.vel[0] += (Math.random()-1/3)*racer.acc[0];
                 racer.vel[1] += (Math.random()-1/3)*racer.acc[1];
 
               	if (racer.vel[0] < 0) { racer.vel[0] = 0; }
+              	if (finishX && racer.XY[0] > finishX) {racer.vel[0] = finishingVel}
 
                 racer.wheel1Theta += racer.vel[0]/racer.wheel1Radius;
               	racer.wheel1Theta = racer.wheel1Theta % 2 * Math.PI;
@@ -622,26 +787,47 @@ function updateRacers() {
 
               	if (finishX && racer.XY[0] > finishX && racer.XY[0] - racer.vel[0]*(curTime - racer.time)/1000 <= finishX) {
                   	finishers.push(racer.name);
-                  	//console.log(racer.name);
+                }
+
+              	if (racer.XY[0] + cameraLoc[0] < canvas.width + 8000){
+                 	stopRace = false;
                 }
 
                 racer.time = curTime;
             }
+
+          	if ((curTime - prevStandingsUpdateTime)/1000 > standingsUpdateDur){
+              	standings = Object.keys(racers).sort((a,b) => {
+                  	let aX = racers[a].XY[0];
+                    let bX = racers[b].XY[0];
+                    if (aX < bX) return 1;
+                    if (aX > bX) return -1;
+                    return 0;
+                });
+              	//console.log(standings);
+              	prevStandingsUpdateTime = curTime;
+            }
+
           	// add finishers to leaderboard
           	if (finishers.length > 0) {
               	leaderboard = leaderboard.concat(finishers.sort((a,b) => {
                     let aX = racers[a].XY[0];
                     let bX = racers[b].XY[0];
-                    if (aX < bX) return -1;
-                    if (aX > bX) return 1;
+                    if (aX < bX) return 1;
+                    if (aX > bX) return -1;
                     return 0;
             	}));
               	//console.log(leaderboard)
-              	if (!winner) winner = leaderboard[0];
+              	if (!winner) {
+                    winner = leaderboard[0];
+                    finishingVel = racers[winner].vel[0];
+                }
             }
 
-          	let newCameraLocX = winner ?
-                -maxXPos + 300 + (canvas.width-300-200)*Math.min(1, (curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000)) :
+           // finishX + cameraLoc[0] > -500
+          	let newCameraLocX = finishX ?
+                Math.max(-maxXPos + 300 + (canvas.width-300-200)*Math.min(1, (curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000)),
+                         canvas.width*0.5 - finishX):
                 -maxXPos + 300 + (canvas.width-300-200)*(curTime - raceStartTime - setupDuration*1000)/(raceDuration * 1000);
           	let dX = newCameraLocX - cameraLoc[0];
           	cameraLoc[0] = newCameraLocX;
@@ -649,7 +835,6 @@ function updateRacers() {
 
           	if (!finishX && (raceDuration + setupDuration) * 1000 - (curTime - raceStartTime) < 5000) {
                 finishX = canvas.width - cameraLoc[0] + 5*maxXVel - 800;
-              	console.log(maxXVel, finishX);
             }
         }
     }
@@ -658,10 +843,34 @@ function updateRacers() {
 
   	if (curTime - raceStartTime < (raceDuration + setupDuration) * 1000 || readying) {
    		requestAnimationFrame(updateRacers);
-  	} else if (raceStartTime && (leaderboard.length < sortedRacers.length || finishX + cameraLoc[0] > -500)){
+  	} else if (raceStartTime && (leaderboard.length < sortedRacers.length || !stopRace)){
       	requestAnimationFrame(updateRacers);
     } else {
-     	console.log(leaderboard)
+      	if (!testing){
+          sendMessageInChat("!addqwoin " + winner + " 5");
+
+          SE_API.store.get('StreamRacersLeaderboardData').then(data => {
+              let date = new Date();
+              let day = date.getDate().toString().padStart(2,'0');
+              let month = (date.getMonth() + 1).toString().padStart(2,'0');
+              let year = date.getFullYear().toString();
+
+              data[year + month + day] ||= {};
+              data[year + month] ||= {};
+              for (let i = 0; i < Math.min(leaderboard.length, 10); i++){
+                  // daily scores
+                  data[year + month + day][leaderboard[i]] ||= 0;
+                  data[year + month + day][leaderboard[i]] += Math.min(leaderboard.length, 10)-i; // 3, 2, 1 points to top 3
+
+                  // monthly scores
+                  data[year + month][leaderboard[i]] ||= 0;
+                  data[year + month][leaderboard[i]] += Math.min(leaderboard.length, 10)-i; // 3, 2, 1 points to top 3
+              }
+
+              SE_API.store.set('StreamRacersLeaderboardData', data);
+          });
+        }
+      	isUpdatingRacers = false;
     }
 };
 
@@ -701,8 +910,27 @@ function updateBackground(dX) {
       foregrounds.splice(rem.pop(),1);
 
       // add a new one
-      for (let i = 0; i < (Math.random()-1/3)*3; i++){
+      //for (let i = 0; i < (Math.random()-1/3)*3; i++){
       	addForegroundItem();
-      }
+      //}
     }
+};
+
+function clearTodaysWinners() {
+	SE_API.store.get('StreamRacersLeaderboardData').then(data => {
+      let date = new Date();
+      let day = date.getDate().toString().padStart(2,'0');
+      let month = (date.getMonth() + 1).toString().padStart(2,'0');
+      let year = date.getFullYear().toString();
+
+      data[year + month + day] ||= {};
+      data[year + month] ||= {};
+      for (let [name, points] of Object.entries(data[year + month + day])){
+         // remove all points from today
+       	 data[year + month][name] -= points;
+      }
+      data[year + month + day] = {};
+
+      SE_API.store.set('StreamRacersLeaderboardData', data);
+    });
 };
