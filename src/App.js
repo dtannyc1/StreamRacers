@@ -7,7 +7,7 @@ export default function App() {
     <BrowserRouter>
       <div className='app'>
         <header className='site-header'>
-          <h1>React from Scratch</h1>
+          <h1>React from Scratch!!!</h1>
           <nav className='main-nav'>
             <NavLink exact to='/'>
               Home
