@@ -5,7 +5,17 @@
       "value": 30,
       "group": "Race Parameters"
   },
-"JWT_TOKEN": {
+  "track_type": {
+     "type": "dropdown",
+      "label": "Race Track",
+      "value": "default",
+      "group": "Race Parameters",
+      "options": {
+          "default": "Default",
+          "winter": "Winter"
+      }
+  },
+  "JWT_TOKEN": {
       "type": "text",
       "label": "JWT Token",
       "value": "",

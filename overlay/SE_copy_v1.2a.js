@@ -1,6 +1,6 @@
 
-let testing = false;
-let autostart = false;
+let testing = true;
+let autostart = true;
 
 let readying;
 let broadcaster = "";
@@ -18,7 +18,7 @@ let testRacers = [];
 if (testing){
   testRacers = ["apocalypse_squirrel", "boristhefrenchcat", "charlysmomm",
                     "medinamind", "neiluj04", "pyobum", "thecomplements",
-                   "andythefrenchy", "thesolid7"];
+                   "andythefrenchy", "thesolid7","pencils45"];
 }
 
 let defaultDrawings = {};
@@ -63,14 +63,38 @@ let wordBank = {
 };
 let chosenWord = null;
 let sentClue = false;
+let foundWord = false;
 
 let chooseRandomWord = () => {
-  let allkeys = Object.keys(wordBank);
-  let randKey = allkeys[Math.floor((Math.random()*allkeys.length))];
-  let allWords = wordBank[randKey];
-  let randWord = allWords[Math.floor((Math.random()*allWords.length))];
-  chosenWord = {"word": randWord.toLowerCase(), "category": randKey};
-  console.log(chosenWord)
+  if (!foundWord){ // havent figured out the word yet
+    if (chosenWord && Date.now() - chosenWord.time > 12*60*60*1000){ // have a word & expired
+     	chooseNewWord();
+    } else {
+      SE_API.store.get('boostWord').then(data => {
+          if (data && Date.now() - data.time < 12*60*60*1000 && !data.found){ // if word exists and is still valid,
+              chosenWord = data;
+              console.log(chosenWord);
+          } else {
+              chooseNewWord();
+          }
+      }).catch(() => {
+          chooseNewWord();
+      });
+    }
+  } else {
+    chooseNewWord();
+  }
+};
+
+let chooseNewWord = () => {
+	let allkeys = Object.keys(wordBank);
+    let randKey = allkeys[Math.floor((Math.random()*allkeys.length))];
+    let allWords = wordBank[randKey];
+    let randWord = allWords[Math.floor((Math.random()*allWords.length))];
+    chosenWord = {"word": randWord.toLowerCase(), "category": randKey, "time": Date.now(), "found": false};
+  	foundWord = false;
+  	SE_API.store.set('boostWord', chosenWord);
+    console.log(chosenWord)
 };
 
 let resetRandomWord = () => {
@@ -86,6 +110,11 @@ function containsChosenWord(input) {
 function boostRacer(racerName) {
     let racer = racers[racerName];
     if (racer) {
+      	if (!foundWord) {
+          foundWord = true;
+          chosenWord.found = true;
+          SE_API.store.set('boostWord', chosenWord);
+        }
         if (!racer.lastBoost || (racer.lastBoost && Date.now() - racer.lastBoost > (boostCooldown*1000))){
 			racer.vel[0] *= 1.2;
             racer.lastBoost = Date.now();
