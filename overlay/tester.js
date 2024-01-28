@@ -9,16 +9,17 @@ let raceStartTime;
 let setupDuration = 5;
 let raceDuration = 30;
 let totalRoadHeight = 95;
-let boostCooldown = 0.5; // time in seconds
+let boostCooldown = 1; // time in seconds
 let winner;
 let finishX;
+let trackType;
 
 let testRacers = [];
 if (testing){
   testRacers = ["apocalypse_squirrel", "boristhefrenchcat", "charlysmomm",
                     "medinamind", "neiluj04", "pyobum", "thecomplements",
-                   "andythefrenchy", "thesolid7", "pencils45"];
-};
+                   "andythefrenchy", "thesolid7"];
+}
 
 let defaultDrawings = {};
 let racers = ({});
@@ -56,19 +57,44 @@ backupButton.addEventListener("click", function() {
 let wordBank = {
   "food": ["pizza", "chocolate", "sushi", "ice cream", "burger", "pasta", "salad", "potato", "tacos", "steak", "coffee", "cake", "popcorn", "pancake", "sandwich", "cheese", "fruit", "cookies", "ramen", "grilled cheese"],
   "video game titles": ["The Legend of Zelda", "Super Mario Bros.", "Fortnite", "Minecraft", "Call of Duty", "Overwatch", "Assassin's Creed", "Grand Theft Auto", "FIFA", "World of Warcraft", "Destiny", "Halo", "Dota 2", "League of Legends", "Final Fantasy", "Skyrim", "Rocket League", "Mortal Kombat", "The Witcher", "Splatoon"],
-  "music genre": ["rock", "pop", "hip-hop", "jazz", "classical", "country", "rap", "blues", "reggae", "electronic", "indie", "folk", "punk", "metal", "soul", "R&B", "dance", "alternative", "latin", "world"],
-  "disney character": ["Mickey Mouse", "Cinderella", "Frozen", "Lion King", "Aladdin", "Pixar", "Disneyland", "Magic Kingdom", "Mulan", "Toy Story", "Elsa", "Donald Duck", "Moana", "Beauty and the Beast", "Pocahontas", "Goofy", "Little Mermaid", "Dumbo", "Snow White", "Peter Pan"],
+  "music genre": ["rock", "pop", "hip hop", "jazz", "classical", "country", "rap", "blues", "reggae", "electronic", "indie", "folk", "punk", "metal", "soul", "R&B", "dance", "alternative", "latin", "world"],
+  "disney character": ["Mickey Mouse", "Cinderella", "Frozen", "Lion King", "Aladdin", "Mulan", "Woody", "Elsa", "Donald Duck", "Moana", "Belle", "Beast", "Pocahontas", "Goofy", "Little Mermaid", "Dumbo", "Snow White", "Peter Pan"],
   "musical instruments": ["guitar", "piano", "violin", "trumpet", "drums", "flute", "saxophone", "clarinet", "bass guitar", "cello", "trombone", "ukulele", "accordion", "harmonica", "banjo", "bagpipes", "harp", "mandolin", "xylophone", "oboe"]
 };
 let chosenWord = null;
 let sentClue = false;
+let foundWord = false;
 
 let chooseRandomWord = () => {
-  let allkeys = Object.keys(wordBank);
-  let randKey = allkeys[Math.floor((Math.random()*allkeys.length))];
-  let allWords = wordBank[randKey];
-  let randWord = allWords[Math.floor((Math.random()*allWords.length))];
-  chosenWord = {"word": randWord.toLowerCase(), "category": randKey};
+  if (!foundWord){ // havent figured out the word yet
+    if (chosenWord && Date.now() - chosenWord.time > 12*60*60*1000){ // have a word & expired
+     	chooseNewWord();
+    } else {
+      SE_API.store.get('boostWord').then(data => {
+          if (data && Date.now() - data.time < 12*60*60*1000){ // if word exists and is still valid,
+              chosenWord = data;
+              console.log(chosenWord);
+          } else {
+              chooseNewWord();
+          }
+      }).catch(() => {
+          chooseNewWord();
+      });
+    }
+  } else {
+    chooseNewWord();
+  }
+};
+
+let chooseNewWord = () => {
+	let allkeys = Object.keys(wordBank);
+    let randKey = allkeys[Math.floor((Math.random()*allkeys.length))];
+    let allWords = wordBank[randKey];
+    let randWord = allWords[Math.floor((Math.random()*allWords.length))];
+    chosenWord = {"word": randWord.toLowerCase(), "category": randKey, "time": Date.now()};
+  	foundWord = false;
+  	SE_API.store.set('boostWord', chosenWord);
+    console.log(chosenWord)
 };
 
 let resetRandomWord = () => {
@@ -84,16 +110,26 @@ function containsChosenWord(input) {
 function boostRacer(racerName) {
     let racer = racers[racerName];
     if (racer) {
+      	if (!foundWord) foundWord = true;
         if (!racer.lastBoost || (racer.lastBoost && Date.now() - racer.lastBoost > (boostCooldown*1000))){
 			racer.vel[0] *= 1.2;
-            racer.lastBoost = boostCooldown
+            racer.lastBoost = Date.now();
+          	racer.showBoost = true;
+            setTimeout(() => {
+                  if (Date.now() - racer.lastBoost > (boostCooldown*1000)){
+				  	racer.showBoost = false;
+                  }
+            	}, 2*boostCooldown*1000);
         };
     };
 };
 
-function loadAssets() {
+async function loadAssets() {
 	defaultDrawings.vehicle = new Image();
   	defaultDrawings.vehicle.src = "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&raw=1";
+
+  	defaultDrawings.boost = new Image();
+  	defaultDrawings.boost.src = "https://www.dropbox.com/scl/fi/lw1w1tija3n3kican60jo/boostflame.png?rlkey=7kz5klgf3t61t52cljhhsla9p&raw=1";
 
   	defaultDrawings.wheel1 = new Image();
   	defaultDrawings.wheel1.src = "https://www.dropbox.com/scl/fi/h40xha1db6oqsa7n5nibi/default_wheel1.png?rlkey=xtolfaiwu6fsj3w7f23jyt6h8&raw=1";
@@ -113,72 +149,211 @@ function loadAssets() {
   	defaultDrawings.backgrounds = [[],[],[]];
   	defaultDrawings.foregrounds = [];
 
-  	let mountain = {img: new Image(), DIM: [800, 500], scale: 1/2};
-  	mountain.img.src = "https://www.dropbox.com/scl/fi/yeygg4k2sy2sum5g18dsp/mountains.png?rlkey=nibv2s6ewbmxbo35p2wn9m0qm&raw=1";
-  	defaultDrawings.backgrounds[0].push(mountain);
+  	if (trackType === "winter"){
+		let bisbi = {img: new Image(), DIM: [500, 500], scale: 1/3};
+        bisbi.img.src = "https://www.dropbox.com/scl/fi/rq2xuu0zcpnq7f5x7aq73/bisbi.png?rlkey=dfjhwcat01syphw0nz41p8r28&raw=1";
+        defaultDrawings.backgrounds[2].push(bisbi);
 
-  	let clouds = {img: new Image(), DIM: [564,516], scale: 1/3};
-  	clouds.img.src = "https://www.dropbox.com/scl/fi/nw5qrer7q70z61vzcy2q3/DoTheGayCloud.MatMan.png?rlkey=a8rfof98i3lxqeih908c9k0wy&raw=1";
-  	defaultDrawings.backgrounds[0].push(clouds);
+        let car_crash = {img: new Image(), DIM: [500,500], scale: 1/3};
+        car_crash.img.src = "https://www.dropbox.com/scl/fi/dwwtm19xg115fhlgzs8s5/car_crash.png?rlkey=uend6weexkjvba2b4yc20w30g&raw=1";
+        defaultDrawings.backgrounds[2].push(car_crash);
 
-  	let fan = {img: new Image(), DIM: [628,728], scale: 1/3};
-  	fan.img.src = "https://www.dropbox.com/scl/fi/i9einckdxllcblbakhxdp/Moulin3.png?rlkey=9q3myaqxpd62l7adszb9w6jae&raw=1";
-  	defaultDrawings.backgrounds[0].push({...fan});
-  	fan.scale = 1/4;
-  	defaultDrawings.backgrounds[1].push({...fan});
+		let champion = {img: new Image(), DIM: [500,500], scale: 1/3};
+        champion.img.src = "https://www.dropbox.com/scl/fi/7we7d79euaxtn1tzhskf4/champion.png?rlkey=5b9olq36iwgt378pa4pvl8l0b&raw=1";
+        defaultDrawings.backgrounds[2].push(champion);
 
-  	let sign = {img: new Image(), DIM: [1100,800], scale: 1/3};
-  	sign.img.src = "https://www.dropbox.com/scl/fi/eydk5ey2uf8s5hfn1p9jb/better_call_asixel.png?rlkey=iaznxl8qfzwftdgvexacteoth&raw=1";
-  	defaultDrawings.backgrounds[2].push(sign);
+		let charly = {img: new Image(), DIM: [500,500], scale: 1/3};
+        charly.img.src = "https://www.dropbox.com/scl/fi/b5guogwj19hf7fyl6z2gf/charly.png?rlkey=k757jhejjt1gq7l5l8d488ny9&raw=1";
+        defaultDrawings.backgrounds[2].push(charly);
 
-  	let barbies = {img: new Image(), DIM: [800,500], scale: 1/1.5};
-  	barbies.img.src = "https://www.dropbox.com/scl/fi/qil9bpr86tc9crdef3nuh/barnies_restobar_grill.png?rlkey=tdqq0u666ayq77xhus0vcdypo&raw=1";
-  	defaultDrawings.backgrounds[2].push(barbies);
+		let christmas_tree = {img: new Image(), DIM: [500,500], scale: 1/2};
+        christmas_tree.img.src = "https://www.dropbox.com/scl/fi/1up1mty687vn93cpx8sxk/christmas_tree.png?rlkey=rmwr20rd7fb5b7jy3jznh2nyv&raw=1";
+        defaultDrawings.backgrounds[0].push({...christmas_tree});
+		christmas_tree.scale = 1/3;
+		defaultDrawings.backgrounds[1].push({...christmas_tree});
+		christmas_tree.scale = 1/4;
+      	defaultDrawings.backgrounds[2].push({...christmas_tree});
 
-  	let tree1 = {img: new Image(), DIM: [500,500], scale: 1/2};
-  	tree1.img.src = "https://www.dropbox.com/scl/fi/rsqpqpv0mel94vq7yd9lv/tree1.png?rlkey=wfsqqgbz1k3aev977it6gm19s&raw=1";
-  	defaultDrawings.backgrounds[0].push({...tree1});
-  	tree1.scale = 1/2.3;
-  	defaultDrawings.backgrounds[1].push({...tree1});
-  	tree1.scale = 1/2.6;
-  	defaultDrawings.backgrounds[2].push({...tree1});
-  	defaultDrawings.foregrounds.push({...tree1});
+		let finn = {img: new Image(), DIM: [500,500], scale: 1/3};
+        finn.img.src = "https://www.dropbox.com/scl/fi/94dxmpgjtghvyxk8t4c43/finn.png?rlkey=49s372q2airjp2qabjc36p7fc&raw=1";
+        defaultDrawings.backgrounds[2].push(finn);
 
-  	let tree2 = {img: new Image(), DIM: [500,500], scale: 1/2.3};
-  	tree2.img.src = "https://www.dropbox.com/scl/fi/4o8bjpt42vp7by6bi2i1l/tree2.png?rlkey=p0auz5elxsrn2n2ja357m8ohs&raw=1";
-  	defaultDrawings.backgrounds[1].push({...tree2});
-  	tree2.scale = 1/2.6;
-  	defaultDrawings.backgrounds[2].push({...tree2});
-  	defaultDrawings.foregrounds.push({...tree2});
+		let fort = {img: new Image(), DIM: [500,500], scale: 1/2};
+        fort.img.src = "https://www.dropbox.com/scl/fi/e0likmq0b87544jgi25h3/fort.png?rlkey=1jxtess9vdeij5uzbc5th0wb2&raw=1";
+        defaultDrawings.backgrounds[0].push({...fort});
 
-  	let bush = {img: new Image(), DIM: [500,500], scale: 1/4};
-  	bush.img.src = "https://www.dropbox.com/scl/fi/4pv0w2xh32xmuffgkdb8n/bush.png?rlkey=hnbnnbpdcnp596qolz91f8jvn&raw=1";
-  	defaultDrawings.backgrounds[1].push({...bush});
-  	bush.scale = 1/5;
-  	defaultDrawings.backgrounds[2].push(bush);
-  	defaultDrawings.foregrounds.push(bush);
+		let Gnu = {img: new Image(), DIM: [500,500], scale: 1/3};
+        Gnu.img.src = "https://www.dropbox.com/scl/fi/2kb3jetdafncxri5e0mdn/Gnu.png?rlkey=ufxfxew4er8xdb55durqjrh5g&raw=1";
+        defaultDrawings.backgrounds[2].push({...Gnu});
 
-  	let rock = {img: new Image(), DIM: [500,500], scale: 1/5};
-  	rock.img.src = "https://www.dropbox.com/scl/fi/wedf2wf50e8dfpgt65wir/rock.png?rlkey=59l6o5ibfuie6y2m3wu137dfv&raw=1";
-  	defaultDrawings.backgrounds[2].push(rock);
-  	defaultDrawings.foregrounds.push(rock);
+		let hockey = {img: new Image(), DIM: [500,500], scale: 1/3};
+        hockey.img.src = "https://www.dropbox.com/scl/fi/sohmdhxd93k7txj17wpyk/hockey.png?rlkey=q5pa74ha093uwexo1q445vix7&raw=1";
+        defaultDrawings.backgrounds[2].push({...hockey});
 
-  	let appleTree = {img: new Image(), DIM: [500,500], scale: 1/2.5};
-  	appleTree.img.src = "https://www.dropbox.com/scl/fi/0lop56qnil503u1fp9h43/apple_tree.png?rlkey=rkcdlj91xzvz7q8musz8lw9pw&raw=1";
-  	defaultDrawings.backgrounds[1].push(appleTree);
-  	defaultDrawings.backgrounds[2].push(appleTree);
+		let ice_fishing = {img: new Image(), DIM: [500,500], scale: 1/3};
+        ice_fishing.img.src = "https://www.dropbox.com/scl/fi/iif208ceopy4qh9cdwfqr/ice_fishing.png?rlkey=ualyvqump63fgy3ka246sysgl&raw=1";
+        defaultDrawings.backgrounds[2].push({...ice_fishing});
 
-  	let rainbow = {img: new Image(), DIM: [500,500], scale: 1};
-  	rainbow.img.src = "https://www.dropbox.com/scl/fi/x0zfus1zohj9a26n6kde3/rainbow.png?rlkey=2zorp76sgnadj8lga7arfgbux&raw=1";
-  	defaultDrawings.backgrounds[0].push(rainbow);
+		let large_tree = {img: new Image(), DIM: [500,500], scale: 1/2};
+        large_tree.img.src = "https://www.dropbox.com/scl/fi/2c3pclg5hsc9d88h9yzly/large_tree.png?rlkey=weub585sl41p6jrvchctwvsqu&raw=1";
+        defaultDrawings.backgrounds[0].push({...large_tree});
+		large_tree.scale = 1/3;
+		defaultDrawings.backgrounds[1].push({...large_tree});
+		large_tree.scale = 1/4;
+        defaultDrawings.backgrounds[2].push({...large_tree});
+        defaultDrawings.foregrounds.push({...large_tree});
 
-  	let mall = {img: new Image(), DIM: [1440,810], scale: 1/3};
-  	mall.img.src = "https://www.dropbox.com/scl/fi/7zugsmvnqcx2bexl1iehs/DestroyTheMall.MatMan.png.png?rlkey=m7ou7box49px8b8xz5dhnwcz6&raw=1";
-  	defaultDrawings.backgrounds[2].push(mall);
+		let mountains = {img: new Image(), DIM: [800,500], scale: 1/2};
+        mountains.img.src = "https://www.dropbox.com/scl/fi/pb9pgx5ncvd620s90y0te/mountains.png?rlkey=ed6chq17omxjwn5jjvfa3pxnt&raw=1";
+        defaultDrawings.backgrounds[0].push({...mountains});
 
-  	let stands = {img: new Image(), DIM: [1100,800], scale: 1/1.75};
-  	stands.img.src = "https://www.dropbox.com/scl/fi/oentkgnkqv04nyv3fvomu/stands.png?rlkey=pbjarhgbnpg7oemn3xu6ytacg&raw=1";
-  	defaultDrawings.stands = stands;
+		let noot = {img: new Image(), DIM: [500,500], scale: 1/3};
+        noot.img.src = "https://www.dropbox.com/scl/fi/z6iy42x4n0hawsoii13u4/noot.png?rlkey=r100s6ws1vn03py3hrerzo5dy&raw=1";
+        defaultDrawings.backgrounds[2].push({...noot});
+
+		let papakaboom = {img: new Image(), DIM: [500,500], scale: 1/2};
+        papakaboom.img.src = "https://www.dropbox.com/scl/fi/r59x16v1q4cyflj04ace4/papakaboom.png?rlkey=kyq1hkl21q7m6kcansqgje9jz&raw=1";
+        defaultDrawings.backgrounds[2].push({...papakaboom});
+
+		let skidoo = {img: new Image(), DIM: [500,500], scale: 1/4};
+        skidoo.img.src = "https://www.dropbox.com/scl/fi/uq2zdhc8bphyj44why1fi/skidoo.png?rlkey=nve8wyt9fkn06kepf7dbczlfv&raw=1";
+        defaultDrawings.backgrounds[2].push({...skidoo});
+
+		let small_tree = {img: new Image(), DIM: [500,500], scale: 1/4};
+        small_tree.img.src = "https://www.dropbox.com/scl/fi/gevqdgmp7fh95xmfkumin/small_tree.png?rlkey=6ba41h0bqvoaz43xmosn1b28v&raw=1";
+        defaultDrawings.backgrounds[2].push({...small_tree});
+
+		let thorpine = {img: new Image(), DIM: [500,500], scale: 1/4};
+        thorpine.img.src = "https://www.dropbox.com/scl/fi/vc0gzjgcoonatwiumcj5h/thorpine.png?rlkey=2is0wmmwoosid5bfre74o5dmc&raw=1";
+        defaultDrawings.backgrounds[2].push({...thorpine});
+
+		let snow_bank = {img: new Image(), DIM: [500,500], scale: 1/2};
+        snow_bank.img.src = "https://www.dropbox.com/scl/fi/4vuh4nl164bcfy5gi3hiv/snow_bank.png?rlkey=j6ufmygm4ljw2zlqytk24osie&raw=1";
+        defaultDrawings.backgrounds[2].push({...snow_bank});
+
+		let snow_pile_1 = {img: new Image(), DIM: [500,500], scale: 1/4};
+        snow_pile_1.img.src = "https://www.dropbox.com/scl/fi/jvg69zj9kdipgwm8ozug0/snow_pile_1.png?rlkey=v9oqf4vplvgmu63spupa73ojm&raw=1";
+        defaultDrawings.backgrounds[2].push({...snow_pile_1});
+      	defaultDrawings.foregrounds.push({...snow_pile_1});
+
+		let snow_pile_2 = {img: new Image(), DIM: [500,500], scale: 1/4};
+        snow_pile_2.img.src = "https://www.dropbox.com/scl/fi/pz657modx6ddp98d3fbmt/snow_pile_2.png?rlkey=wm541ac1per07feqd2z2e4e7t&raw=1";
+        defaultDrawings.backgrounds[2].push({...snow_pile_2});
+      	defaultDrawings.foregrounds.push({...snow_pile_2});
+
+		let snow_pile_3 = {img: new Image(), DIM: [500,500], scale: 1/2};
+        snow_pile_3.img.src = "https://www.dropbox.com/scl/fi/2iinjgvpviztnb6m6k7oh/snow_pile_3.png?rlkey=tyypwy767uf6dfn8tgu7d15x7&raw=1";
+        defaultDrawings.backgrounds[0].push({...snow_pile_3});
+		snow_pile_3.scale = 1/3;
+        defaultDrawings.backgrounds[1].push({...snow_pile_3});
+		snow_pile_3.scale = 1/4;
+        defaultDrawings.backgrounds[2].push({...snow_pile_3});
+      	defaultDrawings.foregrounds.push({...snow_pile_3});
+
+		let snow_pile_4 = {img: new Image(), DIM: [500,500], scale: 1/4};
+        snow_pile_4.img.src = "https://www.dropbox.com/scl/fi/opu6zv4zzwu8x652n4806/snow_pile_4.png?rlkey=bf35vey0trizltosntqvyw3g5&raw=1";
+        defaultDrawings.backgrounds[1].push({...snow_pile_4});
+        defaultDrawings.backgrounds[2].push({...snow_pile_4});
+      	defaultDrawings.foregrounds.push({...snow_pile_4});
+
+		let snow_pile_5 = {img: new Image(), DIM: [500,500], scale: 1/2};
+        snow_pile_5.img.src = "https://www.dropbox.com/scl/fi/zltqea9xoumxrb54p7q8m/snow_pile_5.png?rlkey=elyudrfd7b0u1uqck98u1k1ge&raw=1";
+        defaultDrawings.backgrounds[2].push({...snow_pile_5});
+      	defaultDrawings.foregrounds.push({...snow_pile_5});
+
+		let snowstorm = {img: new Image(), DIM: [500,500], scale: 1/2};
+        snowstorm.img.src = "https://www.dropbox.com/scl/fi/cwy973vmbqca7idad9nb8/snow_storm.png?rlkey=4yu6ez60pt3w7lvns8lqgso5x&raw=1";
+        defaultDrawings.backgrounds[0].push({...snowstorm});
+        defaultDrawings.backgrounds[1].push({...snowstorm});
+        defaultDrawings.backgrounds[2].push({...snowstorm});
+
+		let tennant = {img: new Image(), DIM: [500,500], scale: 1/3};
+        tennant.img.src = "https://www.dropbox.com/scl/fi/zggab4gz3alfaea6dudh4/tennant.png?rlkey=524fprv2k886iy830qp6hh9nl&raw=1";
+        defaultDrawings.backgrounds[2].push({...tennant});
+
+      	let stands = {img: new Image(), DIM: [1100,800], scale: 1/1.75};
+        stands.img.src = "https://www.dropbox.com/scl/fi/ov6refn5j2q87g9nltnsh/winter_stands.png?rlkey=75n1lwp444f57rh8ck7chg8wu&raw=1";
+        defaultDrawings.stands = stands;
+
+      	let snowpiles_background = {img: new Image(), DIM: [1920,1080], scale: 1};
+        snowpiles_background.img.src = "https://www.dropbox.com/scl/fi/i5j4ygfjw760ay0vtm9gb/race_track_1_overlay_background.png?rlkey=qn49wtunqhsrfpgysiaz1yij8&raw=1";
+        defaultDrawings.snowpiles_background = snowpiles_background;
+
+      	let snowpiles_foreground = {img: new Image(), DIM: [1920,1080], scale: 1};
+        snowpiles_foreground.img.src = "https://www.dropbox.com/scl/fi/vo8e2k3szgn14ao0g0h7l/race_track_1_overlay_foreground.png?rlkey=ufyvxnpxm7l1pdluz4us3mvsp&raw=1";
+        defaultDrawings.snowpiles_foreground = snowpiles_foreground;
+
+      	let yellow_lines = {img: new Image(), DIM: [1920,1080], scale: 1};
+        yellow_lines.img.src = "https://www.dropbox.com/scl/fi/hn1n4o8t737jxiqs5wse4/yellow_lines.png?rlkey=gxe6nyrkb66sblqoj1t8fnndr&raw=1";
+        defaultDrawings.yellow_lines = yellow_lines;
+	} else {
+        let mountain = {img: new Image(), DIM: [800, 500], scale: 1/2};
+        mountain.img.src = "https://www.dropbox.com/scl/fi/yeygg4k2sy2sum5g18dsp/mountains.png?rlkey=nibv2s6ewbmxbo35p2wn9m0qm&raw=1";
+        defaultDrawings.backgrounds[0].push(mountain);
+
+        let clouds = {img: new Image(), DIM: [564,516], scale: 1/3};
+        clouds.img.src = "https://www.dropbox.com/scl/fi/nw5qrer7q70z61vzcy2q3/DoTheGayCloud.MatMan.png?rlkey=a8rfof98i3lxqeih908c9k0wy&raw=1";
+        defaultDrawings.backgrounds[0].push(clouds);
+
+        let fan = {img: new Image(), DIM: [628,728], scale: 1/3};
+        fan.img.src = "https://www.dropbox.com/scl/fi/i9einckdxllcblbakhxdp/Moulin3.png?rlkey=9q3myaqxpd62l7adszb9w6jae&raw=1";
+        defaultDrawings.backgrounds[0].push({...fan});
+        fan.scale = 1/4;
+        defaultDrawings.backgrounds[1].push({...fan});
+
+        let sign = {img: new Image(), DIM: [1100,800], scale: 1/3};
+        sign.img.src = "https://www.dropbox.com/scl/fi/eydk5ey2uf8s5hfn1p9jb/better_call_asixel.png?rlkey=iaznxl8qfzwftdgvexacteoth&raw=1";
+        defaultDrawings.backgrounds[2].push(sign);
+
+        let barbies = {img: new Image(), DIM: [800,500], scale: 1/1.5};
+        barbies.img.src = "https://www.dropbox.com/scl/fi/qil9bpr86tc9crdef3nuh/barnies_restobar_grill.png?rlkey=tdqq0u666ayq77xhus0vcdypo&raw=1";
+        defaultDrawings.backgrounds[2].push(barbies);
+
+        let tree1 = {img: new Image(), DIM: [500,500], scale: 1/2};
+        tree1.img.src = "https://www.dropbox.com/scl/fi/rsqpqpv0mel94vq7yd9lv/tree1.png?rlkey=wfsqqgbz1k3aev977it6gm19s&raw=1";
+        defaultDrawings.backgrounds[0].push({...tree1});
+        tree1.scale = 1/2.3;
+        defaultDrawings.backgrounds[1].push({...tree1});
+        tree1.scale = 1/2.6;
+        defaultDrawings.backgrounds[2].push({...tree1});
+        defaultDrawings.foregrounds.push({...tree1});
+
+        let tree2 = {img: new Image(), DIM: [500,500], scale: 1/2.3};
+        tree2.img.src = "https://www.dropbox.com/scl/fi/4o8bjpt42vp7by6bi2i1l/tree2.png?rlkey=p0auz5elxsrn2n2ja357m8ohs&raw=1";
+        defaultDrawings.backgrounds[1].push({...tree2});
+        tree2.scale = 1/2.6;
+        defaultDrawings.backgrounds[2].push({...tree2});
+        defaultDrawings.foregrounds.push({...tree2});
+
+        let bush = {img: new Image(), DIM: [500,500], scale: 1/4};
+        bush.img.src = "https://www.dropbox.com/scl/fi/4pv0w2xh32xmuffgkdb8n/bush.png?rlkey=hnbnnbpdcnp596qolz91f8jvn&raw=1";
+        defaultDrawings.backgrounds[1].push({...bush});
+        bush.scale = 1/5;
+        defaultDrawings.backgrounds[2].push(bush);
+        defaultDrawings.foregrounds.push(bush);
+
+        let rock = {img: new Image(), DIM: [500,500], scale: 1/5};
+        rock.img.src = "https://www.dropbox.com/scl/fi/wedf2wf50e8dfpgt65wir/rock.png?rlkey=59l6o5ibfuie6y2m3wu137dfv&raw=1";
+        defaultDrawings.backgrounds[2].push(rock);
+        defaultDrawings.foregrounds.push(rock);
+
+        let appleTree = {img: new Image(), DIM: [500,500], scale: 1/2.5};
+        appleTree.img.src = "https://www.dropbox.com/scl/fi/0lop56qnil503u1fp9h43/apple_tree.png?rlkey=rkcdlj91xzvz7q8musz8lw9pw&raw=1";
+        defaultDrawings.backgrounds[1].push(appleTree);
+        defaultDrawings.backgrounds[2].push(appleTree);
+
+        let rainbow = {img: new Image(), DIM: [500,500], scale: 1};
+        rainbow.img.src = "https://www.dropbox.com/scl/fi/x0zfus1zohj9a26n6kde3/rainbow.png?rlkey=2zorp76sgnadj8lga7arfgbux&raw=1";
+        defaultDrawings.backgrounds[0].push(rainbow);
+
+        let mall = {img: new Image(), DIM: [1440,810], scale: 1/3};
+        mall.img.src = "https://www.dropbox.com/scl/fi/7zugsmvnqcx2bexl1iehs/DestroyTheMall.MatMan.png.png?rlkey=m7ou7box49px8b8xz5dhnwcz6&raw=1";
+        defaultDrawings.backgrounds[2].push(mall);
+
+        let stands = {img: new Image(), DIM: [1100,800], scale: 1/1.75};
+        stands.img.src = "https://www.dropbox.com/scl/fi/oentkgnkqv04nyv3fvomu/stands.png?rlkey=pbjarhgbnpg7oemn3xu6ytacg&raw=1";
+        defaultDrawings.stands = stands;
+    }
 };
 
 const options = {
@@ -260,40 +435,79 @@ function drawBackground() {
   	ctx.rect(0,1080-25-totalRoadHeight*(numDiv+1)/numDiv,1920,totalRoadHeight+totalRoadHeight*2/numDiv);
   	ctx.fill();
   	ctx.closePath();
-  	for (let i=0; i < numDiv; i++){
-        ctx.fillStyle = "hsl(" + Math.floor((i*360/numDiv)).toString() + ",100%,50%)";
-      	ctx.strokeStyle = "hsl(" + Math.floor((i*360/numDiv)).toString() + ",100%,50%)";
-        //ctx.beginPath();
-        ctx.fillRect(0,1080-25-totalRoadHeight*(numDiv-i)/numDiv,1920,totalRoadHeight/numDiv);
-      	ctx.strokeRect(0,1080-25-totalRoadHeight*(numDiv-i)/numDiv,1920,totalRoadHeight/numDiv);
-        //ctx.fill();
-        //ctx.closePath();
+
+  	if (trackType === "winter"){
+	  // winter track
+      ctx.fillStyle = "#B8B8B8";
+      ctx.beginPath();
+      ctx.rect(0,1080-25-totalRoadHeight-10*(numDiv+1)/numDiv,1920,totalRoadHeight+10+totalRoadHeight*2/numDiv);
+      ctx.fill();
+      ctx.closePath();
+
+      let imgs = [defaultDrawings.yellow_lines];
+      for (let img of imgs){
+        if (img.img.complete && img.img.naturalWidth){
+          ctx.drawImage(img.img, -1920 + cameraLoc[0]%1920, 0, 1920, 1080);
+          ctx.drawImage(img.img, cameraLoc[0]%1920, 0, 1920, 1080);
+          ctx.drawImage(img.img, 1920 + cameraLoc[0]%1920, 0, 1920, 1080);
+        }
+      }
+    } else {
+      // rainbow track
+      for (let i=0; i < numDiv; i++){
+          ctx.fillStyle = "hsl(" + Math.floor((i*360/numDiv)).toString() + ",100%,50%)";
+          ctx.strokeStyle = "hsl(" + Math.floor((i*360/numDiv)).toString() + ",100%,50%)";
+          //ctx.beginPath();
+          ctx.fillRect(0,1080-25-totalRoadHeight*(numDiv-i)/numDiv,1920,totalRoadHeight/numDiv);
+          ctx.strokeRect(0,1080-25-totalRoadHeight*(numDiv-i)/numDiv,1920,totalRoadHeight/numDiv);
+          //ctx.fill();
+          //ctx.closePath();
+      }
     }
 
   	ctx.translate(...cameraLoc);
 
   	// draw background images, images further back are slightly larger
   	for (let i = 0; i < backgrounds.length; i++){
+      	if (i === 2 && trackType === "winter"){
+          ctx.resetTransform();
+          let imgs = [defaultDrawings.snowpiles_background];
+          for (let img of imgs){
+            if (img.img.complete && img.img.naturalWidth){
+              ctx.drawImage(img.img, -1920 + cameraLoc[0]%1920, 0, 1920, 1080);
+              ctx.drawImage(img.img, cameraLoc[0]%1920, 0, 1920, 1080);
+              ctx.drawImage(img.img, 1920 + cameraLoc[0]%1920, 0, 1920, 1080);
+            }
+          }
+          ctx.translate(...cameraLoc);
+        }
       	let arr = backgrounds[i]
       	for (let img of arr) {
-          	ctx.drawImage(img.img, ...img.XY, img.DIM[0]*img.scale, img.DIM[1]*img.scale+10*(2-i));
+          	if (img.img.complete && img.img.naturalWidth){
+          		ctx.drawImage(img.img, ...img.XY, img.DIM[0]*img.scale, img.DIM[1]*img.scale+10*(2-i));
+            }
         }
     }
 
   	// draw start line if relevant
   	if (readying || -100 + cameraLoc[0] > -500 ) {
-      	ctx.drawImage(defaultDrawings.startLine, -100, 880, 200, 200);
+      	if (defaultDrawings.startLine.complete && defaultDrawings.startLine.naturalWidth){
+      		ctx.drawImage(defaultDrawings.startLine, -100, 880, 200, 200);
+        }
     };
 
   	// draw finish line if relevant
   	if (finishX) {
+      if (defaultDrawings.finishLine.complete && defaultDrawings.finishLine.naturalWidth){
       	ctx.drawImage(defaultDrawings.finishLine, finishX-100, 880, 200, 200);
 
       	let img = defaultDrawings.stands;
       	let y = 960-img.DIM[1]*img.scale
       	//ctx.drawImage(img.img, finishX-650, y, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
-      	ctx.drawImage(img.img, finishX, y, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
-
+        if (img.img.complete && img.img.naturalWidth){
+      		ctx.drawImage(img.img, finishX, y, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
+        }
+      }
     };
 
   	// reset everything
@@ -301,11 +515,23 @@ function drawBackground() {
 };
 
 function drawForeground() {
+  	if (trackType === "winter"){
+      let imgs = [defaultDrawings.snowpiles_foreground];
+      for (let img of imgs){
+        if (img.img.complete && img.img.naturalWidth){
+          ctx.drawImage(img.img, -1920 + cameraLoc[0]%1920, 0, 1920, 1080);
+          ctx.drawImage(img.img, cameraLoc[0]%1920, 0, 1920, 1080);
+          ctx.drawImage(img.img, 1920 + cameraLoc[0]%1920, 0, 1920, 1080);
+        }
+      }
+    }
   	ctx.translate(...cameraLoc);
   	ctx.globalAlpha = 1; // make foreground somewhat transparent
   	// draw foreground images
   	for (let img of foregrounds) {
+      if (img.img.complete && img.img.naturalWidth){
       	ctx.drawImage(img.img, ...img.XY, img.DIM[0]*img.scale, img.DIM[1]*img.scale);
+      }
     }
 
   	// reset everything
@@ -353,6 +579,9 @@ function drawRacers() {
             // draw vehicle
             ctx.fillStyle = "blue";
             if (racer.vehicle) {
+              	if (racer.showBoost) {
+                 	ctx.drawImage(racer.boost, ...racer.boostTL, ...racer.boostDIM);
+                }
                 ctx.drawImage(racer.vehicle, ...racer.vehicleTL, ...racer.vehicleDIM);
 
                 // draw wheel 1
@@ -431,7 +660,7 @@ window.addEventListener('onEventReceived', async function (obj) {
                       	//sendMessageInChat("Race entries open, !join to enter");
                     } else if (message.startsWith("!go") || message.startsWith("!potato")){
                       	if (sortedRacers.length > 0){
-                          //startRace();
+                          startRace();
                         }
                     } else if (event.data.text.startsWith("!resetSEStore")){
                       	resetSEStore();
@@ -457,9 +686,14 @@ window.addEventListener('onWidgetLoad', async function (obj) {
   	clientID = fieldData.client_id;
   	clientSecret = fieldData.client_secret;
   	jebaitedToken = fieldData.jebaited_token;
+  	trackType = fieldData.track_type;
+  	//if (fieldData.testing_field){
+    // 	testing = true;
+    //  	autostart = true;
+    //}
   	options.headers.Authorization = 'Bearer ' + fieldData.JWT_TOKEN;
 
-  	loadAssets();
+  	await loadAssets();
 
   	// get auth token?
   	let twitchURL = 'https://id.twitch.tv/oauth2/token';
@@ -654,6 +888,11 @@ async function addRacer(name, displayColor) {
                 racer.vehicleTL = [-200, -175];
                 racer.vehicleDIM = [200, 200];
                 racer.vehicleCR = [-150, -60]; // center of rotation
+
+          		racer.showBoost = false;
+          		racer.boost = defaultDrawings.boost;
+          		racer.boostTL = [-259.6, -175];
+                racer.boostDIM = [259.6, 200];
 
                 racer.wheel1 = defaultDrawings.wheel1;
                 //racer.wheel1.src = "https://www.dropbox.com/scl/fi/6xqc3i22e9tudpbau8co3/default_wheel1.svg?rlkey=wvprdn16gvssjt0zoaedmv55s&raw=1";
