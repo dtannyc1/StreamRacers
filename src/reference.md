@@ -1,11 +1,56 @@
-Few Reference Links:
+# Few Reference Links:
 
 - [SE API docs](https://dev.streamelements.com/docs/api-docs/cd02cda5171ea-o-auth2)
+- [Probably Better SE API docs](https://c4ldas.github.io/streamelements-api/)
 - [Twitch API docs](https://dev.twitch.tv/docs/api/reference/#get-users)
 - [SE Widget docs](https://dev.streamelements.com/docs/widgets-old/186263f447d1d-custom-widget)
 
 
-Notes for development:
+## From SE discord:
+The route for kvstore is different. It is https://kvstore.streamelements.com/ and it isn't documented.
+
+To list all the entries:
+```
+https://kvstore.streamelements.com/v2/channel/ACCOUNT_ID/customWidget
+Method: GET
+Headers: 
+  Accept: application/json
+  Authorization: bearer JWT or apikey OVERLAY_TOKEN
+```
+
+To list a single key (just add the name of the key at the end)
+```
+https://kvstore.streamelements.com/v2/channel/ACCOUNT_ID/customWidget.KEY_NAME
+Method: GET
+Headers: 
+  Accept: application/json
+  Authorization: bearer JWT or apikey OVERLAY_TOKEN
+```
+
+To create/modify a key
+```
+https://kvstore.streamelements.com/v2/channel/ACCOUNT_ID
+Method: PUT
+Headers: 
+  Accept: application/json
+  Content-type: application/json
+  Authorization: bearer JWT or apikey OVERLAY_TOKEN
+Body: { "key": "customWidget.KEY_NAME", "value": "YOUR_VALUE" }
+```
+
+## To get from an JWT token to a apiToken:
+
+Since you have the oAuth/JWT token, you can get theapiToken from /channels/me endpoint.
+https://c4ldas.github.io/streamelements-api/#/operations/Get/channels/me
+https://api.streamelements.com/kappa/v2/channels/me
+
+Headers should include ``Authorization: Bearer TOKEN``
+
+From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore alerts endpoint.
+
+
+
+# Notes for development:
 - Don't save anything. Inputs for images should be links, which they can host on their own Dropbox or whatever. Data should be saved in user's own SE.store.
 - Game should have generic functions for drawing images in certain ways. ie spin, oscillate, translate, static, etc
 - Data should be stored in a way to know which function to call, then pass in relevant image params as necessary

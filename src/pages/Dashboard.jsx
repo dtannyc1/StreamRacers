@@ -1,0 +1,43 @@
+import { useState } from 'react'
+import RacerList from '../components/racers/RacerList'
+import TrackList from '../components/tracks/TrackList'
+import ChannelProfile from '../components/ChannelProfile'
+import { useAuth } from '../context/AuthContext'
+
+const tabs = ['Racers', 'Tracks']
+
+const Dashboard = () => {
+  const { channel, clearToken } = useAuth()
+  const [activeTab, setActiveTab] = useState('Racers')
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-8">
+      <div className="max-w-4xl mx-auto flex flex-col gap-6">
+
+        {channel && <ChannelProfile channel={channel} onClear={clearToken} />}
+
+        <div className="flex gap-1 border-b border-gray-700">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab
+                  ? 'text-purple-400 border-b-2 border-purple-400'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'Racers' && <RacerList />}
+        {activeTab === 'Tracks' && <TrackList />}
+
+      </div>
+    </div>
+  )
+}
+
+export default Dashboard
