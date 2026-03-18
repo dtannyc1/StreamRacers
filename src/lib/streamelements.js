@@ -3,7 +3,7 @@ const KV_BASE_URL = 'https://kvstore.streamelements.com/v2/channel'
 
 const authHeaders = (token) => ({
   Authorization: `Bearer ${token}`,
-  Accept: 'application/json',
+  Accept: 'application/json; charset=utf-8',
 })
 
 // ── Channels ──────────────────────────────────────────────────────────────────
@@ -22,6 +22,16 @@ export const getChannel = async (token) => {
 }
 
 // ── KVStore ───────────────────────────────────────────────────────────────────
+
+export const listKVKeys = async (token, channelId) => {
+  const res = await fetch(`${KV_BASE_URL}/${channelId}/customWidget`, {
+    headers: authHeaders(token),
+  })
+
+  if (!res.ok) throw new Error(`Failed to list kvstore keys (${res.status})`)
+
+  return res.json()
+}
 
 export const getKVKey = async (token, channelId, key) => {
   const res = await fetch(`${KV_BASE_URL}/${channelId}/customWidget.${key}`, {
@@ -56,9 +66,21 @@ export const setKVKey = async (token, channelId, key, value) => {
 // ── Convenience helpers ───────────────────────────────────────────────────────
 
 export const getRacersAndTracks = async (token, channelId) => {
+  const existing = await listKVKeys(token, channelId)
+  const existingKeys = Object.keys(existing)
+
+  const initIfMissing = async (key) => {
+    if (!existingKeys.includes(key)) {
+      await setKVKey(token, channelId, key, {})
+      return {}
+    }
+    const res = await getKVKey(token, channelId, key)
+    return res
+  }
+
   const [racers, tracks] = await Promise.all([
-    getKVKey(token, channelId, 'customRacers'),
-    getKVKey(token, channelId, 'customTracks'),
+    initIfMissing('customRacers'),
+    initIfMissing('customTracks'),
   ])
 
   return { racers, tracks }

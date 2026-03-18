@@ -14,7 +14,20 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
 
-        {channel && <ChannelProfile channel={channel} onClear={clearToken} />}
+        <div className="flex items-center justify-between">
+          {channel
+            ? <ChannelProfile channel={channel} onClear={clearToken} />
+            : <p className="text-sm text-gray-500">Could not load channel info.</p>
+          }
+          {!channel && (
+            <button
+              onClick={clearToken}
+              className="text-xs text-red-400 hover:text-red-300 transition-colors"
+            >
+              Logout
+            </button>
+          )}
+        </div>
 
         <div className="flex gap-1 border-b border-gray-700">
           {tabs.map(tab => (

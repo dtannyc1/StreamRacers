@@ -25,7 +25,7 @@ const Login = () => {
       <div className="w-full max-w-lg flex flex-col gap-8">
 
         <div>
-          <h1 className="text-3xl font-bold text-purple-400">StreamElements Tool</h1>
+          <h1 className="text-3xl font-bold text-purple-400">Stream Racer Vehicle and Track Editor</h1>
           <p className="text-gray-400 mt-2">Connect your StreamElements account to get started.</p>
         </div>
 
@@ -38,13 +38,13 @@ const Login = () => {
               Go to <span className="text-purple-400 font-medium">streamelements.com</span> and log in to your account.
             </Step>
             <Step number={2}>
-              Click your avatar in the top right corner and open <span className="text-purple-400 font-medium">Account Settings</span>.
+              Click your avatar in the top right corner, click on your username, and open <span className="text-purple-400 font-medium">Channel Settings</span>.
             </Step>
             <Step number={3}>
-              Scroll down to the <span className="text-purple-400 font-medium">Channels</span> section and click <span className="text-purple-400 font-medium">Show Token</span> next to your JWT token.
+              Find the <span className="text-purple-400 font-medium">Your Channels</span> section and click the copy icon next to your <span className="text-purple-400 font-medium">JWT token</span>.
             </Step>
             <Step number={4}>
-              Copy the token and paste it below.
+              Paste it below.
             </Step>
           </div>
         </div>

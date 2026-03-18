@@ -2,14 +2,13 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { getChannel } from '../lib/streamelements'
 
 const TOKEN_KEY = 'se_jwt'
-
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) ?? null)
   const [channel, setChannel] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
     if (!token) {
@@ -19,13 +18,15 @@ export const AuthProvider = ({ children }) => {
 
     const fetchChannel = async () => {
       setLoading(true)
-      setError(null)
+      setAuthError(null)
       try {
         const data = await getChannel(token)
         setChannel(data)
       } catch (err) {
-        setError(err.message)
         setChannel(null)
+        setAuthError(err.message)
+        localStorage.removeItem(TOKEN_KEY)
+        setToken(null)
       } finally {
         setLoading(false)
       }
@@ -43,11 +44,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(TOKEN_KEY)
     setToken(null)
     setChannel(null)
-    setError(null)
+    setAuthError(null)
   }
 
+  const dismissAuthError = () => setAuthError(null)
+
   return (
-    <AuthContext.Provider value={{ token, channel, loading, error, saveToken, clearToken }}>
+    <AuthContext.Provider value={{ token, channel, loading, authError, dismissAuthError, saveToken, clearToken }}>
       {children}
     </AuthContext.Provider>
   )
