@@ -104,8 +104,8 @@ const AssetForm = ({ asset, onUpdate }) => {
             if ((newType === 'rotating' || newType === 'oscillating') && !asset.cr) {
               // initialize CR to center of the asset
               patch.cr = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
-              patch.theta = 0
               patch.radius = Math.min(asset.dim[0], asset.dim[1]) / 4
+              patch.handleAngle = 0
             }
 
             if (newType === 'oscillating' && asset.minTheta == null) {
@@ -149,6 +149,17 @@ const AssetForm = ({ asset, onUpdate }) => {
         </Row>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Rotation</p>
+        <SliderInput
+          label="Tilt (θ)"
+          value={toDeg(asset.theta ?? 0)}
+          min={-180}
+          max={180}
+          onChange={(v) => u({ theta: toRad(v) })}
+        />
+      </div>
+
       {(asset.type === 'rotating' || asset.type === 'oscillating') && (
         <>
           <div className="flex flex-col gap-2">
@@ -165,19 +176,7 @@ const AssetForm = ({ asset, onUpdate }) => {
                 onChange={(v) => u({ cr: [asset.cr?.[0] ?? 0, -v] })}
               />
             </Row>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Rotation</p>
-            <Row>
-              <NumInput
-                label="Initial Angle (°)"
-                value={toDeg(asset.theta ?? 0)}
-                step={1}
-                onChange={(v) => u({ theta: toRad(v) })}
-              />
-              <NumInput label="Radius" value={asset.radius ?? 0} onChange={(v) => u({ radius: v })} />
-            </Row>
+            <NumInput label="Radius" value={asset.radius ?? 0} onChange={(v) => u({ radius: v })} />
           </div>
         </>
       )}

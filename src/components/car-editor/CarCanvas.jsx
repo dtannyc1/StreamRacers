@@ -9,7 +9,7 @@ const BOTTOM_EDGE_Y = 0
 const FRONT_EDGE_X = 0
 const DRAG_THRESHOLD = 4
 const CR_HANDLE_RADIUS = 7
-const THETA_HANDLE_RADIUS = 6
+const RADIUS_HANDLE_RADIUS = 6
 const HANDLE_SIZE = 8
 const HANDLE_HIT = 12
 
@@ -37,10 +37,10 @@ const drawCRHandle = (ctx, cx, cy) => {
   ctx.restore()
 }
 
-const drawThetaHandle = (ctx, cr, theta, radius) => {
+const drawRadiusHandle = (ctx, cr, handleAngle, radius) => {
   const [cx, cy] = cr
-  const hx = cx + Math.cos(theta) * radius
-  const hy = cy + Math.sin(theta) * radius
+  const hx = cx + Math.cos(handleAngle) * radius
+  const hy = cy + Math.sin(handleAngle) * radius
 
   ctx.save()
   ctx.setLineDash([])
@@ -58,7 +58,7 @@ const drawThetaHandle = (ctx, cr, theta, radius) => {
   ctx.strokeStyle = '#38bdf8'
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.arc(hx, hy, THETA_HANDLE_RADIUS, 0, Math.PI * 2)
+  ctx.arc(hx, hy, RADIUS_HANDLE_RADIUS, 0, Math.PI * 2)
   ctx.fill()
   ctx.stroke()
 
@@ -90,6 +90,7 @@ const drawAsset = (ctx, asset, img, t, isSelected) => {
   if (!img) return
   const [x, y] = asset.tl
   const [w, h] = asset.dim
+  const theta = asset.theta ?? 0
 
   ctx.save()
 
@@ -99,10 +100,17 @@ const drawAsset = (ctx, asset, img, t, isSelected) => {
     ctx.clip()
     if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
   } else if (asset.type === 'static') {
+    if (theta !== 0) {
+      const cx = x + w / 2
+      const cy = y + h / 2
+      ctx.translate(cx, cy)
+      ctx.rotate(theta)
+      ctx.translate(-cx, -cy)
+    }
     if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
   } else if (asset.type === 'rotating') {
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const angle = 2 * Math.PI * t * 2
+    const angle = theta + 2 * Math.PI * t * 2
     ctx.translate(cx, cy)
     ctx.rotate(angle)
     ctx.translate(-cx, -cy)
@@ -112,7 +120,7 @@ const drawAsset = (ctx, asset, img, t, isSelected) => {
     const min = asset.minTheta ?? -Math.PI / 6
     const max = asset.maxTheta ?? Math.PI / 6
     const phase = asset.phase ?? 0
-    const angle = ((max - min) / 2) * Math.sin(t * 3 + phase) + (max + min) / 2
+    const angle = theta + ((max - min) / 2) * Math.sin(t * 3 + phase) + (max + min) / 2
     ctx.translate(cx, cy)
     ctx.rotate(angle)
     ctx.translate(-cx, -cy)
@@ -163,16 +171,16 @@ const hitTestCR = (mx, my, asset) => {
   return Math.sqrt(dx * dx + dy * dy) <= CR_HANDLE_RADIUS + 4
 }
 
-const hitTestTheta = (mx, my, asset) => {
+const hitTestRadius = (mx, my, asset) => {
   if (!asset?.cr || (asset.type !== 'rotating' && asset.type !== 'oscillating')) return false
   const [cx, cy] = asset.cr
-  const theta = asset.theta ?? 0
+  const handleAngle = asset.handleAngle ?? 0
   const radius = asset.radius ?? 20
-  const hx = cx + Math.cos(theta) * radius
-  const hy = cy + Math.sin(theta) * radius
+  const hx = cx + Math.cos(handleAngle) * radius
+  const hy = cy + Math.sin(handleAngle) * radius
   const dx = mx - hx
   const dy = my - hy
-  return Math.sqrt(dx * dx + dy * dy) <= THETA_HANDLE_RADIUS + 4
+  return Math.sqrt(dx * dx + dy * dy) <= RADIUS_HANDLE_RADIUS + 4
 }
 
 const hitTestCorner = (mx, my, asset) => {
@@ -215,7 +223,7 @@ const CarCanvas = ({
   const dragStartPos = useRef(null)
   const didDrag = useRef(false)
   const draggingCR = useRef(false)
-  const draggingTheta = useRef(false)
+  const draggingRadius = useRef(false)
 
   useEffect(() => {
     assets.forEach(asset => {
@@ -263,7 +271,7 @@ const CarCanvas = ({
       assets.forEach(asset => {
         const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
         const img = imagesRef.current[url]
-        const t = ((draggingCR.current || draggingTheta.current) && asset.id === selectedId) ? 0 : tRef.current
+        const t = ((draggingCR.current || draggingRadius.current) && asset.id === selectedId) ? 0 : tRef.current
         drawAsset(ctx, asset, img, t, asset.id === selectedId)
       })
 
@@ -275,7 +283,7 @@ const CarCanvas = ({
 
       // draw CR handle on top of everything
       if (selectedAsset?.cr && (selectedAsset.type === 'rotating' || selectedAsset.type === 'oscillating')) {
-        drawThetaHandle(ctx, selectedAsset.cr, selectedAsset.theta ?? 0, selectedAsset.radius ?? 20)
+        drawRadiusHandle(ctx, selectedAsset.cr, selectedAsset.handleAngle ?? 0, selectedAsset.radius ?? 20)
         drawCRHandle(ctx, selectedAsset.cr[0], selectedAsset.cr[1])
       }
 
@@ -307,12 +315,12 @@ const CarCanvas = ({
 
     const corner = hitTestCorner(mx, my, selectedAsset)
     const isCR = !corner && hitTestCR(mx, my, selectedAsset)
-    const isTheta = !corner && !isCR && hitTestTheta(mx, my, selectedAsset)
+    const isRadius = !corner && !isCR && hitTestRadius(mx, my, selectedAsset)
 
     draggingCR.current = isCR
-    draggingTheta.current = isTheta
+    draggingRadius.current = isRadius
 
-    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isTheta)
+    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius)
   }, [onMouseDown, getCanvasPos, selectedAsset])
 
   const handleMouseMove = useCallback((e) => {
@@ -336,9 +344,9 @@ const CarCanvas = ({
 
       const onCorner = hitTestCorner(mx, my, selectedAsset)
       const onCR = hitTestCR(mx, my, selectedAsset)
-      const onTheta = hitTestTheta(mx, my, selectedAsset)
+      const onRadius = hitTestRadius(mx, my, selectedAsset)
 
-      if (!onCorner && !onCR && !onTheta) {
+      if (!onCorner && !onCR && !onRadius) {
         const hit = [...assets].reverse().find(asset => {
           const [ax, ay] = asset.tl
           const [aw, ah] = asset.dim
@@ -351,7 +359,7 @@ const CarCanvas = ({
     dragStartPos.current = null
     didDrag.current = false
     draggingCR.current = false
-    draggingTheta.current = false
+    draggingRadius.current = false
     onMouseUp(e)
   }, [assets, selectedAsset, onSelectAsset, onMouseUp, getCanvasPos])
 

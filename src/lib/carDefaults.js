@@ -8,6 +8,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
     type: 'avatar',
     tl: [-134, -145 + 14.597],
     dim: [80, 80],
+    theta: 0,
   },
   {
     id: crypto.randomUUID(),
@@ -16,6 +17,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
     type: 'static',
     tl: [-183, -175 + 14.597],
     dim: [200, 200],
+    theta: 0,
   },
   {
     id: crypto.randomUUID(),
@@ -25,8 +27,9 @@ export const createDefaultAssets = (avatarUrl = '') => [
     tl: [-185, -135 + 14.597],
     dim: [481 / 2.5, 301 / 2.5],
     cr: [-135, -37 + 14.597],
-    theta: Math.PI / 6,
+    theta: 0,
     radius: 50 / 2.5,
+    handleAngle: 0,
   },
   {
     id: crypto.randomUUID(),
@@ -36,8 +39,9 @@ export const createDefaultAssets = (avatarUrl = '') => [
     tl: [-178, -135 + 14.597],
     dim: [481 / 2.5, 301 / 2.5],
     cr: [-40, -37 + 14.597],
-    theta: Math.PI / 6,
+    theta: 0,
     radius: 50 / 2.5,
+    handleAngle: 0,
   },
 ]
 

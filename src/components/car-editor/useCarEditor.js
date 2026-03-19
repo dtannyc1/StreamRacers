@@ -57,7 +57,7 @@ export const useCarEditor = (initialCar = null) => {
   // 'asset' | 'cr'
   const dragState = useRef(null)
 
-  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR, resizeCorner, draggingTheta) => {
+  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR, resizeCorner, draggingRadius) => {
     if (!selectedAsset) return
     if (resizeCorner) {
       dragState.current = {
@@ -71,14 +71,12 @@ export const useCarEditor = (initialCar = null) => {
         startRadius: selectedAsset.radius ?? null,
         scale,
       }
-    } else if (draggingTheta) {
+    } else if (draggingRadius) {
       dragState.current = {
-        mode: 'theta',
+        mode: 'radius',
         startMouseX: e.clientX,
         startMouseY: e.clientY,
         startCR: [...(selectedAsset.cr ?? [0, 0])],
-        startTheta: selectedAsset.theta ?? 0,
-        startRadius: selectedAsset.radius ?? 20,
         scale,
       }
     } else if (draggingCR) {
@@ -115,14 +113,14 @@ export const useCarEditor = (initialCar = null) => {
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }
       if (startCR) patch.cr = [startCR[0] + dx, startCR[1] + dy]
       updateAsset(selectedId, patch)
-    } else if (mode === 'theta') {
+    } else if (mode === 'radius') {
       const { startCR } = dragState.current
       const [cx, cy] = startCR
       const relX = canvasX - cx
       const relY = canvasY - cy
-      const theta = Math.atan2(relY, relX)
+      const handleAngle = Math.atan2(relY, relX)
       const radius = Math.max(1, Math.sqrt(relX ** 2 + relY ** 2))
-      updateAsset(selectedId, { theta, radius })
+      updateAsset(selectedId, { radius, handleAngle })
     } else if (mode === 'resize') {
       const { corner, startTL, startDIM } = dragState.current
       let [x, y] = startTL
