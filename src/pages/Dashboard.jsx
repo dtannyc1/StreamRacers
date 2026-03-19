@@ -3,6 +3,7 @@ import RacerList from '../components/racers/RacerList'
 import TrackList from '../components/tracks/TrackList'
 import ChannelProfile from '../components/ChannelProfile'
 import { useAuth } from '../context/AuthContext'
+import { getTwitchAccessToken } from '../lib/twitch'
 
 const tabs = ['Racers', 'Tracks']
 
@@ -10,7 +11,7 @@ const Dashboard = () => {
   const { channel, settling, clearToken } = useAuth()
   const [activeTab, setActiveTab] = useState('Racers')
 
-  if (settling) return (
+  if (settling || !getTwitchAccessToken()) return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
       <p className="text-sm text-gray-400">Loading...</p>
     </div>
