@@ -26,6 +26,8 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
     onCanvasMouseDown,
     onCanvasMouseMove,
     onCanvasMouseUp,
+    onSpriteUrlChange,
+    toggleAspectLock,
   } = useCarEditor(initialCar)
 
   const handleSave = async () => {
@@ -118,7 +120,12 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
               onMoveDown={moveAssetDown}
             />
             <div className="border-t border-gray-700 pt-4">
-              <AssetForm asset={selectedAsset} onUpdate={updateAsset} />
+              <AssetForm 
+                asset={selectedAsset} 
+                onUpdate={updateAsset} 
+                onSpriteUrlChange={onSpriteUrlChange}
+                toggleAspectLock={toggleAspectLock}
+              />
             </div>
           </div>
         </div>

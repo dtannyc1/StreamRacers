@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { createDefaultCar } from '../../lib/carDefaults'
+import { resolveImageUrl } from '../../lib/utils'
 
 export const useCarEditor = (initialCar = null) => {
   const [car, setCar] = useState(() => initialCar ?? createDefaultCar())
@@ -69,6 +70,7 @@ export const useCarEditor = (initialCar = null) => {
         startDIM: [...selectedAsset.dim],
         startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
         startRadius: selectedAsset.radius ?? null,
+        aspectLocked: selectedAsset.type === 'avatar' || (selectedAsset.aspectLocked ?? false ),
         scale,
       }
     } else if (draggingRadius) {
@@ -149,7 +151,7 @@ export const useCarEditor = (initialCar = null) => {
       if (h < 10) h = 10
 
       // lock aspect ratio for avatar type
-      if (selectedAsset.type === 'avatar') {
+      if (selectedAsset.type === 'avatar' || dragState.current.aspectLocked) {
         const aspect = startDIM[0] / startDIM[1]
         if (corner === 'tl' || corner === 'br') {
           // use average of both deltas to drive both dimensions
@@ -193,6 +195,26 @@ export const useCarEditor = (initialCar = null) => {
     dragState.current = null
   }, [])
 
+  const onSpriteUrlChange = useCallback((id, url) => {
+    updateAsset(id, { spriteUrl: url })
+    if (!url) return
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const h = 200
+      const w = (img.naturalWidth / img.naturalHeight) * h
+      updateAsset(id, { dim: [w, h], baseDim: [w, h], aspectLocked: true })
+    }
+    img.src = resolveImageUrl(url)
+  }, [updateAsset])
+
+  const toggleAspectLock = useCallback((id) => {
+    setCar(prev => ({
+      ...prev,
+      assets: prev.assets.map(a => a.id === id ? { ...a, aspectLocked: !a.aspectLocked } : a),
+    }))
+  }, [])
+
   return {
     car,
     selectedId,
@@ -207,5 +229,7 @@ export const useCarEditor = (initialCar = null) => {
     onCanvasMouseDown,
     onCanvasMouseMove,
     onCanvasMouseUp,
+    onSpriteUrlChange,
+    toggleAspectLock,
   }
 }

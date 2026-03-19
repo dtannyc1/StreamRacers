@@ -42,11 +42,11 @@ const NumInput = ({ label, value, onChange, step = 1 }) => (
   </label>
 )
 
-const SliderInput = ({ label, value, onChange, min = 0, max = 360, step = 1 }) => (
+const SliderInput = ({ label, value, onChange, min = 0, max = 360, step = 1, unit = "" }) => (
   <label className="flex flex-col gap-1">
     <div className="flex items-center justify-between">
       <span className="text-xs text-gray-400">{label}</span>
-      <span className="text-xs text-gray-500">{Math.round(value)}°</span>
+      <span className="text-xs text-gray-500">{Math.round(value*100)/100}{unit}</span>
     </div>
     <input
       type="range"
@@ -64,12 +64,54 @@ const Row = ({ children }) => (
   <div className="grid grid-cols-2 gap-2">{children}</div>
 )
 
-const AssetForm = ({ asset, onUpdate }) => {
+const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock }) => {
   if (!asset) return (
     <p className="text-xs text-gray-500 text-center py-4">Select an asset to edit it.</p>
   )
 
   const u = (patch) => onUpdate(asset.id, patch)
+  const aspectLocked = asset.aspectLocked ?? false
+  const aspect = asset.dim[0] / asset.dim[1]
+
+  const handleWidthChange = (w) => {
+    if (w < 1) w = 1
+    if (aspectLocked) {
+      u({ dim: [w, w / aspect] })
+    } else {
+      u({ dim: [w, asset.dim[1]] })
+    }
+  }
+
+  const handleHeightChange = (h) => {
+    if (h < 1) h = 1
+    if (aspectLocked) {
+      u({ dim: [h * aspect, h] })
+    } else {
+      u({ dim: [asset.dim[0], h] })
+    }
+  }
+
+  // base dimensions for scale reference (100% = current dim)
+  const baseW = asset.baseDim?.[0] ?? asset.dim[0]
+  const baseH = asset.baseDim?.[1] ?? asset.dim[1]
+
+  const handleScaleX = (pct) => {
+    const w = baseW * (pct / 100)
+    if (aspectLocked) {
+      u({ dim: [w, w / aspect] })
+    } else {
+      u({ dim: [w, asset.dim[1]] })
+    }
+  }
+
+  const handleScaleY = (pct) => {
+    const h = baseH * (pct / 100)
+    if (aspectLocked) {
+      u({ dim: [h * aspect, h] })
+    } else {
+      u({ dim: [asset.dim[0], h] })
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -89,7 +131,7 @@ const AssetForm = ({ asset, onUpdate }) => {
         <DebouncedUrlInput
           value={asset.spriteUrl}
           disabled={asset.type === 'avatar'}
-          onChange={(v) => u({ spriteUrl: v })}
+          onChange={(v) => onSpriteUrlChange(asset.id, v)}
         />
       </label>
 
@@ -142,10 +184,40 @@ const AssetForm = ({ asset, onUpdate }) => {
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Dimensions</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Dimensions</p>
+          <button
+            onClick={() => toggleAspectLock(asset.id)}
+            className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+              aspectLocked
+                ? 'border-purple-500 text-purple-400 bg-purple-900/30'
+                : 'border-gray-600 text-gray-400 hover:border-gray-400'
+            }`}
+          >
+            {aspectLocked ? '🔒 Locked' : '🔓 Free'}
+          </button>
+        </div>
         <Row>
-          <NumInput label="W" value={asset.dim[0]} onChange={(v) => u({ dim: [v, asset.dim[1]] })} />
-          <NumInput label="H" value={asset.dim[1]} onChange={(v) => u({ dim: [asset.dim[0], v] })} />
+          <NumInput label="W" value={asset.dim[0]} onChange={handleWidthChange} />
+          <NumInput label="H" value={asset.dim[1]} onChange={handleHeightChange} />
+        </Row>
+        <Row>
+          <SliderInput
+            label="Scale X (%)"
+            value={(asset.dim[0] / baseW) * 100}
+            min={10}
+            max={300}
+            step={1}
+            onChange={handleScaleX}
+          />
+          <SliderInput
+            label="Scale Y (%)"
+            value={(asset.dim[1] / baseH) * 100}
+            min={10}
+            max={300}
+            step={1}
+            onChange={handleScaleY}
+          />
         </Row>
       </div>
 
