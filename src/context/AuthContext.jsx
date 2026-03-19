@@ -9,13 +9,15 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) ?? null)
   const [channel, setChannel] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [settling, setSettling] = useState(true)
   const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
     if (!token) {
+      setSettling(false)
       setChannel(null)
       return
-    }
+    } 
 
     const fetchChannel = async () => {
       setLoading(true)
@@ -23,9 +25,9 @@ export const AuthProvider = ({ children }) => {
       try {
         const data = await getChannel(token)
         setChannel(data)
-
         if (!getTwitchAccessToken()) {
           redirectToTwitchLogin()
+          return
         }
       } catch (err) {
         setChannel(null)
@@ -34,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         setToken(null)
       } finally {
         setLoading(false)
+        setSettling(false)
       }
     }
 
@@ -42,6 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const saveToken = (newToken) => {
     localStorage.setItem(TOKEN_KEY, newToken)
+    setSettling(true)
     setToken(newToken)
   }
 
@@ -56,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   const dismissAuthError = () => setAuthError(null)
 
   return (
-    <AuthContext.Provider value={{ token, channel, loading, authError, dismissAuthError, saveToken, clearToken }}>
+    <AuthContext.Provider value={{ token, channel, loading, settling, authError, dismissAuthError, saveToken, clearToken }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,5 +1,4 @@
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
 import TokenInput from '../components/TokenInput'
 
 const Step = ({ number, children }) => (
@@ -13,11 +12,9 @@ const Step = ({ number, children }) => (
 
 const Login = () => {
   const { saveToken, loading, error } = useAuth()
-  const navigate = useNavigate()
 
   const handleSave = (token) => {
     saveToken(token)
-    navigate('/')
   }
 
   return (

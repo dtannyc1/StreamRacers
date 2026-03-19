@@ -7,8 +7,14 @@ import { useAuth } from '../context/AuthContext'
 const tabs = ['Racers', 'Tracks']
 
 const Dashboard = () => {
-  const { channel, clearToken } = useAuth()
+  const { channel, settling, clearToken } = useAuth()
   const [activeTab, setActiveTab] = useState('Racers')
+
+  if (settling) return (
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+      <p className="text-sm text-gray-400">Loading...</p>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
