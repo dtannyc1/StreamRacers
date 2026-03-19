@@ -26,6 +26,9 @@ const DebouncedUrlInput = ({ value, onChange, disabled }) => {
   )
 }
 
+const toDeg = (rad) => Math.round((rad * 180 / Math.PI) * 100) / 100
+const toRad = (deg) => deg * Math.PI / 180
+
 const NumInput = ({ label, value, onChange, step = 1 }) => (
   <label className="flex flex-col gap-1">
     <span className="text-xs text-gray-400">{label}</span>
@@ -148,7 +151,12 @@ const AssetForm = ({ asset, onUpdate }) => {
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Rotation</p>
             <Row>
-              <NumInput label="Initial Angle (rad)" value={asset.theta ?? 0} step={0.01} onChange={(v) => u({ theta: v })} />
+              <NumInput
+                label="Initial Angle (°)"
+                value={toDeg(asset.theta ?? 0)}
+                step={1}
+                onChange={(v) => u({ theta: toRad(v) })}
+              />
               <NumInput label="Radius" value={asset.radius ?? 0} onChange={(v) => u({ radius: v })} />
             </Row>
           </div>
@@ -157,10 +165,20 @@ const AssetForm = ({ asset, onUpdate }) => {
 
       {asset.type === 'oscillating' && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Oscillation Range (rad)</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Oscillation Range (°)</p>
           <Row>
-            <NumInput label="Min θ" value={asset.minTheta ?? -Math.PI / 6} step={0.01} onChange={(v) => u({ minTheta: v })} />
-            <NumInput label="Max θ" value={asset.maxTheta ?? Math.PI / 6} step={0.01} onChange={(v) => u({ maxTheta: v })} />
+            <NumInput
+              label="Min θ (°)"
+              value={toDeg(asset.minTheta ?? -Math.PI / 6)}
+              step={1}
+              onChange={(v) => u({ minTheta: toRad(v) })}
+            />
+            <NumInput
+              label="Max θ (°)"
+              value={toDeg(asset.maxTheta ?? Math.PI / 6)}
+              step={1}
+              onChange={(v) => u({ maxTheta: toRad(v) })}
+            />
           </Row>
         </div>
       )}

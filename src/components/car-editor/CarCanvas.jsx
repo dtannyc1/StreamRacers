@@ -9,6 +9,7 @@ const BOTTOM_EDGE_Y = 0
 const FRONT_EDGE_X = 0
 const DRAG_THRESHOLD = 4
 const CR_HANDLE_RADIUS = 7
+const THETA_HANDLE_RADIUS = 6
 const HANDLE_SIZE = 8
 const HANDLE_HIT = 12
 
@@ -31,6 +32,34 @@ const drawCRHandle = (ctx, cx, cy) => {
   ctx.lineTo(cx + CR_HANDLE_RADIUS + 4, cy)
   ctx.moveTo(cx, cy - CR_HANDLE_RADIUS - 4)
   ctx.lineTo(cx, cy + CR_HANDLE_RADIUS + 4)
+  ctx.stroke()
+
+  ctx.restore()
+}
+
+const drawThetaHandle = (ctx, cr, theta, radius) => {
+  const [cx, cy] = cr
+  const hx = cx + Math.cos(theta) * radius
+  const hy = cy + Math.sin(theta) * radius
+
+  ctx.save()
+  ctx.setLineDash([])
+
+  // line from CR to handle
+  ctx.strokeStyle = '#38bdf8'
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(hx, hy)
+  ctx.stroke()
+
+  // handle circle
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.2)'
+  ctx.strokeStyle = '#38bdf8'
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.arc(hx, hy, THETA_HANDLE_RADIUS, 0, Math.PI * 2)
+  ctx.fill()
   ctx.stroke()
 
   ctx.restore()
@@ -133,6 +162,18 @@ const hitTestCR = (mx, my, asset) => {
   return Math.sqrt(dx * dx + dy * dy) <= CR_HANDLE_RADIUS + 4
 }
 
+const hitTestTheta = (mx, my, asset) => {
+  if (!asset?.cr || (asset.type !== 'rotating' && asset.type !== 'oscillating')) return false
+  const [cx, cy] = asset.cr
+  const theta = asset.theta ?? 0
+  const radius = asset.radius ?? 20
+  const hx = cx + Math.cos(theta) * radius
+  const hy = cy + Math.sin(theta) * radius
+  const dx = mx - hx
+  const dy = my - hy
+  return Math.sqrt(dx * dx + dy * dy) <= THETA_HANDLE_RADIUS + 4
+}
+
 const hitTestCorner = (mx, my, asset) => {
   if (!asset) return null
   const [x, y] = asset.tl
@@ -173,6 +214,7 @@ const CarCanvas = ({
   const dragStartPos = useRef(null)
   const didDrag = useRef(false)
   const draggingCR = useRef(false)
+  const draggingTheta = useRef(false)
 
   useEffect(() => {
     assets.forEach(asset => {
@@ -220,7 +262,7 @@ const CarCanvas = ({
       assets.forEach(asset => {
         const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
         const img = imagesRef.current[url]
-        const t = (draggingCR.current && asset.id === selectedId) ? 0 : tRef.current
+        const t = ((draggingCR.current || draggingTheta.current) && asset.id === selectedId) ? 0 : tRef.current
         drawAsset(ctx, asset, img, t, asset.id === selectedId)
       })
 
@@ -232,6 +274,7 @@ const CarCanvas = ({
 
       // draw CR handle on top of everything
       if (selectedAsset?.cr && (selectedAsset.type === 'rotating' || selectedAsset.type === 'oscillating')) {
+        drawThetaHandle(ctx, selectedAsset.cr, selectedAsset.theta ?? 0, selectedAsset.radius ?? 20)
         drawCRHandle(ctx, selectedAsset.cr[0], selectedAsset.cr[1])
       }
 
@@ -263,21 +306,25 @@ const CarCanvas = ({
 
     const corner = hitTestCorner(mx, my, selectedAsset)
     const isCR = !corner && hitTestCR(mx, my, selectedAsset)
+    const isTheta = !corner && !isCR && hitTestTheta(mx, my, selectedAsset)
 
     draggingCR.current = isCR
-    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner)
+    draggingTheta.current = isTheta
+
+    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isTheta)
   }, [onMouseDown, getCanvasPos, selectedAsset])
 
   const handleMouseMove = useCallback((e) => {
+    const { x, y } = getCanvasPos(e)
     if (dragStartPos.current) {
-      const { x, y } = getCanvasPos(e)
       const dx = x - dragStartPos.current.x
       const dy = y - dragStartPos.current.y
       if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
         didDrag.current = true
       }
     }
-    onMouseMove(e)
+    // pass canvas-space position relative to origin
+    onMouseMove(e, x - ORIGIN[0], y - ORIGIN[1])
   }, [onMouseMove, getCanvasPos])
 
   const handleMouseUp = useCallback((e) => {
@@ -288,8 +335,9 @@ const CarCanvas = ({
 
       const onCorner = hitTestCorner(mx, my, selectedAsset)
       const onCR = hitTestCR(mx, my, selectedAsset)
+      const onTheta = hitTestTheta(mx, my, selectedAsset)
 
-      if (!onCorner && !onCR) {
+      if (!onCorner && !onCR && !onTheta) {
         const hit = [...assets].reverse().find(asset => {
           const [ax, ay] = asset.tl
           const [aw, ah] = asset.dim
@@ -302,6 +350,7 @@ const CarCanvas = ({
     dragStartPos.current = null
     didDrag.current = false
     draggingCR.current = false
+    draggingTheta.current = false
     onMouseUp(e)
   }, [assets, selectedAsset, onSelectAsset, onMouseUp, getCanvasPos])
 

@@ -57,7 +57,7 @@ export const useCarEditor = (initialCar = null) => {
   // 'asset' | 'cr'
   const dragState = useRef(null)
 
-  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR, resizeCorner) => {
+  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR, resizeCorner, draggingTheta) => {
     if (!selectedAsset) return
     if (resizeCorner) {
       dragState.current = {
@@ -69,6 +69,16 @@ export const useCarEditor = (initialCar = null) => {
         startDIM: [...selectedAsset.dim],
         startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
         startRadius: selectedAsset.radius ?? null,
+        scale,
+      }
+    } else if (draggingTheta) {
+      dragState.current = {
+        mode: 'theta',
+        startMouseX: e.clientX,
+        startMouseY: e.clientY,
+        startCR: [...(selectedAsset.cr ?? [0, 0])],
+        startTheta: selectedAsset.theta ?? 0,
+        startRadius: selectedAsset.radius ?? 20,
         scale,
       }
     } else if (draggingCR) {
@@ -91,7 +101,7 @@ export const useCarEditor = (initialCar = null) => {
     }
   }, [selectedAsset])
 
-  const onCanvasMouseMove = useCallback((e) => {
+  const onCanvasMouseMove = useCallback((e, canvasX, canvasY) => {
     if (!dragState.current || !selectedId) return
     const { mode, startMouseX, startMouseY, scale } = dragState.current
     const dx = (e.clientX - startMouseX) * scale
@@ -105,6 +115,14 @@ export const useCarEditor = (initialCar = null) => {
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }
       if (startCR) patch.cr = [startCR[0] + dx, startCR[1] + dy]
       updateAsset(selectedId, patch)
+    } else if (mode === 'theta') {
+      const { startCR } = dragState.current
+      const [cx, cy] = startCR
+      const relX = canvasX - cx
+      const relY = canvasY - cy
+      const theta = Math.atan2(relY, relX)
+      const radius = Math.max(1, Math.sqrt(relX ** 2 + relY ** 2))
+      updateAsset(selectedId, { theta, radius })
     } else if (mode === 'resize') {
       const { corner, startTL, startDIM } = dragState.current
       let [x, y] = startTL
