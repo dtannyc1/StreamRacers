@@ -4,7 +4,8 @@ import { KVStoreProvider } from './context/KVStoreContext'
 import Modal from './components/Modal'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-//import CarEditor from './pages/CarEditor'
+import TwitchCallback from './pages/TwitchCallback'
+import CarEditor from './pages/CarEditor'
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth()
@@ -27,11 +28,10 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={token ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        {/*
         <Route path="/racer/new" element={<ProtectedRoute><CarEditor mode="new-user" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/new" element={<ProtectedRoute><CarEditor mode="new-car" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/:carIndex/edit" element={<ProtectedRoute><CarEditor mode="edit" /></ProtectedRoute>} />
-        */}
+        <Route path="/auth/twitch/callback" element={<TwitchCallback />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

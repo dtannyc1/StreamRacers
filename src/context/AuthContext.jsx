@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { getChannel } from '../lib/streamelements'
+import { getTwitchAccessToken, redirectToTwitchLogin, clearTwitchAccessToken } from '../lib/twitch'
 
 const TOKEN_KEY = 'se_jwt'
 const AuthContext = createContext(null)
@@ -22,6 +23,10 @@ export const AuthProvider = ({ children }) => {
       try {
         const data = await getChannel(token)
         setChannel(data)
+
+        if (!getTwitchAccessToken()) {
+          redirectToTwitchLogin()
+        }
       } catch (err) {
         setChannel(null)
         setAuthError(err.message)
@@ -42,6 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const clearToken = () => {
     localStorage.removeItem(TOKEN_KEY)
+    clearTwitchAccessToken()
     setToken(null)
     setChannel(null)
     setAuthError(null)
