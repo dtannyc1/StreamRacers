@@ -7,10 +7,9 @@ export const createDefaultAssets = (avatarUrl = '') => [
     id: crypto.randomUUID(),
     name: 'Avatar',
     spriteUrl: avatarUrl,
-    type: 'static',
+    type: 'avatar',
     tl: [-134, -145 + 14.597],
     dim: [80, 80],
-    isAvatar: true,
   },
   {
     id: crypto.randomUUID(),

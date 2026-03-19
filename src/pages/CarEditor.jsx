@@ -10,17 +10,24 @@ const CarEditor = ({ mode }) => {
   const { racers } = useKVStore()
 
   const [initialCar, setInitialCar] = useState(null)
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (mode === 'edit') {
-      setInitialCar(racers?.[username]?.[parseInt(carIndex)] ?? null)
+      const car = racers?.[username]?.[parseInt(carIndex)]
+      const existingAvatarUrl = car?.assets?.find(a => a.type === 'avatar')?.spriteUrl ?? ''
+      setAvatarUrl(existingAvatarUrl)
+      setInitialCar(car ?? null)
       setReady(true)
       return
     }
 
     getTwitchUser(username)
-      .then(user => setInitialCar(createDefaultCar(user.profile_image_url)))
+      .then(user => {
+        setAvatarUrl(user.profile_image_url)
+        setInitialCar(createDefaultCar(user.profile_image_url))
+      })
       .catch(() => setInitialCar(createDefaultCar()))
       .finally(() => setReady(true))
   }, [mode, username, carIndex])
@@ -31,7 +38,7 @@ const CarEditor = ({ mode }) => {
     </div>
   )
 
-  return <CarEditorInner mode={mode} username={username} carIndex={carIndex} initialCar={initialCar} />
+  return <CarEditorInner mode={mode} username={username} carIndex={carIndex} initialCar={initialCar} avatarUrl={avatarUrl} />
 }
 
 export default CarEditor

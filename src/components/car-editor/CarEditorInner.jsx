@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 import { useCarEditor } from './useCarEditor'
 import CarCanvas from './CarCanvas'
 import AssetPanel from './AssetPanel'
 import AssetForm from './AssetForm'
 
-const CarEditorInner = ({ mode, username, carIndex, initialCar }) => {
+const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => {
   const { racers, updateRacers } = useKVStore()
+  const [saveError, setSaveError] = useState(null)
   const navigate = useNavigate()
 
   const {
@@ -26,13 +28,24 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar }) => {
   } = useCarEditor(initialCar)
 
   const handleSave = async () => {
+    const avatarCount = car.assets.filter(a => a.type === 'avatar').length
+    if (avatarCount === 0) {
+        setSaveError('This car must have exactly one avatar asset before saving.')
+        return
+    }
+    if (avatarCount > 1) {
+        setSaveError('This car has more than one avatar asset. Please remove the extras before saving.')
+        return
+    }
+
+    setSaveError(null)
     const updated = { ...racers }
     if (mode === 'new-user' || mode === 'new-car') {
-      updated[username] = [...(racers[username] ?? []), car]
+        updated[username] = [...(racers[username] ?? []), car]
     } else if (mode === 'edit') {
-      const cars = [...racers[username]]
-      cars[parseInt(carIndex)] = car
-      updated[username] = cars
+        const cars = [...racers[username]]
+        cars[parseInt(carIndex)] = car
+        updated[username] = cars
     }
     await updateRacers(updated)
     navigate('/')
@@ -60,12 +73,17 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar }) => {
               <span className="text-sm text-gray-400">for <span className="text-purple-400">{username}</span></span>
             )}
           </div>
-          <button
-            onClick={handleSave}
-            className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
-          >
-            Save Car
-          </button>
+          <div className="flex items-center gap-4">
+            {saveError && (
+                <p className="text-sm text-red-400">{saveError}</p>
+            )}
+            <button
+                onClick={handleSave}
+                className="rounded-lg cursor-pointer bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+            >
+                Save Car
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-[1fr_280px] gap-6">
@@ -73,6 +91,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar }) => {
             assets={car.assets}
             selectedId={selectedId}
             selectedAsset={selectedAsset}
+            avatarUrl={avatarUrl}
             onSelectAsset={setSelectedId}
             onMouseDown={onCanvasMouseDown}
             onMouseMove={onCanvasMouseMove}

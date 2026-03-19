@@ -132,6 +132,28 @@ export const useCarEditor = (initialCar = null) => {
       if (w < 10) w = 10
       if (h < 10) h = 10
 
+      // lock aspect ratio for avatar type
+      if (selectedAsset.type === 'avatar') {
+        const aspect = startDIM[0] / startDIM[1]
+        if (corner === 'tl' || corner === 'br') {
+          // use average of both deltas to drive both dimensions
+          const avg = (w + h * aspect) / 2
+          w = avg
+          h = avg / aspect
+          if (corner === 'tl') {
+            x = startTL[0] + (startDIM[0] - w)
+            y = startTL[1] + (startDIM[1] - h)
+          }
+        } else if (corner === 'tr') {
+          h = w / aspect
+          y = startTL[1] + (startDIM[1] - h)
+        } else if (corner === 'bl') {
+          w = h * aspect
+          x = startTL[0] + (startDIM[0] - w)
+        }
+      }
+
+
       const patch = { tl: [x, y], dim: [w, h] }
 
       if (selectedAsset.cr) {

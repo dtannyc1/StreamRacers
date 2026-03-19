@@ -63,7 +63,7 @@ const drawAsset = (ctx, asset, img, t, isSelected) => {
 
   ctx.save()
 
-  if (asset.isAvatar) {
+  if (asset.type === 'avatar') {
     ctx.beginPath()
     ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2)
     ctx.clip()
@@ -149,7 +149,6 @@ const hitTestCorner = (mx, my, asset) => {
       my >= pos.y - HANDLE_HIT / 2 &&
       my <= pos.y + HANDLE_SIZE + HANDLE_HIT / 2
     ) {
-      console.log('hit corner', corner)
       return corner
     }
   }
@@ -160,6 +159,7 @@ const CarCanvas = ({
   assets,
   selectedId,
   selectedAsset,
+  avatarUrl,
   onSelectAsset,
   onMouseDown,
   onMouseMove,
@@ -175,14 +175,15 @@ const CarCanvas = ({
 
   useEffect(() => {
     assets.forEach(asset => {
-      if (asset.spriteUrl && !imagesRef.current[asset.spriteUrl]) {
+      const url = asset.type === 'avatar' ? avatarUrl : asset.spriteUrl
+      if (url && !imagesRef.current[url]) {
         const img = new Image()
         img.crossOrigin = 'anonymous'
-        img.src = asset.spriteUrl
-        imagesRef.current[asset.spriteUrl] = img
+        img.src = url
+        imagesRef.current[url] = img
       }
     })
-  }, [assets])
+  }, [assets, avatarUrl])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -214,7 +215,8 @@ const CarCanvas = ({
       drawAlignmentLines(ctx)
 
       assets.forEach(asset => {
-        const img = imagesRef.current[asset.spriteUrl]
+        const url = asset.type === 'avatar' ? avatarUrl : asset.spriteUrl
+        const img = imagesRef.current[url]
         const t = (draggingCR.current && asset.id === selectedId) ? 0 : tRef.current
         drawAsset(ctx, asset, img, t, asset.id === selectedId)
       })

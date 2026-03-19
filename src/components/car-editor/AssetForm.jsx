@@ -42,6 +42,7 @@ const AssetForm = ({ asset, onUpdate }) => {
           value={asset.spriteUrl}
           onChange={(e) => u({ spriteUrl: e.target.value })}
           placeholder="https://..."
+          disabled={asset.type === 'avatar'}
           className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
         />
       </label>
@@ -53,6 +54,7 @@ const AssetForm = ({ asset, onUpdate }) => {
           onChange={(e) => u({ type: e.target.value })}
           className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
         >
+          <option value="avatar">Avatar</option>
           <option value="static">Static</option>
           <option value="rotating">Rotating</option>
           <option value="oscillating">Oscillating</option>
