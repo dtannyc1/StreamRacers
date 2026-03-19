@@ -1,0 +1,39 @@
+// strip all html tags and null bytes
+export const sanitizeString = (str) =>
+  str.replace(/<[^>]*>/g, '').replace(/\0/g, '').trim()
+
+// sanitize every string value in an object recursively
+export const sanitizeDeep = (value) => {
+  if (typeof value === 'string') return sanitizeString(value)
+  if (Array.isArray(value)) return value.map(sanitizeDeep)
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [sanitizeString(k), sanitizeDeep(v)])
+    )
+  }
+  return value
+}
+
+// validate a JWT token is plausibly shaped (three base64url segments)
+export const isValidJWT = (token) =>
+  /^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$/.test(token.trim())
+
+// validate a URL is http/https only
+export const isValidHttpUrl = (str) => {
+  try {
+    const url = new URL(str)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+// validate a car before saving — checks all asset sprite URLs
+export const validateCar = (car) => {
+  for (const asset of car.assets) {
+    if (asset.type !== 'avatar' && asset.spriteUrl && !isValidHttpUrl(asset.spriteUrl)) {
+      return `Asset "${asset.name}" has an invalid sprite URL.`
+    }
+  }
+  return null
+}
