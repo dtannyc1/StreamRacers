@@ -1,3 +1,31 @@
+import { useState, useEffect } from 'react'
+
+const DebouncedUrlInput = ({ value, onChange, disabled }) => {
+  const [local, setLocal] = useState(value)
+
+  // sync if parent value changes (e.g. switching selected asset)
+  useEffect(() => {
+    setLocal(value)
+  }, [value])
+
+  useEffect(() => {
+    if (local === value) return
+    const timer = setTimeout(() => onChange(local), 600)
+    return () => clearTimeout(timer)
+  }, [local])
+
+  return (
+    <input
+      type="text"
+      value={disabled ? "User's Twitch profile picture" : local}
+      onChange={(e) => setLocal(e.target.value)}
+      disabled={disabled}
+      placeholder="https://..."
+      className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-40 disabled:cursor-not-allowed w-full"
+    />
+  )
+}
+
 const NumInput = ({ label, value, onChange, step = 1 }) => (
   <label className="flex flex-col gap-1">
     <span className="text-xs text-gray-400">{label}</span>
@@ -37,13 +65,10 @@ const AssetForm = ({ asset, onUpdate }) => {
 
       <label className="flex flex-col gap-1">
         <span className="text-xs text-gray-400">Sprite URL</span>
-        <input
-          type="text"
+        <DebouncedUrlInput
           value={asset.spriteUrl}
-          onChange={(e) => u({ spriteUrl: e.target.value })}
-          placeholder="https://..."
           disabled={asset.type === 'avatar'}
-          className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
+          onChange={(v) => u({ spriteUrl: v })}
         />
       </label>
 
@@ -51,7 +76,24 @@ const AssetForm = ({ asset, onUpdate }) => {
         <span className="text-xs text-gray-400">Type</span>
         <select
           value={asset.type}
-          onChange={(e) => u({ type: e.target.value })}
+          onChange={(e) => {
+            const newType = e.target.value
+            const patch = { type: newType }
+
+            if ((newType === 'rotating' || newType === 'oscillating') && !asset.cr) {
+              // initialize CR to center of the asset
+              patch.cr = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
+              patch.theta = 0
+              patch.radius = Math.min(asset.dim[0], asset.dim[1]) / 4
+            }
+
+            if (newType === 'oscillating' && asset.minTheta == null) {
+              patch.minTheta = -Math.PI / 6
+              patch.maxTheta = Math.PI / 6
+            }
+
+            u(patch)
+          }}
           className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
         >
           <option value="avatar">Avatar</option>

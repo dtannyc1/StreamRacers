@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react'
+import { resolveImageUrl } from '../../lib/utils'
 
 export const CANVAS_W = 600
 export const CANVAS_H = 400
@@ -175,15 +176,17 @@ const CarCanvas = ({
 
   useEffect(() => {
     assets.forEach(asset => {
-      const url = asset.type === 'avatar' ? avatarUrl : asset.spriteUrl
-      if (url && !imagesRef.current[url]) {
+      const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
+      if (!url) return
+      // always re-fetch if the url isn't in cache
+      if (!imagesRef.current[url]) {
         const img = new Image()
         img.crossOrigin = 'anonymous'
         img.src = url
         imagesRef.current[url] = img
       }
     })
-  }, [assets, avatarUrl])
+  }, [assets.map(a => resolveImageUrl(a.type === 'avatar' ? avatarUrl : a.spriteUrl)).join(','), avatarUrl])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -215,7 +218,7 @@ const CarCanvas = ({
       drawAlignmentLines(ctx)
 
       assets.forEach(asset => {
-        const url = asset.type === 'avatar' ? avatarUrl : asset.spriteUrl
+        const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
         const img = imagesRef.current[url]
         const t = (draggingCR.current && asset.id === selectedId) ? 0 : tRef.current
         drawAsset(ctx, asset, img, t, asset.id === selectedId)
