@@ -3,6 +3,7 @@ import { sanitizeString, isValidJWT } from '../lib/sanitize'
 
 const TokenInput = ({ onSave }) => {
   const [value, setValue] = useState('')
+  const [error, setError] = useState(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -38,6 +39,7 @@ const TokenInput = ({ onSave }) => {
           Save
         </button>
       </form>
+      {error && <p className="text-xs text-red-400">{error}</p>}
       <p className="text-xs text-gray-500">
         Your token is stored locally and never sent anywhere except StreamElements.
       </p>
