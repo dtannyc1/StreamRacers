@@ -54,3 +54,8 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 - Don't save anything. Inputs for images should be links, which they can host on their own Dropbox or whatever. Data should be saved in user's own SE.store.
 - Game should have generic functions for drawing images in certain ways. ie spin, oscillate, translate, static, etc
 - Data should be stored in a way to know which function to call, then pass in relevant image params as necessary
+
+
+# Notes for deployment:
+- `npm run dev` to start up local version
+- push to main to deploy it on github pages with env vars injected

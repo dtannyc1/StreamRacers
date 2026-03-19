@@ -250,7 +250,6 @@ const CarCanvas = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       className="w-full rounded-lg border border-gray-700 cursor-crosshair bg-sky-300"
     />
   )
