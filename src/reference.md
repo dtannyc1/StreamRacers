@@ -59,3 +59,27 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 # Notes for deployment:
 - `npm run dev` to start up local version
 - push to main to deploy it on github pages with env vars injected
+
+
+
+# Notes for next changes:
+
+## Immediate changes
+- add handle for radius that changes both radius and theta0
+- remove default images from assets. it should only be links
+- allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
+- adjust login flow. the redirect stuff for twitch permissions makes things render and rerender a few times.
+- protect against code injections before and streamelements stuff
+  - JWT token input
+  - any data insertion
+
+## Track stuff
+- Need few layers, background, main, foreground
+- main should have few requirements
+  - start line, finish line, main image minimum
+  - if moving main elements, need an option to repeat (ie dashed lines on road)
+- background and foreground assets should have min/max sizes
+- default track should exist and should be the background of vehicle uploader for scale. The main element of the default track should not be editable, but users should be able to upload background and foreground elements.
+- users should be able to adjust the default track.
+- when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
+  
