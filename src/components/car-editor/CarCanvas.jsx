@@ -97,7 +97,7 @@ const drawAlignmentLines = (ctx) => {
   ctx.lineTo(FRONT_EDGE_X, CANVAS_H)
   ctx.stroke()
   ctx.fillStyle = '#34d399'
-  ctx.fillText('front edge', FRONT_EDGE_X + 4, -ORIGIN[1] + 14)
+  ctx.fillText('front edge', FRONT_EDGE_X - 60, -ORIGIN[1] + 14)
   ctx.restore()
 }
 
@@ -251,7 +251,7 @@ const CarCanvas = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      className="w-full rounded-lg border border-gray-700 cursor-crosshair bg-gray-950"
+      className="w-full rounded-lg border border-gray-700 cursor-crosshair bg-sky-300"
     />
   )
 }
