@@ -68,9 +68,6 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 - remove default images from assets. it should only be links
 - allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
 - adjust login flow. the redirect stuff for twitch permissions makes things render and rerender a few times.
-- protect against code injections before and streamelements stuff
-  - JWT token input
-  - any data insertion
 
 ## Track stuff
 - Need few layers, background, main, foreground

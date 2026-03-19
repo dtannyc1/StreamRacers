@@ -1,13 +1,19 @@
 import { useState } from 'react'
+import { sanitizeString, isValidJWT } from '../lib/sanitize'
 
 const TokenInput = ({ onSave }) => {
   const [value, setValue] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const trimmed = value.trim()
-    if (!trimmed) return
-    onSave(trimmed)
+    const sanitized = sanitizeString(value)
+    if (!sanitized) return
+    if (!isValidJWT(sanitized)) {
+      setError('That doesn\'t look like a valid JWT token. Please check and try again.')
+      return
+    }
+    setError(null)
+    onSave(sanitized)
     setValue('')
   }
 

@@ -5,6 +5,7 @@ import { useCarEditor } from './useCarEditor'
 import CarCanvas from './CarCanvas'
 import AssetPanel from './AssetPanel'
 import AssetForm from './AssetForm'
+import { sanitizeDeep, validateCar } from '../../lib/sanitize'
 
 const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => {
   const { racers, updateRacers } = useKVStore()
@@ -30,23 +31,32 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
   const handleSave = async () => {
     const avatarCount = car.assets.filter(a => a.type === 'avatar').length
     if (avatarCount === 0) {
-        setSaveError('This car must have exactly one avatar asset before saving.')
-        return
+      setSaveError('This car must have exactly one avatar asset before saving.')
+      return
     }
     if (avatarCount > 1) {
-        setSaveError('This car has more than one avatar asset. Please remove the extras before saving.')
-        return
+      setSaveError('This car has more than one avatar asset. Please remove the extras before saving.')
+      return
+    }
+
+    const carError = validateCar(car)
+    if (carError) {
+      setSaveError(carError)
+      return
     }
 
     setSaveError(null)
+    const sanitizedCar = sanitizeDeep(car)
     const updated = { ...racers }
+
     if (mode === 'new-user' || mode === 'new-car') {
-        updated[username] = [...(racers[username] ?? []), car]
+      updated[username] = [...(racers[username] ?? []), sanitizedCar]
     } else if (mode === 'edit') {
-        const cars = [...racers[username]]
-        cars[parseInt(carIndex)] = car
-        updated[username] = cars
+      const cars = [...racers[username]]
+      cars[parseInt(carIndex)] = sanitizedCar
+      updated[username] = cars
     }
+
     await updateRacers(updated)
     navigate('/')
   }
