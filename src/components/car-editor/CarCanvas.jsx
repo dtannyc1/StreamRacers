@@ -111,7 +111,8 @@ const drawAsset = (ctx, asset, img, t, isSelected) => {
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
     const min = asset.minTheta ?? -Math.PI / 6
     const max = asset.maxTheta ?? Math.PI / 6
-    const angle = ((max - min) / 2) * Math.sin(t * 3) + (max + min) / 2
+    const phase = asset.phase ?? 0
+    const angle = ((max - min) / 2) * Math.sin(t * 3 + phase) + (max + min) / 2
     ctx.translate(cx, cy)
     ctx.rotate(angle)
     ctx.translate(-cx, -cy)

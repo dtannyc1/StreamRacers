@@ -42,6 +42,24 @@ const NumInput = ({ label, value, onChange, step = 1 }) => (
   </label>
 )
 
+const SliderInput = ({ label, value, onChange, min = 0, max = 360, step = 1 }) => (
+  <label className="flex flex-col gap-1">
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-xs text-gray-500">{Math.round(value)}°</span>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value))}
+      className="w-full accent-purple-500"
+    />
+  </label>
+)
+
 const Row = ({ children }) => (
   <div className="grid grid-cols-2 gap-2">{children}</div>
 )
@@ -93,6 +111,7 @@ const AssetForm = ({ asset, onUpdate }) => {
             if (newType === 'oscillating' && asset.minTheta == null) {
               patch.minTheta = -Math.PI / 6
               patch.maxTheta = Math.PI / 6
+              patch.phase = 0
             }
 
             u(patch)
@@ -180,6 +199,11 @@ const AssetForm = ({ asset, onUpdate }) => {
               onChange={(v) => u({ maxTheta: toRad(v) })}
             />
           </Row>
+          <SliderInput
+            label="Phase"
+            value={toDeg(asset.phase ?? 0)}
+            onChange={(v) => u({ phase: toRad(v) })}
+          />
         </div>
       )}
 

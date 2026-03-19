@@ -66,6 +66,10 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 
 ## Immediate changes
 - allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
+- separate radius measurement from theta0
+- adjust theta0 to be a slider. should apply to all types
+- when image is changed, dimensions should change accordingly
+- show scaleX scaleY in display, make it a slider, relative to original image size. also include a lock aspect ratio toggle 
 
 ## Track stuff
 - Need few layers, background, main, foreground
