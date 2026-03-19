@@ -21,13 +21,13 @@ const CarCard = ({ car, index, username }) => {
       <div className="flex gap-3">
         <button
           onClick={() => navigate(`/racer/${username}/car/${index}/edit`)}
-          className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+          className="text-xs cursor-pointer text-purple-400 hover:text-purple-300 transition-colors"
         >
           Edit
         </button>
         <button
           onClick={handleDelete}
-          className="text-xs text-red-400 hover:text-red-300 transition-colors"
+          className="text-xs cursor-pointer text-red-400 hover:text-red-300 transition-colors"
         >
           Delete
         </button>

@@ -10,7 +10,7 @@ const RacerRow = ({ username, cars = [] }) => {
     <div className="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
       <button
         onClick={() => setExpanded(prev => !prev)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-750 transition-colors"
+        className="w-full flex items-center justify-between cursor-pointer px-4 py-3 hover:bg-gray-700 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-white">{username}</span>
@@ -34,7 +34,7 @@ const RacerRow = ({ username, cars = [] }) => {
           ))}
           <button
             onClick={() => navigate(`/racer/${username}/car/new`)}
-            className="mt-1 text-sm text-purple-400 hover:text-purple-300 transition-colors text-left"
+            className="mt-1 cursor-pointer text-sm text-purple-400 hover:text-purple-300 transition-colors text-left"
           >
             + Add car
           </button>
