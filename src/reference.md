@@ -65,7 +65,6 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 # Notes for next changes:
 
 ## Immediate changes
-- remove default images from assets. it should only be links
 - allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
 
 ## Track stuff

@@ -1,6 +1,4 @@
-import defaultVehicle from '../assets/defaultVehicle.png'
-import defaultWheel1 from '../assets/defaultWheel1.png'
-import defaultWheel2 from '../assets/defaultWheel2.png'
+import { getImageUrl } from './imageLibrary'
 
 export const createDefaultAssets = (avatarUrl = '') => [
   {
@@ -14,7 +12,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
   {
     id: crypto.randomUUID(),
     name: 'Vehicle',
-    spriteUrl: defaultVehicle,
+    spriteUrl: getImageUrl('default-vehicle'),
     type: 'static',
     tl: [-183, -175 + 14.597],
     dim: [200, 200],
@@ -22,7 +20,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
   {
     id: crypto.randomUUID(),
     name: 'Left Wheel',
-    spriteUrl: defaultWheel1,
+    spriteUrl: getImageUrl('default-wheel-1'),
     type: 'rotating',
     tl: [-185, -135 + 14.597],
     dim: [481 / 2.5, 301 / 2.5],
@@ -33,7 +31,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
   {
     id: crypto.randomUUID(),
     name: 'Right Wheel',
-    spriteUrl: defaultWheel2,
+    spriteUrl: getImageUrl('default-wheel-2'),
     type: 'rotating',
     tl: [-178, -135 + 14.597],
     dim: [481 / 2.5, 301 / 2.5],
