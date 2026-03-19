@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/src/assets/StreamRacersLogo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stream Racers</title>
+    <script>
+      (function() {
+        const query = window.location.search;
+        if (query.startsWith('?p=')) {
+          const params = new URLSearchParams(query);
+          const path = decodeURIComponent(params.get('p') || '/');
+          const hash = params.get('h') ? decodeURIComponent(params.get('h')) : '';
+          window.history.replaceState(null, '', '/StreamRacers' + path + hash);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
