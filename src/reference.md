@@ -51,10 +51,10 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 
 
 # Notes for development:
-- Don't save anything. Inputs for images should be links, which they can host on their own Dropbox or whatever. Data should be saved in user's own SE.store.
+- Don't save anything. Inputs for images should be links, which they can host on their own Dropbox or whatever. Data should be saved in user's own SE.store. Consider uploading imgur files on the user's behalf. 
 - Game should have generic functions for drawing images in certain ways. ie spin, oscillate, translate, static, etc
 - Data should be stored in a way to know which function to call, then pass in relevant image params as necessary
-
+- Because it's a static website, there's no way to do socket.io stuff to emit events to streamelements... User will have to manually refresh their browser source in order to get the latest data.
 
 # Notes for deployment:
 - `npm run dev` to start up local version
@@ -66,8 +66,6 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 
 ## Immediate changes
 - allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
-- when image is changed, dimensions should change accordingly
-- show scaleX scaleY in display, make it a slider, relative to original image size. also include a lock aspect ratio toggle 
 
 ## Track stuff
 - Need few layers, background, main, foreground
