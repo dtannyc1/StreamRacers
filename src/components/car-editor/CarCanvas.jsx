@@ -8,6 +8,8 @@ const BOTTOM_EDGE_Y = 0
 const FRONT_EDGE_X = 0
 const DRAG_THRESHOLD = 4
 const CR_HANDLE_RADIUS = 7
+const HANDLE_SIZE = 8
+const HANDLE_HIT = 12
 
 const drawCRHandle = (ctx, cx, cy) => {
   ctx.save()
@@ -30,6 +32,27 @@ const drawCRHandle = (ctx, cx, cy) => {
   ctx.lineTo(cx, cy + CR_HANDLE_RADIUS + 4)
   ctx.stroke()
 
+  ctx.restore()
+}
+
+const drawCornerHandles = (ctx, x, y, w, h) => {
+  const corners = [
+    { x: x - 2, y: y - 2 },           // tl
+    { x: x + w - HANDLE_SIZE + 2, y: y - 2 },       // tr
+    { x: x - 2, y: y + h - HANDLE_SIZE + 2 },       // bl
+    { x: x + w - HANDLE_SIZE + 2, y: y + h - HANDLE_SIZE + 2 }, // br
+  ]
+  ctx.save()
+  ctx.fillStyle = '#a855f7'
+  ctx.strokeStyle = '#ffffff'
+  ctx.lineWidth = 1.5
+  ctx.setLineDash([])
+  corners.forEach(({ x, y }) => {
+    ctx.beginPath()
+    ctx.rect(x, y, HANDLE_SIZE, HANDLE_SIZE)
+    ctx.fill()
+    ctx.stroke()
+  })
   ctx.restore()
 }
 
@@ -109,6 +132,30 @@ const hitTestCR = (mx, my, asset) => {
   return Math.sqrt(dx * dx + dy * dy) <= CR_HANDLE_RADIUS + 4
 }
 
+const hitTestCorner = (mx, my, asset) => {
+  if (!asset) return null
+  const [x, y] = asset.tl
+  const [w, h] = asset.dim
+  const corners = {
+    tl: { x: x - 2, y: y - 2 },
+    tr: { x: x + w - HANDLE_SIZE + 2, y: y - 2 },
+    bl: { x: x - 2, y: y + h - HANDLE_SIZE + 2 },
+    br: { x: x + w - HANDLE_SIZE + 2, y: y + h - HANDLE_SIZE + 2 },
+  }
+  for (const [corner, pos] of Object.entries(corners)) {
+    if (
+      mx >= pos.x - HANDLE_HIT / 2 &&
+      mx <= pos.x + HANDLE_SIZE + HANDLE_HIT / 2 &&
+      my >= pos.y - HANDLE_HIT / 2 &&
+      my <= pos.y + HANDLE_SIZE + HANDLE_HIT / 2
+    ) {
+      console.log('hit corner', corner)
+      return corner
+    }
+  }
+  return null
+}
+
 const CarCanvas = ({
   assets,
   selectedId,
@@ -172,6 +219,12 @@ const CarCanvas = ({
         drawAsset(ctx, asset, img, t, asset.id === selectedId)
       })
 
+      if (selectedAsset) {
+        const [x, y] = selectedAsset.tl
+        const [w, h] = selectedAsset.dim
+        drawCornerHandles(ctx, x, y, w, h)
+      }
+
       // draw CR handle on top of everything
       if (selectedAsset?.cr && (selectedAsset.type === 'rotating' || selectedAsset.type === 'oscillating')) {
         drawCRHandle(ctx, selectedAsset.cr[0], selectedAsset.cr[1])
@@ -202,9 +255,12 @@ const CarCanvas = ({
 
     dragStartPos.current = { x, y }
     didDrag.current = false
-    draggingCR.current = hitTestCR(mx, my, selectedAsset)
 
-    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, draggingCR.current)
+    const corner = hitTestCorner(mx, my, selectedAsset)
+    const isCR = !corner && hitTestCR(mx, my, selectedAsset)
+
+    draggingCR.current = isCR
+    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner)
   }, [onMouseDown, getCanvasPos, selectedAsset])
 
   const handleMouseMove = useCallback((e) => {
@@ -225,8 +281,10 @@ const CarCanvas = ({
       const mx = x - ORIGIN[0]
       const my = y - ORIGIN[1]
 
-      // don't re-select if clicking the CR handle of already selected asset
-      if (!hitTestCR(mx, my, selectedAsset)) {
+      const onCorner = hitTestCorner(mx, my, selectedAsset)
+      const onCR = hitTestCR(mx, my, selectedAsset)
+
+      if (!onCorner && !onCR) {
         const hit = [...assets].reverse().find(asset => {
           const [ax, ay] = asset.tl
           const [aw, ah] = asset.dim

@@ -57,9 +57,21 @@ export const useCarEditor = (initialCar = null) => {
   // 'asset' | 'cr'
   const dragState = useRef(null)
 
-  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR) => {
+  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR, resizeCorner) => {
     if (!selectedAsset) return
-    if (draggingCR) {
+    if (resizeCorner) {
+      dragState.current = {
+        mode: 'resize',
+        corner: resizeCorner,
+        startMouseX: e.clientX,
+        startMouseY: e.clientY,
+        startTL: [...selectedAsset.tl],
+        startDIM: [...selectedAsset.dim],
+        startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
+        startRadius: selectedAsset.radius ?? null,
+        scale,
+      }
+    } else if (draggingCR) {
       dragState.current = {
         mode: 'cr',
         startMouseX: e.clientX,
@@ -88,11 +100,53 @@ export const useCarEditor = (initialCar = null) => {
     if (mode === 'cr') {
       const { startCR } = dragState.current
       updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy] })
-    } else {
+    } else if (mode === 'asset') {
       const { startTL, startCR } = dragState.current
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }
-      // move CR along with the asset
       if (startCR) patch.cr = [startCR[0] + dx, startCR[1] + dy]
+      updateAsset(selectedId, patch)
+    } else if (mode === 'resize') {
+      const { corner, startTL, startDIM } = dragState.current
+      let [x, y] = startTL
+      let [w, h] = startDIM
+
+      if (corner === 'tl') {
+        x = startTL[0] + dx
+        y = startTL[1] + dy
+        w = startDIM[0] - dx
+        h = startDIM[1] - dy
+      } else if (corner === 'tr') {
+        y = startTL[1] + dy
+        w = startDIM[0] + dx
+        h = startDIM[1] - dy
+      } else if (corner === 'bl') {
+        x = startTL[0] + dx
+        w = startDIM[0] - dx
+        h = startDIM[1] + dy
+      } else if (corner === 'br') {
+        w = startDIM[0] + dx
+        h = startDIM[1] + dy
+      }
+
+      // enforce minimum size
+      if (w < 10) w = 10
+      if (h < 10) h = 10
+
+      const patch = { tl: [x, y], dim: [w, h] }
+
+      if (selectedAsset.cr) {
+        const startCR = dragState.current.startCR
+        patch.cr = [
+          startCR[0] * (w / startDIM[0]),
+          startCR[1] * (h / startDIM[1]),
+        ]
+      }
+
+      if (dragState.current.startRadius !== null) {
+        const avgScale = (w / startDIM[0] + h / startDIM[1]) / 2
+        patch.radius = dragState.current.startRadius * avgScale
+      }
+
       updateAsset(selectedId, patch)
     }
   }, [selectedId, updateAsset])
