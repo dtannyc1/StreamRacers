@@ -161,6 +161,10 @@ const TrackEditor = ({ mode }) => {
     : null
 
   const handleSelectAsset = (id, listKey) => {
+    if (id === null) {
+      setSelection(null)
+      return
+    }
     setSelection({ type: 'asset', id, listKey })
   }
 
@@ -423,20 +427,8 @@ const TrackEditor = ({ mode }) => {
               onSelect={handleSelectAsset}
               onAdd={handleAddAsset}
               onRemove={handleRemoveAsset}
+              onUpdate={updateAsset}
             />
-
-            {/* Asset form */}
-            {selectedAsset && (
-              <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Edit Asset</h3>
-                <TrackAssetForm
-                  asset={selectedAsset}
-                  listKey={selection.listKey}
-                  onUpdate={updateAsset}
-                />
-              </div>
-            )}
-
           </div>
         </div>
       </div>

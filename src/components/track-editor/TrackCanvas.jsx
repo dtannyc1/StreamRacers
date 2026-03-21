@@ -37,33 +37,6 @@ const drawFullScreen = (ctx, img) => {
   ctx.drawImage(img, 0, 0, CANVAS_W, CANVAS_H)
 }
 
-const drawScattered = (ctx, assets, imageCache, seed, selectedAssetId) => {
-  assets.forEach((asset, i) => {
-    const img = imageCache.current[resolveImageUrl(asset.url)]
-    const isSelected = asset.id === selectedAssetId
-    if (!img?.naturalWidth && !isSelected) return
-    const pseudo = (n) => ((Math.sin(n * 127.1 + seed * 311.7) * 43758.5453) % 1 + 1) % 1
-    const x = pseudo(i * 2) * CANVAS_W
-    const { top, height } = getRoadBounds({ p1: [0, CANVAS_H - 25 - 400], p2: [0, CANVAS_H - 25] })
-    const y = top - asset.dim[1] * asset.scale * pseudo(i * 2 + 1)
-    const w = asset.dim[0] * asset.scale / 2
-    const h = asset.dim[1] * asset.scale / 2
-    if (img?.naturalWidth) ctx.drawImage(img, x, y, w, h)
-    if (isSelected) {
-      if (!img?.naturalWidth) {
-        ctx.fillStyle = 'rgba(168, 85, 247, 0.15)'
-        ctx.fillRect(x, y, w, h)
-      }
-      ctx.save()
-      ctx.strokeStyle = '#a855f7'
-      ctx.lineWidth = 2
-      ctx.setLineDash([4, 4])
-      ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
-      ctx.restore()
-    }
-  })
-}
-
 const drawStands = (ctx, img, stands) => {
   if (!img?.naturalWidth || !stands) return
   const w = stands.dim[0] * stands.scale
@@ -191,6 +164,7 @@ const TrackCanvas = ({
   const dragStartPos = useRef(null)
   const didDrag = useRef(false)
   const tRef = useRef(0)
+  const scatterPositions = useRef({})
 
   useEffect(() => { trackRef.current = track }, [track])
   useEffect(() => { selectionRef.current = selection }, [selection])
@@ -265,7 +239,8 @@ const TrackCanvas = ({
       }
 
       drawScattered(ctx, t.backgroundAssets, imageCache, 42,
-        sel?.type === 'asset' && sel.listKey === 'backgroundAssets' ? sel.id : null)
+        sel?.type === 'asset' && sel.listKey === 'backgroundAssets' ? sel.id : null,
+        'background', t.racingLine)
 
       drawRoad(ctx, t.road, t.racingLine)
 
@@ -307,7 +282,8 @@ const TrackCanvas = ({
       })
 
       drawScattered(ctx, t.foregroundAssets, imageCache, 99,
-        sel?.type === 'asset' && sel.listKey === 'foregroundAssets' ? sel.id : null)
+        sel?.type === 'asset' && sel.listKey === 'foregroundAssets' ? sel.id : null,
+        'foreground', t.racingLine)
 
       if (t.overlayForeground?.url) {
         drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayForeground.url)])
@@ -324,6 +300,43 @@ const TrackCanvas = ({
     animRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(animRef.current)
   }, [])
+
+  const drawScattered = (ctx, assets, imageCache, seed, selectedAssetId, layer, racingLine) => {
+    const { top, bottom } = getRoadBounds(racingLine)
+
+    assets.forEach((asset, i) => {
+        const img = imageCache.current[resolveImageUrl(asset.url)]
+        const isSelected = asset.id === selectedAssetId
+        if (!img?.naturalWidth && !isSelected) return
+
+        const key = `${seed}-${asset.id}`
+        if (!scatterPositions.current[key]) {
+        scatterPositions.current[key] = { x: Math.random() * CANVAS_W }
+        }
+
+        const { x } = scatterPositions.current[key]
+        const w = asset.dim[0] * asset.scale
+        const h = asset.dim[1] * asset.scale
+
+        // anchor bottom edge to road top for background, road bottom for foreground
+        const anchorY = layer === 'foreground' ? bottom : top
+        const y = anchorY - h
+
+        if (img?.naturalWidth) ctx.drawImage(img, x, y, w, h)
+        if (isSelected) {
+        if (!img?.naturalWidth) {
+            ctx.fillStyle = 'rgba(168, 85, 247, 0.15)'
+            ctx.fillRect(x, y, w, h)
+        }
+        ctx.save()
+        ctx.strokeStyle = '#a855f7'
+        ctx.lineWidth = 2
+        ctx.setLineDash([4, 4])
+        ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
+        ctx.restore()
+        }
+    })
+    }
 
   const getCanvasPos = useCallback((e) => {
     const rect = canvasRef.current.getBoundingClientRect()
