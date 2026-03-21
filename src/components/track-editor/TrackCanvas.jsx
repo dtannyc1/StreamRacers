@@ -289,6 +289,34 @@ const TrackCanvas = ({
         drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayForeground.url)])
       }
 
+      if (sel?.type === 'asset') {
+        const listKey = sel.listKey
+        const asset = t[listKey]?.find(a => a.id === sel.id)
+        if (asset) {
+          const img = imageCache.current[resolveImageUrl(asset.url)]
+          if (img?.naturalWidth) {
+            const key = `${listKey === 'backgroundAssets' ? 42 : 99}-${asset.id}`
+            const pos = scatterPositions.current[key]
+            if (pos) {
+              const { top, bottom } = getRoadBounds(t.racingLine)
+              const w = asset.dim[0] * asset.scale
+              const h = asset.dim[1] * asset.scale
+              const anchorY = listKey === 'foregroundAssets' ? bottom : top
+              const y = anchorY - h
+              ctx.drawImage(img, pos.x, y, w, h)
+
+              // selection outline
+              ctx.save()
+              ctx.strokeStyle = '#a855f7'
+              ctx.lineWidth = 2
+              ctx.setLineDash([4, 4])
+              ctx.strokeRect(pos.x - 2, y - 2, w + 4, h + 4)
+              ctx.restore()
+            }
+          }
+        }
+      }
+
       if (isRacingLineSelected) {
         drawLineEditor(ctx, t.racingLine)
         drawRacingLineImage(ctx, rlImg, t.racingLine, true)

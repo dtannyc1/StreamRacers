@@ -156,10 +156,6 @@ const TrackEditor = ({ mode }) => {
     return () => cancelAnimationFrame(animRef.current)
   }, [activeRacers.length > 0])
 
-  const selectedAsset = selection?.type === 'asset'
-    ? track[selection.listKey]?.find(a => a.id === selection.id)
-    : null
-
   const handleSelectAsset = (id, listKey) => {
     if (id === null) {
       setSelection(null)
