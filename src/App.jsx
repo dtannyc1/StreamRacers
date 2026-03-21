@@ -4,6 +4,7 @@ import { KVStoreProvider } from './context/KVStoreContext'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import CarEditor from './pages/CarEditor'
+import TrackEditor from './pages/TrackEditor'
 import TwitchCallback from './pages/TwitchCallback'
 import Modal from './components/Modal'
 
@@ -13,7 +14,7 @@ const ProtectedRoute = ({ children }) => {
 }
 
 const AppRoutes = () => {
-  const { token, settling, authError, dismissAuthError } = useAuth()
+  const { token, settling, authError, dismissAuthError, clearToken } = useAuth()
 
   // always allow the Twitch callback to render so it can parse the token
   if (window.location.pathname.includes('/auth/twitch/callback')) {
@@ -25,8 +26,14 @@ const AppRoutes = () => {
   }
 
   if (settling) return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center gap-4">
       <p className="text-sm text-gray-400">Loading...</p>
+      <button
+        onClick={clearToken}
+        className="text-xs text-red-400 hover:text-red-300 transition-colors"
+      >
+        Logout
+      </button>
     </div>
   )
 
@@ -46,6 +53,8 @@ const AppRoutes = () => {
         <Route path="/racer/new" element={<ProtectedRoute><CarEditor mode="new-user" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/new" element={<ProtectedRoute><CarEditor mode="new-car" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/:carIndex/edit" element={<ProtectedRoute><CarEditor mode="edit" /></ProtectedRoute>} />
+        <Route path="/track/new" element={<ProtectedRoute><TrackEditor mode="new" /></ProtectedRoute>} />
+        <Route path="/track/:trackName/edit" element={<ProtectedRoute><TrackEditor mode="edit" /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
