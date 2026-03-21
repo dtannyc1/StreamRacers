@@ -187,25 +187,24 @@ const TrackEditor = ({ mode }) => {
   const handleAddRacer = async () => {
     if (!customRacers) return
 
-    const username = pickRandomRacer(customRacers)
-    if (!username) return
+    const activeUsernames = new Set(activeRacers.map(r => r.username))
+    const available = Object.entries(customRacers)
+      .filter(([username, cars]) =>
+        Array.isArray(cars) && cars.length > 0 && !activeUsernames.has(username)
+      )
+      .map(([username]) => username)
 
+    if (available.length === 0) return
+
+    const username = available[Math.floor(Math.random() * available.length)]
     const racer = spawnRacer(username, customRacers, track.racingLine)
     if (!racer) return
 
-    // fetch avatar if we don't have it yet
     if (!racerAvatars[username]) {
       try {
         const twitchUser = await getTwitchUser(username)
         setRacerAvatars(prev => ({ ...prev, [username]: twitchUser.profile_image_url }))
-
-        // preload car images
-        racer.car.assets.forEach(asset => {
-          const url = asset.type === 'avatar'
-            ? twitchUser.profile_image_url
-            : asset.spriteUrl
-          preloadCarImages(racer.car, twitchUser.profile_image_url, racerImageCache.current)
-        })
+        preloadCarImages(racer.car, twitchUser.profile_image_url, racerImageCache.current)
       } catch {
         // proceed without avatar
       }

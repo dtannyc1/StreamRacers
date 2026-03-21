@@ -1,4 +1,4 @@
-const SPEED = 200 // px per second
+const INITIAL_SPEED = 400 // px per second
 const DONE_DISTANCE = 1920 * 2
 
 export const pickRandomRacer = (customRacers) => {
@@ -25,6 +25,8 @@ export const spawnRacer = (username, customRacers, racingLine) => {
     username,
     car,
     xy: [-200, y],
+    vel: [INITIAL_SPEED, 0],
+    acc: [6, 0],
     distanceTravelled: 0,
     spawnTime: performance.now(),
   }
@@ -33,8 +35,8 @@ export const spawnRacer = (username, customRacers, racingLine) => {
 export const updateRacers = (racers, dt) =>
   racers.map(racer => ({
     ...racer,
-    xy: [racer.xy[0] + SPEED * dt, racer.xy[1]],
-    distanceTravelled: racer.distanceTravelled + SPEED * dt,
+    xy: [racer.xy[0] + racer.vel[0] * dt, racer.xy[1] + racer.vel[1] * dt],
+    distanceTravelled: racer.distanceTravelled + racer.vel[0] * dt,
   }))
 
 export const isRacerDone = (racer) =>
