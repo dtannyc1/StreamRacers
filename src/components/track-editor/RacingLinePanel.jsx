@@ -5,7 +5,7 @@ import RacingLineForm from './RacingLineForm'
 
 const SUBSECTION_TOOLTIPS = {
   'Image': 'Start/finish line image',
-  'Line Segment': 'Line Segment defining the start and finish line. Yellow end point handles are drawn on the canvas for easier editing.',
+  'Line Segment': 'Line Segment defining the start/finish line. Yellow end point handles are drawn on the canvas for easier editing. The line segment also dictates the height of the track on stream.',
 }
 
 const DebouncedUrlInput = ({ value, onChange }) => {
