@@ -14,12 +14,13 @@ const getRoadBounds = (racingLine) => {
   return { top, bottom, height: bottom - top }
 }
 
-const drawRoad = (ctx, road, racingLine) => {
+const drawRoad = (ctx, road, racingLine, imageCache) => {
   const { top, height } = getRoadBounds(racingLine)
+
   if (road.type === 'rainbow') {
     const numDiv = 10
     ctx.fillStyle = 'black'
-    ctx.fillRect(0, top - height * 2 / numDiv, CANVAS_W, height + height * 4 / numDiv)
+    ctx.fillRect(0, top - height * 2 / numDiv, CANVAS_W, height + height * 2 / numDiv)
     for (let i = 0; i < numDiv; i++) {
       ctx.fillStyle = `hsl(${Math.floor(i * 360 / numDiv)},100%,50%)`
       ctx.fillRect(0, top + height * (numDiv - i - 1) / numDiv, CANVAS_W, height / numDiv)
@@ -29,19 +30,21 @@ const drawRoad = (ctx, road, racingLine) => {
     ctx.fillRect(0, top - height * 0.2, CANVAS_W, height * 1.4)
     ctx.fillStyle = road.color ?? '#888888'
     ctx.fillRect(0, top, CANVAS_W, height)
+  } else if (road.type === 'image') {
+    const img = road.url ? imageCache.current[resolveImageUrl(road.url)] : null
+    if (img?.naturalWidth) {
+      ctx.drawImage(img, road.x ?? 0, road.y ?? 0,
+        road.dim[0] * (road.scale ?? 1),
+        road.dim[1] * (road.scale ?? 1))
+    }
   }
 }
 
-const drawFullScreen = (ctx, img) => {
-  if (!img?.naturalWidth) return
-  ctx.drawImage(img, 0, 0, CANVAS_W, CANVAS_H)
-}
-
-const drawStands = (ctx, img, stands) => {
-  if (!img?.naturalWidth || !stands) return
-  const w = stands.dim[0] * stands.scale
-  const h = stands.dim[1] * stands.scale
-  ctx.drawImage(img, CANVAS_W - w - 20, CANVAS_H - 25 - 400 - h + 20, w, h)
+const drawScrollingImage = (ctx, img, slot) => {
+  if (!img?.naturalWidth || !slot) return
+  const w = slot.dim ? slot.dim[0] * (slot.scale ?? 1) : CANVAS_W
+  const h = slot.dim ? slot.dim[1] * (slot.scale ?? 1) : CANVAS_H
+  ctx.drawImage(img, slot.x ?? 0, slot.y ?? 0, w, h)
 }
 
 const drawRacingLineImage = (ctx, img, racingLine, isSelected) => {
@@ -177,11 +180,9 @@ const TrackCanvas = ({
   // preload track images
   useEffect(() => {
     const urls = [
-      track.overlayBackground?.url,
-      track.overlayForeground?.url,
       track.scrollingImage?.url,
-      track.stands?.url,
       track.racingLine?.url,
+      track.road?.url,
       ...track.racingLine.startModifiers.map(m => m.url),
       ...track.racingLine.finishModifiers.map(m => m.url),
       ...track.backgroundAssets.map(a => a.url),
@@ -197,11 +198,9 @@ const TrackCanvas = ({
       }
     })
   }, [
-    track.overlayBackground?.url,
-    track.overlayForeground?.url,
     track.scrollingImage?.url,
-    track.stands?.url,
     track.racingLine?.url,
+    track.road?.url,
     track.racingLine.startModifiers.map(m => m.url).join(','),
     track.racingLine.finishModifiers.map(m => m.url).join(','),
     track.backgroundAssets.map(a => a.url).join(','),
@@ -237,22 +236,15 @@ const TrackCanvas = ({
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
-      if (t.overlayBackground?.url) {
-        drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayBackground.url)])
-      }
-
-      drawRoad(ctx, t.road, t.racingLine)
+      drawRoad(ctx, t.road, t.racingLine, imageCache)
 
       drawScattered(ctx, t.backgroundAssets, imageCache, 42,
         sel?.type === 'asset' && sel.listKey === 'backgroundAssets' ? sel.id : null,
         'background', t.racingLine)
 
       if (t.scrollingImage?.url) {
-        drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.scrollingImage.url)])
-      }
-
-      if (t.stands?.url) {
-        drawStands(ctx, imageCache.current[resolveImageUrl(t.stands.url)], t.stands)
+        const img = imageCache.current[resolveImageUrl(t.scrollingImage.url)]
+        drawScrollingImage(ctx, img, t.scrollingImage)
       }
 
       // draw racing line image
@@ -291,10 +283,6 @@ const TrackCanvas = ({
       drawScattered(ctx, t.foregroundAssets, imageCache, 99,
         sel?.type === 'asset' && sel.listKey === 'foregroundAssets' ? sel.id : null,
         'foreground', t.racingLine)
-
-      if (t.overlayForeground?.url) {
-        drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayForeground.url)])
-      }
 
       if (sel?.type === 'asset') {
         const listKey = sel.listKey

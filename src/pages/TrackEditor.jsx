@@ -9,92 +9,7 @@ import { sanitizeDeep, isValidHttpUrl } from '../lib/sanitize'
 import { spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
 import { preloadCarImages } from '../lib/racerRenderer'
 import { getTwitchUser } from '../lib/twitch'
-
-const SlotInput = ({ label, slot, onUpdate, onClear }) => {
-  const [local, setLocal] = useState(slot?.url ?? '')
-
-  useState(() => { setLocal(slot?.url ?? '') }, [slot?.url])
-
-  useState(() => {
-    if (local === (slot?.url ?? '')) return
-    const timer = setTimeout(() => {
-      if (!local) { onClear(); return }
-      onUpdate({ url: local })
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [local])
-
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-xs text-gray-400">{label}</span>
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={local}
-          onChange={(e) => setLocal(e.target.value)}
-          placeholder="https://..."
-          className="flex-1 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-        />
-        {slot?.url && (
-          <button onClick={onClear} className="text-xs text-red-400 hover:text-red-300 transition-colors">✕</button>
-        )}
-      </div>
-    </label>
-  )
-}
-
-const StandsForm = ({ stands, onUpdate, onClear }) => {
-  const [local, setLocal] = useState(stands?.url ?? '')
-
-  useState(() => { setLocal(stands?.url ?? '') }, [stands?.url])
-
-  useState(() => {
-    if (local === (stands?.url ?? '')) return
-    const timer = setTimeout(() => {
-      if (!local) { onClear(); return }
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => onUpdate({ url: local, dim: [img.naturalWidth, img.naturalHeight], scale: 0.571 })
-      img.src = local
-      if (!img.complete) onUpdate({ url: local, dim: stands?.dim ?? [1100, 800], scale: stands?.scale ?? 0.571 })
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [local])
-
-  return (
-    <div className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1">
-        <span className="text-xs text-gray-400">Stands Image URL</span>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={local}
-            onChange={(e) => setLocal(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-          />
-          {stands?.url && (
-            <button onClick={onClear} className="text-xs text-red-400 hover:text-red-300 transition-colors">✕</button>
-          )}
-        </div>
-      </label>
-      {stands?.url && (
-        <label className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">Scale</span>
-            <span className="text-xs text-gray-500">{Math.round((stands.scale ?? 0.571) * 100)}%</span>
-          </div>
-          <input
-            type="range" min={0.1} max={2} step={0.05}
-            value={stands.scale ?? 0.571}
-            onChange={(e) => onUpdate({ ...stands, scale: parseFloat(e.target.value) })}
-            className="w-full accent-purple-500"
-          />
-        </label>
-      )}
-    </div>
-  )
-}
+import RoadDetailsPanel from '../components/track-editor/RoadDetailsPanel'
 
 const TrackEditor = ({ mode }) => {
   const { trackName } = useParams()
@@ -337,38 +252,17 @@ const TrackEditor = ({ mode }) => {
               racerAvatars={racerAvatars}
               visibleModifierKey={visibleModifierKey}
             />
-
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 flex flex-col gap-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Road</h3>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="roadType" value="rainbow"
-                    checked={track.road.type === 'rainbow'}
-                    onChange={() => setRoad({ type: 'rainbow' })}
-                    className="accent-purple-500"
-                  />
-                  <span className="text-sm text-white">Rainbow</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="roadType" value="solid"
-                    checked={track.road.type === 'solid'}
-                    onChange={() => setRoad({ type: 'solid' })}
-                    className="accent-purple-500"
-                  />
-                  <span className="text-sm text-white">Solid Color</span>
-                </label>
-                {track.road.type === 'solid' && (
-                  <input type="color" value={track.road.color ?? '#888888'}
-                    onChange={(e) => setRoad({ color: e.target.value })}
-                    className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
-                  />
-                )}
-              </div>
-            </div>
           </div>
 
           {/* Right panel */}
-          <div className="flex flex-col gap-6 pr-1">
+          <div className="flex flex-col gap-3 pr-1">
+
+            <RoadDetailsPanel
+              track={track}
+              setRoad={setRoad}
+              setSlot={setSlot}
+              clearSlot={clearSlot}
+            />
 
             {/* Racing line */}
             <RacingLinePanel
