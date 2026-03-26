@@ -30,10 +30,15 @@ const DebouncedUrlInput = ({ value, onChange }) => {
 const SubSection = ({ label, modifierCollapsed, toggleModifier, children  }) => {
   const collapsed = modifierCollapsed[label] ?? true
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col">
         <div
           onClick={() => toggleModifier(label)}
-          className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
+          className={`flex items-center justify-between rounded-lg px-3 py-2 
+                    border cursor-pointer 
+                    transition-colors select-none 
+                    ${collapsed ? 
+                      'bg-gray-700/50 border-gray-600 hover:border-gray-400' : 
+                      'bg-purple-900/40 border border-purple-600 rounded-b-none hover:border-purple-500'}`}
         >
           <Tooltip text={SUBSECTION_TOOLTIPS[label]}>
             <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label} <span className="ml-1 text-gray-500 text-xs">ⓘ</span></span>
@@ -41,7 +46,7 @@ const SubSection = ({ label, modifierCollapsed, toggleModifier, children  }) => 
           <span className="text-xs text-gray-400">{collapsed ? '▼' : '▲'}</span>
         </div>
       {!collapsed && (
-        <div className="px-3 py-3 bg-gray-800/60 border border-gray-600 rounded-lg flex flex-col gap-3">
+        <div className="px-3 py-3 border border-purple-600 bg-purple-950/30 rounded-t-none rounded-lg flex flex-col gap-3">
           {children}
         </div>
       )}
@@ -123,7 +128,7 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
                   </button>
                 </div>
                 {isSelected && (
-                  <div className="rounded-b-lg border border-t-0 border-purple-600 bg-gray-800/60 px-3 py-3">
+                  <div className="rounded-b-lg border border-t-0 border-purple-600 bg-purple-950/30 px-3 py-3">
                     <RacingLineForm
                       selection={selection}
                       racingLine={racingLine}

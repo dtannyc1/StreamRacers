@@ -40,16 +40,19 @@ const Row = ({ children }) => (
 const SubSection = ({ label, children, defaultCollapsed = true }) => {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col">
       <div
         onClick={() => setCollapsed(prev => !prev)}
-        className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
+        className={`flex items-center justify-between rounded-lg px-3 py-2 
+                  bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 
+                  transition-colors select-none 
+                  ${collapsed ? '' : 'bg-purple-900/40 border border-purple-600 hover:border-purple-500 rounded-b-none'}`}
       >
         <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label}</span>
         <span className="text-xs text-gray-400">{collapsed ? '▼' : '▲'}</span>
       </div>
       {!collapsed && (
-        <div className="px-3 py-3 bg-gray-800/60 border border-gray-600 rounded-lg flex flex-col gap-3">
+        <div className="px-3 py-3 border border-purple-600 bg-purple-950/30 rounded-lg rounded-t-none flex flex-col gap-3">
           {children}
         </div>
       )}
@@ -105,7 +108,7 @@ const RoadDetailsPanel = ({ track, setRoad, setSlot, clearSlot }) => {
         <div className="flex flex-col gap-1 pl-1">
 
           {/* Road Type */}
-          <SubSection label="Road Type" defaultCollapsed={false}>
+          <SubSection label="Road Type">
             <div className="flex flex-col gap-2">
               {['rainbow', 'solid', 'image'].map(type => (
                 <label key={type} className="flex items-center gap-2 cursor-pointer">

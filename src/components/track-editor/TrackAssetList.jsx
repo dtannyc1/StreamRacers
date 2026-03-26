@@ -95,7 +95,7 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
                     </div>
 
                     {isSelected && (
-                      <div className="rounded-b-lg border border-t-0 border-purple-600 bg-gray-800/60 px-3 py-3">
+                      <div className="rounded-b-lg border border-t-0 border-purple-600 bg-purple-950/30 px-3 py-3">
                         <TrackAssetForm
                           asset={asset}
                           listKey={listKey}
