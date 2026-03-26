@@ -388,31 +388,15 @@ const TrackEditor = ({ mode }) => {
             </div>
 
             {/* Racing line */}
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
-              <RacingLinePanel
-                racingLine={track.racingLine}
-                selection={selection}
-                onSelect={setSelection}
-                onUpdateRacingLine={updateRacingLine}
-                onAddModifier={handleAddModifier}
-                onRemoveModifier={handleRemoveModifier}
-              />
-            </div>
-
-            {/* Racing line form */}
-            {(selection?.type === 'racingLine' || selection?.type === 'modifier') && (
-              <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-                  {selection.type === 'racingLine' ? 'Edit Racing Line' : 'Edit Modifier'}
-                </h3>
-                <RacingLineForm
-                  selection={selection}
-                  racingLine={track.racingLine}
-                  onUpdateRacingLine={updateRacingLine}
-                  onUpdateModifier={updateModifier}
-                />
-              </div>
-            )}
+            <RacingLinePanel
+              racingLine={track.racingLine}
+              selection={selection}
+              onSelect={setSelection}
+              onUpdateRacingLine={updateRacingLine}
+              onAddModifier={handleAddModifier}
+              onRemoveModifier={handleRemoveModifier}
+              onUpdateModifier={updateModifier}
+            />
 
             {/* Asset lists */}
             <TrackAssetList

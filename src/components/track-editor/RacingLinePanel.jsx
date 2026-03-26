@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
+import RacingLineForm from './RacingLineForm'
 
 const DebouncedUrlInput = ({ value, onChange }) => {
   const [local, setLocal] = useState(value)
-
   useEffect(() => { setLocal(value) }, [value])
-
   useEffect(() => {
     if (local === value) return
     const timer = setTimeout(() => onChange(local), 600)
     return () => clearTimeout(timer)
   }, [local])
-
   return (
     <input
       type="text"
@@ -23,52 +21,92 @@ const DebouncedUrlInput = ({ value, onChange }) => {
   )
 }
 
-const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRemove }) => (
-  <div className="flex flex-col gap-2">
-    <div className="flex items-center justify-between">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        {modifierKey === 'startModifiers' ? 'Start Modifiers' : 'Finish Modifiers'}
-      </p>
-      <button
-        onClick={() => onAdd(modifierKey)}
-        className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
-      >
-        + Add
-      </button>
-    </div>
+const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRemove, onUpdate, racingLine }) => {
+  const [collapsed, setCollapsed] = useState(true)
+  const label = modifierKey === 'startModifiers' ? 'Start Modifiers' : 'Finish Modifiers'
 
-    {modifiers.length === 0 && (
-      <p className="text-xs text-gray-500">No modifiers yet.</p>
-    )}
+  const handleClick = (id) => {
+    if (selection?.type === 'modifier' && selection.id === id && selection.modifierKey === modifierKey) {
+      onSelect(null)
+    } else {
+      onSelect({ type: 'modifier', id, modifierKey })
+    }
+  }
 
+  return (
     <div className="flex flex-col gap-1">
-      {modifiers.map((mod, index) => (
-        <div
-          key={mod.id}
-          onClick={() => onSelect(mod.id, modifierKey)}
-          className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer transition-colors ${
-            selection?.type === 'modifier' && selection.id === mod.id && selection.modifierKey === modifierKey
-              ? 'bg-purple-900/40 border border-purple-600'
-              : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
-          }`}
-        >
-          <div>
-            <p className="text-sm text-white">{mod.name || `Modifier ${index + 1}`}</p>
-            <p className="text-xs text-gray-400 truncate max-w-[160px]">
-              {mod.url ? (() => { try { return new URL(mod.url).hostname } catch { return mod.url } })() : 'No URL'}
-            </p>
-          </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); onRemove(modifierKey, mod.id) }}
-            className="text-xs text-red-400 hover:text-red-300 transition-colors"
-          >
-            ✕
-          </button>
+      <div
+        onClick={() => setCollapsed(prev => !prev)}
+        className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label}</span>
+          <span className="text-xs text-gray-500">{modifiers.length}</span>
         </div>
-      ))}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={(e) => { e.stopPropagation(); onAdd(modifierKey) }}
+            className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            + Add
+          </button>
+          <span className="text-xs text-gray-400">{collapsed ? '▼' : '▲'}</span>
+        </div>
+      </div>
+
+      {!collapsed && (
+        <div className="flex flex-col gap-1 pl-1">
+          {modifiers.length === 0 && (
+            <p className="text-xs text-gray-500 px-2 py-1">No modifiers yet.</p>
+          )}
+          {modifiers.map((mod, index) => {
+            const isSelected = selection?.type === 'modifier' &&
+              selection.id === mod.id &&
+              selection.modifierKey === modifierKey
+            return (
+              <div key={mod.id} className="flex flex-col">
+                <div
+                  onClick={() => handleClick(mod.id)}
+                  className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer transition-colors ${
+                    isSelected
+                      ? 'bg-purple-900/40 border border-purple-600 rounded-b-none'
+                      : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm text-white">{mod.name || `Modifier ${index + 1}`}</p>
+                    <p className="text-xs text-gray-400 truncate max-w-[160px]">
+                      {mod.url
+                        ? (() => { try { return new URL(mod.url).hostname } catch { return mod.url } })()
+                        : 'No URL'
+                      }
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRemove(modifierKey, mod.id) }}
+                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+                {isSelected && (
+                  <div className="rounded-b-lg border border-t-0 border-purple-600 bg-gray-800/60 px-3 py-3">
+                    <RacingLineForm
+                      selection={selection}
+                      racingLine={racingLine}
+                      onUpdateRacingLine={() => {}}
+                      onUpdateModifier={onUpdate}
+                    />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
-  </div>
-)
+  )
+}
 
 const RacingLinePanel = ({
   racingLine,
@@ -77,8 +115,13 @@ const RacingLinePanel = ({
   onUpdateRacingLine,
   onAddModifier,
   onRemoveModifier,
+  onUpdateModifier,
 }) => {
-  const isSelected = selection?.type === 'racingLine'
+  const [sectionCollapsed, setSectionCollapsed] = useState(true)
+  const isLineSelected = selection?.type === 'racingLine'
+
+  const crossX = Math.round((racingLine.p1[0] + racingLine.p2[0]) / 2)
+  const roadHeight = Math.round(Math.abs(racingLine.p2[1] - racingLine.p1[1]))
 
   const handleUrlChange = (url) => {
     onUpdateRacingLine({ url })
@@ -89,55 +132,78 @@ const RacingLinePanel = ({
     img.src = resolveImageUrl(url)
   }
 
-  const crossX = Math.round((racingLine.p1[0] + racingLine.p2[0]) / 2)
-  const roadHeight = Math.round(Math.abs(racingLine.p2[1] - racingLine.p1[1]))
-
   return (
-    <div className="flex flex-col gap-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Racing Line</h3>
+    <div className="flex flex-col gap-1">
 
-      {/* Main racing line slot — click to enter editing mode */}
+      {/* Section header */}
       <div
-        onClick={() => onSelect({ type: 'racingLine' })}
-        className={`flex flex-col gap-3 rounded-lg p-3 cursor-pointer border transition-colors ${
-          isSelected
-            ? 'border-yellow-500 bg-yellow-900/20'
-            : 'border-gray-700 hover:border-gray-500'
-        }`}
+        onClick={() => setSectionCollapsed(prev => !prev)}
+        className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
       >
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-yellow-400">Line Segment + Image</p>
-          {isSelected && <p className="text-xs text-yellow-400/60">editing</p>}
-        </div>
-
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-          <DebouncedUrlInput value={racingLine.url} onChange={handleUrlChange} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-          <span>Crossing X: <span className="text-white">{crossX}</span></span>
-          <span>Road Height: <span className="text-white">{roadHeight}px</span></span>
-        </div>
+        <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">Start/Finish Line Details</span>
+        <span className="text-xs text-gray-400">{sectionCollapsed ? '▼' : '▲'}</span>
       </div>
 
-      {/* Modifier lists */}
-      <ModifierList
-        modifiers={racingLine.startModifiers}
-        modifierKey="startModifiers"
-        selection={selection}
-        onSelect={(id, modifierKey) => onSelect({ type: 'modifier', id, modifierKey })}
-        onAdd={onAddModifier}
-        onRemove={onRemoveModifier}
-      />
+      {!sectionCollapsed && (
+        <div className="flex flex-col gap-1 pl-1">
 
-      <ModifierList
-        modifiers={racingLine.finishModifiers}
-        modifierKey="finishModifiers"
-        selection={selection}
-        onSelect={(id, modifierKey) => onSelect({ type: 'modifier', id, modifierKey })}
-        onAdd={onAddModifier}
-        onRemove={onRemoveModifier}
-      />
+          {/* Line segment + image row */}
+          <div className="flex flex-col">
+            <div
+              onClick={() => onSelect(isLineSelected ? null : { type: 'racingLine' })}
+              className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer transition-colors ${
+                isLineSelected
+                  ? 'bg-yellow-900/20 border border-yellow-500 rounded-b-none'
+                  : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
+              }`}
+            >
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-300">Line Segment + Image*</p>
+              </div>
+              <span className="text-xs text-gray-400">{isLineSelected ? '▲' : '▼'}</span>
+            </div>
+
+            {isLineSelected && (
+              <div className="rounded-b-lg border border-t-0 border-yellow-500 bg-gray-800/60 px-3 py-3 flex flex-col gap-3">
+                <label className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
+                  <span className="text-xs text-gray-400">Image URL</span>
+                  <DebouncedUrlInput value={racingLine.url} onChange={handleUrlChange} />
+                </label>
+                <RacingLineForm
+                  selection={selection}
+                  racingLine={racingLine}
+                  onUpdateRacingLine={onUpdateRacingLine}
+                  onUpdateModifier={onUpdateModifier}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Modifier lists */}
+          <ModifierList
+            modifiers={racingLine.startModifiers}
+            modifierKey="startModifiers"
+            selection={selection}
+            onSelect={onSelect}
+            onAdd={onAddModifier}
+            onRemove={onRemoveModifier}
+            onUpdate={onUpdateModifier}
+            racingLine={racingLine}
+          />
+
+          <ModifierList
+            modifiers={racingLine.finishModifiers}
+            modifierKey="finishModifiers"
+            selection={selection}
+            onSelect={onSelect}
+            onAdd={onAddModifier}
+            onRemove={onRemoveModifier}
+            onUpdate={onUpdateModifier}
+            racingLine={racingLine}
+          />
+
+        </div>
+      )}
     </div>
   )
 }
