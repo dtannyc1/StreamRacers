@@ -152,6 +152,7 @@ const TrackCanvas = ({
   onSelectAsset,
   activeRacers,
   racerAvatars,
+  visibleModifierKey,
 }) => {
   const canvasRef = useRef(null)
   const imageCache = useRef({})
@@ -165,11 +166,13 @@ const TrackCanvas = ({
   const didDrag = useRef(false)
   const tRef = useRef(0)
   const scatterPositions = useRef({})
+  const visibleModifierKeyRef = useRef(visibleModifierKey)
 
   useEffect(() => { trackRef.current = track }, [track])
   useEffect(() => { selectionRef.current = selection }, [selection])
   useEffect(() => { activeRacersRef.current = activeRacers }, [activeRacers])
   useEffect(() => { racerAvatarsRef.current = racerAvatars }, [racerAvatars])
+  useEffect(() => { visibleModifierKeyRef.current = visibleModifierKey }, [visibleModifierKey])
 
   // preload track images
   useEffect(() => {
@@ -263,17 +266,21 @@ const TrackCanvas = ({
         ctx.drawImage(rlImg, t.racingLine.x - rlW / 2, t.racingLine.y - rlH / 2, rlW, rlH)
       }
 
-      // start modifiers
-      t.racingLine.startModifiers.forEach(mod => {
-        const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
-        drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id)
-      })
+      // start modifiers — only draw if startModifiers is the visible key or neither is expanded
+      if (visibleModifierKeyRef.current === 'startModifiers' || visibleModifierKeyRef.current === null) {
+        t.racingLine.startModifiers.forEach(mod => {
+          const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
+          drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id && sel.modifierKey === 'startModifiers')
+        })
+      }
 
-      // finish modifiers
-      t.racingLine.finishModifiers.forEach(mod => {
-        const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
-        drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id)
-      })
+      // finish modifiers — only draw if finishModifiers is the visible key or neither is expanded
+      if (visibleModifierKeyRef.current === 'finishModifiers') {
+        t.racingLine.finishModifiers.forEach(mod => {
+          const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
+          drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id && sel.modifierKey === 'finishModifiers')
+        })
+      }
 
       // draw active racers
       activeRacersRef.current.forEach(racer => {

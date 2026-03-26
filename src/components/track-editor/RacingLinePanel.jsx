@@ -21,8 +21,7 @@ const DebouncedUrlInput = ({ value, onChange }) => {
   )
 }
 
-const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRemove, onUpdate, racingLine }) => {
-  const [collapsed, setCollapsed] = useState(true)
+const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRemove, onUpdate, racingLine, collapsed, onToggle }) => {
   const label = modifierKey === 'startModifiers' ? 'Start Modifiers' : 'Finish Modifiers'
 
   const handleClick = (id) => {
@@ -36,7 +35,7 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
   return (
     <div className="flex flex-col gap-1">
       <div
-        onClick={() => setCollapsed(prev => !prev)}
+        onClick={onToggle}
         className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
       >
         <div className="flex items-center gap-2">
@@ -116,12 +115,36 @@ const RacingLinePanel = ({
   onAddModifier,
   onRemoveModifier,
   onUpdateModifier,
+  onVisibleModifierKeyChange,
 }) => {
   const [sectionCollapsed, setSectionCollapsed] = useState(true)
+  const [modifierCollapsed, setModifierCollapsed] = useState({
+    startModifiers: true,
+    finishModifiers: true,
+  })
   const isLineSelected = selection?.type === 'racingLine'
 
-  const crossX = Math.round((racingLine.p1[0] + racingLine.p2[0]) / 2)
-  const roadHeight = Math.round(Math.abs(racingLine.p2[1] - racingLine.p1[1]))
+  useEffect(() => {
+    const visibleKey = Object.entries(modifierCollapsed).find(([_, v]) => !v)?.[0] ?? null
+    onVisibleModifierKeyChange?.(visibleKey)
+  }, [modifierCollapsed])
+
+  const toggleModifier = (modifierKey) => {
+    setModifierCollapsed(prev => ({
+      startModifiers: true,
+      finishModifiers: true,
+      [modifierKey]: !prev[modifierKey],
+    }))
+  }
+
+  const handleSectionToggle = () => {
+    setSectionCollapsed(prev => {
+      if (!prev) {
+        setModifierCollapsed({ startModifiers: true, finishModifiers: true })
+      }
+      return !prev
+    })
+  }
 
   const handleUrlChange = (url) => {
     onUpdateRacingLine({ url })
@@ -137,7 +160,7 @@ const RacingLinePanel = ({
 
       {/* Section header */}
       <div
-        onClick={() => setSectionCollapsed(prev => !prev)}
+        onClick={handleSectionToggle}
         className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
       >
         <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">Start/Finish Line Details</span>
@@ -183,6 +206,8 @@ const RacingLinePanel = ({
           <ModifierList
             modifiers={racingLine.startModifiers}
             modifierKey="startModifiers"
+            collapsed={modifierCollapsed.startModifiers}
+            onToggle={() => toggleModifier('startModifiers')}
             selection={selection}
             onSelect={onSelect}
             onAdd={onAddModifier}
@@ -194,6 +219,8 @@ const RacingLinePanel = ({
           <ModifierList
             modifiers={racingLine.finishModifiers}
             modifierKey="finishModifiers"
+            collapsed={modifierCollapsed.finishModifiers}
+            onToggle={() => toggleModifier('finishModifiers')}
             selection={selection}
             onSelect={onSelect}
             onAdd={onAddModifier}

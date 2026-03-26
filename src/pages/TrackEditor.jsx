@@ -4,11 +4,9 @@ import { useKVStore } from '../context/KVStoreContext'
 import { useTrackEditor } from '../components/track-editor/useTrackEditor'
 import TrackCanvas from '../components/track-editor/TrackCanvas'
 import TrackAssetList from '../components/track-editor/TrackAssetList'
-import TrackAssetForm from '../components/track-editor/TrackAssetForm'
 import RacingLinePanel from '../components/track-editor/RacingLinePanel'
-import RacingLineForm from '../components/track-editor/RacingLineForm'
 import { sanitizeDeep, isValidHttpUrl } from '../lib/sanitize'
-import { pickRandomRacer, spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
+import { spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
 import { preloadCarImages } from '../lib/racerRenderer'
 import { getTwitchUser } from '../lib/twitch'
 
@@ -106,6 +104,7 @@ const TrackEditor = ({ mode }) => {
   const [selection, setSelection] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [saved, setSaved] = useState(false)
+  const [visibleModifierKey, setVisibleModifierKey] = useState(null)
   const [activeRacers, setActiveRacers] = useState([])
   const [racerAvatars, setRacerAvatars] = useState({})
   const activeRacersRef = useRef(activeRacers)
@@ -336,6 +335,7 @@ const TrackEditor = ({ mode }) => {
               onSelectAsset={handleSelectAsset}
               activeRacers={activeRacers}
               racerAvatars={racerAvatars}
+              visibleModifierKey={visibleModifierKey}
             />
 
             <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 flex flex-col gap-4">
@@ -396,6 +396,7 @@ const TrackEditor = ({ mode }) => {
               onAddModifier={handleAddModifier}
               onRemoveModifier={handleRemoveModifier}
               onUpdateModifier={updateModifier}
+              onVisibleModifierKeyChange={setVisibleModifierKey}
             />
 
             {/* Asset lists */}
