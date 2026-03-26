@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
+import Tooltip from '../ToolTip'
+
+const SUBSECTION_TOOLTIPS = {
+  'Road Type': 'Choose between a colorful rainbow road, a solid color road, or a custom image road.',
+  'Scrolling Image': 'An optional image that scrolls along the road to create a sense of speed. Often used for road markers.',
+}
 
 const DebouncedUrlInput = ({ value, onChange }) => {
   const [local, setLocal] = useState(value ?? '')
@@ -48,7 +54,9 @@ const SubSection = ({ label, children, defaultCollapsed = true }) => {
                   transition-colors select-none 
                   ${collapsed ? '' : 'bg-purple-900/40 border border-purple-600 hover:border-purple-500 rounded-b-none'}`}
       >
-        <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label}</span>
+        <Tooltip text={SUBSECTION_TOOLTIPS[label]}>
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label} <span className="ml-1 text-gray-500 text-xs">ⓘ</span></span>
+        </Tooltip>
         <span className="text-xs text-gray-400">{collapsed ? '▼' : '▲'}</span>
       </div>
       {!collapsed && (
