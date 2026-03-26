@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 
-const Tooltip = ({ text, children }) => {
+const Tooltip = ({ text, children, options={translation: "translate(0%, -100%)"} }) => {
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
@@ -32,7 +32,7 @@ const Tooltip = ({ text, children }) => {
             position: 'fixed',
             top: pos.top,
             left: pos.left,
-            transform: 'translate(0%, -100%)',
+            transform: options.translation,
             zIndex: 9999,
           }}
           className="w-56 rounded-lg bg-gray-900 border border-gray-600 px-3 py-2 text-xs text-gray-300 shadow-xl pointer-events-none"

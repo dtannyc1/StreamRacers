@@ -10,6 +10,7 @@ import { spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/rac
 import { preloadCarImages } from '../lib/racerRenderer'
 import { getTwitchUser } from '../lib/twitch'
 import RoadDetailsPanel from '../components/track-editor/RoadDetailsPanel'
+import Tooltip from '../components/ToolTip'
 
 const TrackEditor = ({ mode }) => {
   const { trackName } = useParams()
@@ -220,13 +221,18 @@ const TrackEditor = ({ mode }) => {
           ) : (
             <div className="flex items-center gap-3">
               {saveError && <p className="text-sm text-red-400">{saveError}</p>}
-              <button
-                onClick={handleAddRacer}
-                disabled={!customRacers || Object.keys(customRacers).length === 0}
-                className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              <Tooltip
+                text="Render one of the custom racers you've created"
+                options={{translation: "translate(-50%, 100%)"}}
               >
-                + Add Racer
-              </button>
+                <button
+                  onClick={handleAddRacer}
+                  disabled={!customRacers || Object.keys(customRacers).length === 0}
+                  className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  + Add Racer
+                </button>
+              </Tooltip>
               <button
                 onClick={handleSave}
                 className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
