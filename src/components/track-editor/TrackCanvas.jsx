@@ -20,7 +20,7 @@ const drawRoad = (ctx, road, racingLine, imageCache) => {
   if (road.type === 'rainbow') {
     const numDiv = 10
     ctx.fillStyle = 'black'
-    ctx.fillRect(0, top - height * 2 / numDiv, CANVAS_W, height + height * 2 / numDiv)
+    ctx.fillRect(0, top - height * 2 / numDiv, CANVAS_W, height + height * 4 / numDiv)
     for (let i = 0; i < numDiv; i++) {
       ctx.fillStyle = `hsl(${Math.floor(i * 360 / numDiv)},100%,50%)`
       ctx.fillRect(0, top + height * (numDiv - i - 1) / numDiv, CANVAS_W, height / numDiv)
@@ -313,8 +313,8 @@ const TrackCanvas = ({
       }
 
       if (isRacingLineSelected) {
-        drawLineEditor(ctx, t.racingLine)
         drawRacingLineImage(ctx, rlImg, t.racingLine, true)
+        drawLineEditor(ctx, t.racingLine)
       }
 
       animRef.current = requestAnimationFrame(draw)
