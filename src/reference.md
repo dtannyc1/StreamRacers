@@ -64,16 +64,35 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 
 # Notes for next changes:
 
-## Immediate changes
+## General changes
 - allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
 
-## Track stuff
-- Need few layers, background, main, foreground
-- main should have few requirements
-  - start line, finish line, main image minimum
-  - if moving main elements, need an option to repeat (ie dashed lines on road)
-- background and foreground assets should have min/max sizes
-- default track should exist and should be the background of vehicle uploader for scale. The main element of the default track should not be editable, but users should be able to upload background and foreground elements.
-- users should be able to adjust the default track.
+## Racer
+- Rename section to "User Specific Vehicles"
+- Add default Vehicle
+  - All streamers should have a default racer for all users
+  - This default should be used instead of the static one coded in?
+  - Allow for color changing options
+- Add global vehicles
+  - Allows for some vehicles to be used for all users
+    - Add limiting options for global vehicles
+    - Add percentage chance of change
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
+
+## Track 
+- Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent.
+- Add toggle to enable/disable track scrolling
+  - need to change how bg/fg assets are rendered...
+  - need to fix scrolling asset rendering
   
+## Settings
+- Add default settings
+  - Default Track Name
+  - Race Join words
+  - Race Start words
+  - Boost? Boost Words?
+
+## Instructions
+- Add js file that can be easily added to StreamElements?
+  - See if a direct import is possible...
+  - Need to figure out how to add automated dropdown menu options for track selection

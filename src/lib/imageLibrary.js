@@ -18,6 +18,28 @@ export const IMAGE_LIBRARY = {
       url: 'https://www.dropbox.com/scl/fi/avrdy5jpr2ky0xfo5h6bz/default_wheel2.png?rlkey=msdi1tkjhoot006z1n0cuic5u&st=2ess0iq9&dl=0',
     },
   ],
+  tracks: [
+    {
+      id: 'racing-line',
+      name: 'Racing Line',
+      url: 'https://www.dropbox.com/scl/fi/sp4n0j6iqbnpnme05zhak/racing_line.png?rlkey=rf7wga3zfnrz52z57i258vi1y&st=ihj77zey&dl=0',
+    },
+    {
+      id: 'start-flag',
+      name: 'Start Flag',
+      url: 'https://www.dropbox.com/scl/fi/6sy2a7pvvuwkozk3tvbvq/start_flag.png?rlkey=ik03ay7yv17yv5bxk1lvhl39q&st=7juc9iog&dl=0',
+    },
+    {
+      id: 'finish-flag',
+      name: 'Finish Flag',
+      url: 'https://www.dropbox.com/scl/fi/elrpti7l28qro4soudskz/finish_flag.png?rlkey=q8jsg8bt2dqzhqpj2litbmcsf&st=3iu1dexx&dl=0',
+    },
+    {
+      id: 'scrolling-lines',
+      name: 'Scrolling Lines',
+      url: 'https://www.dropbox.com/scl/fi/hn1n4o8t737jxiqs5wse4/yellow_lines.png?rlkey=gxe6nyrkb66sblqoj1t8fnndr&st=83eyetrq&dl=0',
+    }
+  ]
 }
 
 export const getImageUrl = (id) => {

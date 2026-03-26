@@ -4,99 +4,13 @@ import { useKVStore } from '../context/KVStoreContext'
 import { useTrackEditor } from '../components/track-editor/useTrackEditor'
 import TrackCanvas from '../components/track-editor/TrackCanvas'
 import TrackAssetList from '../components/track-editor/TrackAssetList'
-import TrackAssetForm from '../components/track-editor/TrackAssetForm'
 import RacingLinePanel from '../components/track-editor/RacingLinePanel'
-import RacingLineForm from '../components/track-editor/RacingLineForm'
 import { sanitizeDeep, isValidHttpUrl } from '../lib/sanitize'
-import { pickRandomRacer, spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
+import { spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
 import { preloadCarImages } from '../lib/racerRenderer'
 import { getTwitchUser } from '../lib/twitch'
-
-const SlotInput = ({ label, slot, onUpdate, onClear }) => {
-  const [local, setLocal] = useState(slot?.url ?? '')
-
-  useState(() => { setLocal(slot?.url ?? '') }, [slot?.url])
-
-  useState(() => {
-    if (local === (slot?.url ?? '')) return
-    const timer = setTimeout(() => {
-      if (!local) { onClear(); return }
-      onUpdate({ url: local })
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [local])
-
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-xs text-gray-400">{label}</span>
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={local}
-          onChange={(e) => setLocal(e.target.value)}
-          placeholder="https://..."
-          className="flex-1 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-        />
-        {slot?.url && (
-          <button onClick={onClear} className="text-xs text-red-400 hover:text-red-300 transition-colors">✕</button>
-        )}
-      </div>
-    </label>
-  )
-}
-
-const StandsForm = ({ stands, onUpdate, onClear }) => {
-  const [local, setLocal] = useState(stands?.url ?? '')
-
-  useState(() => { setLocal(stands?.url ?? '') }, [stands?.url])
-
-  useState(() => {
-    if (local === (stands?.url ?? '')) return
-    const timer = setTimeout(() => {
-      if (!local) { onClear(); return }
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => onUpdate({ url: local, dim: [img.naturalWidth, img.naturalHeight], scale: 0.571 })
-      img.src = local
-      if (!img.complete) onUpdate({ url: local, dim: stands?.dim ?? [1100, 800], scale: stands?.scale ?? 0.571 })
-    }, 600)
-    return () => clearTimeout(timer)
-  }, [local])
-
-  return (
-    <div className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1">
-        <span className="text-xs text-gray-400">Stands Image URL</span>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={local}
-            onChange={(e) => setLocal(e.target.value)}
-            placeholder="https://..."
-            className="flex-1 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-          />
-          {stands?.url && (
-            <button onClick={onClear} className="text-xs text-red-400 hover:text-red-300 transition-colors">✕</button>
-          )}
-        </div>
-      </label>
-      {stands?.url && (
-        <label className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">Scale</span>
-            <span className="text-xs text-gray-500">{Math.round((stands.scale ?? 0.571) * 100)}%</span>
-          </div>
-          <input
-            type="range" min={0.1} max={2} step={0.05}
-            value={stands.scale ?? 0.571}
-            onChange={(e) => onUpdate({ ...stands, scale: parseFloat(e.target.value) })}
-            className="w-full accent-purple-500"
-          />
-        </label>
-      )}
-    </div>
-  )
-}
+import RoadDetailsPanel from '../components/track-editor/RoadDetailsPanel'
+import Tooltip from '../components/ToolTip'
 
 const TrackEditor = ({ mode }) => {
   const { trackName } = useParams()
@@ -106,6 +20,7 @@ const TrackEditor = ({ mode }) => {
   const [selection, setSelection] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [saved, setSaved] = useState(false)
+  const [visibleModifierKey, setVisibleModifierKey] = useState(null)
   const [activeRacers, setActiveRacers] = useState([])
   const [racerAvatars, setRacerAvatars] = useState({})
   const activeRacersRef = useRef(activeRacers)
@@ -306,13 +221,18 @@ const TrackEditor = ({ mode }) => {
           ) : (
             <div className="flex items-center gap-3">
               {saveError && <p className="text-sm text-red-400">{saveError}</p>}
-              <button
-                onClick={handleAddRacer}
-                disabled={!customRacers || Object.keys(customRacers).length === 0}
-                className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              <Tooltip
+                text="Render one of the custom racers you've created"
+                options={{translation: "translate(-50%, 100%)"}}
               >
-                + Add Racer
-              </button>
+                <button
+                  onClick={handleAddRacer}
+                  disabled={!customRacers || Object.keys(customRacers).length === 0}
+                  className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  + Add Racer
+                </button>
+              </Tooltip>
               <button
                 onClick={handleSave}
                 className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
@@ -336,83 +256,31 @@ const TrackEditor = ({ mode }) => {
               onSelectAsset={handleSelectAsset}
               activeRacers={activeRacers}
               racerAvatars={racerAvatars}
+              visibleModifierKey={visibleModifierKey}
             />
-
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 flex flex-col gap-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Road</h3>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="roadType" value="rainbow"
-                    checked={track.road.type === 'rainbow'}
-                    onChange={() => setRoad({ type: 'rainbow' })}
-                    className="accent-purple-500"
-                  />
-                  <span className="text-sm text-white">Rainbow</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="roadType" value="solid"
-                    checked={track.road.type === 'solid'}
-                    onChange={() => setRoad({ type: 'solid' })}
-                    className="accent-purple-500"
-                  />
-                  <span className="text-sm text-white">Solid Color</span>
-                </label>
-                {track.road.type === 'solid' && (
-                  <input type="color" value={track.road.color ?? '#888888'}
-                    onChange={(e) => setRoad({ color: e.target.value })}
-                    className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
-                  />
-                )}
-              </div>
-            </div>
           </div>
 
           {/* Right panel */}
-          <div className="flex flex-col gap-6 overflow-y-auto max-h-[800px] pr-1">
+          <div className="flex flex-col gap-3 pr-1">
 
-            {/* Slot images */}
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 flex flex-col gap-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Slot Images</h3>
-              <SlotInput label="Overlay Background" slot={track.overlayBackground}
-                onUpdate={(v) => setSlot('overlayBackground', v)}
-                onClear={() => clearSlot('overlayBackground')} />
-              <SlotInput label="Overlay Foreground" slot={track.overlayForeground}
-                onUpdate={(v) => setSlot('overlayForeground', v)}
-                onClear={() => clearSlot('overlayForeground')} />
-              <SlotInput label="Scrolling Image" slot={track.scrollingImage}
-                onUpdate={(v) => setSlot('scrollingImage', v)}
-                onClear={() => clearSlot('scrollingImage')} />
-              <StandsForm stands={track.stands}
-                onUpdate={(v) => setSlot('stands', v)}
-                onClear={() => clearSlot('stands')} />
-            </div>
+            <RoadDetailsPanel
+              track={track}
+              setRoad={setRoad}
+              setSlot={setSlot}
+              clearSlot={clearSlot}
+            />
 
             {/* Racing line */}
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
-              <RacingLinePanel
-                racingLine={track.racingLine}
-                selection={selection}
-                onSelect={setSelection}
-                onUpdateRacingLine={updateRacingLine}
-                onAddModifier={handleAddModifier}
-                onRemoveModifier={handleRemoveModifier}
-              />
-            </div>
-
-            {/* Racing line form */}
-            {(selection?.type === 'racingLine' || selection?.type === 'modifier') && (
-              <div className="rounded-lg bg-gray-800 border border-gray-700 p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-                  {selection.type === 'racingLine' ? 'Edit Racing Line' : 'Edit Modifier'}
-                </h3>
-                <RacingLineForm
-                  selection={selection}
-                  racingLine={track.racingLine}
-                  onUpdateRacingLine={updateRacingLine}
-                  onUpdateModifier={updateModifier}
-                />
-              </div>
-            )}
+            <RacingLinePanel
+              racingLine={track.racingLine}
+              selection={selection}
+              onSelect={setSelection}
+              onUpdateRacingLine={updateRacingLine}
+              onAddModifier={handleAddModifier}
+              onRemoveModifier={handleRemoveModifier}
+              onUpdateModifier={updateModifier}
+              onVisibleModifierKeyChange={setVisibleModifierKey}
+            />
 
             {/* Asset lists */}
             <TrackAssetList

@@ -1,9 +1,15 @@
 import { useState } from 'react'
 import TrackAssetForm from './TrackAssetForm'
+import Tooltip from '../ToolTip'
 
 const SECTION_LABELS = {
   backgroundAssets: 'Background Assets',
   foregroundAssets: 'Foreground Assets',
+}
+
+const SECTION_TOOLTIPS = {
+  backgroundAssets: 'Images rendered randomly behind the road. They scroll at the same speed as the road, so they are good for adding depth and atmosphere to the track.',
+  foregroundAssets: 'Images rendered randomly in front of the road. They scroll at the same speed as the road, so they are good for adding depth and atmosphere to the track.',
 }
 
 const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onAdd, onRemove, onUpdate }) => {
@@ -30,14 +36,16 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
             onClick={() => toggleSection(listKey)}
             className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">
-                {SECTION_LABELS[listKey]}
-              </span>
-              <span className="text-xs text-gray-500">
-                {track[listKey].length}
-              </span>
-            </div>
+            <Tooltip text={SECTION_TOOLTIPS[listKey]}>
+              <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">
+                    {SECTION_LABELS[listKey]}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {track[listKey].length}
+                  </span>
+              </div>
+            </Tooltip>
             <div className="flex items-center gap-3">
               <button
                 onClick={(e) => { e.stopPropagation(); onAdd(listKey) }}
@@ -87,7 +95,7 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
                     </div>
 
                     {isSelected && (
-                      <div className="rounded-b-lg border border-t-0 border-purple-600 bg-gray-800/60 px-3 py-3">
+                      <div className="rounded-b-lg border border-t-0 border-purple-600 bg-purple-950/30 px-3 py-3">
                         <TrackAssetForm
                           asset={asset}
                           listKey={listKey}

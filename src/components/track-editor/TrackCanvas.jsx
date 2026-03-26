@@ -14,8 +14,9 @@ const getRoadBounds = (racingLine) => {
   return { top, bottom, height: bottom - top }
 }
 
-const drawRoad = (ctx, road, racingLine) => {
+const drawRoad = (ctx, road, racingLine, imageCache) => {
   const { top, height } = getRoadBounds(racingLine)
+
   if (road.type === 'rainbow') {
     const numDiv = 10
     ctx.fillStyle = 'black'
@@ -29,19 +30,21 @@ const drawRoad = (ctx, road, racingLine) => {
     ctx.fillRect(0, top - height * 0.2, CANVAS_W, height * 1.4)
     ctx.fillStyle = road.color ?? '#888888'
     ctx.fillRect(0, top, CANVAS_W, height)
+  } else if (road.type === 'image') {
+    const img = road.url ? imageCache.current[resolveImageUrl(road.url)] : null
+    if (img?.naturalWidth) {
+      ctx.drawImage(img, road.x ?? 0, road.y ?? 0,
+        road.dim[0] * (road.scale ?? 1),
+        road.dim[1] * (road.scale ?? 1))
+    }
   }
 }
 
-const drawFullScreen = (ctx, img) => {
-  if (!img?.naturalWidth) return
-  ctx.drawImage(img, 0, 0, CANVAS_W, CANVAS_H)
-}
-
-const drawStands = (ctx, img, stands) => {
-  if (!img?.naturalWidth || !stands) return
-  const w = stands.dim[0] * stands.scale
-  const h = stands.dim[1] * stands.scale
-  ctx.drawImage(img, CANVAS_W - w - 20, CANVAS_H - 25 - 400 - h + 20, w, h)
+const drawScrollingImage = (ctx, img, slot) => {
+  if (!img?.naturalWidth || !slot) return
+  const w = slot.dim ? slot.dim[0] * (slot.scale ?? 1) : CANVAS_W
+  const h = slot.dim ? slot.dim[1] * (slot.scale ?? 1) : CANVAS_H
+  ctx.drawImage(img, slot.x ?? 0, slot.y ?? 0, w, h)
 }
 
 const drawRacingLineImage = (ctx, img, racingLine, isSelected) => {
@@ -152,6 +155,7 @@ const TrackCanvas = ({
   onSelectAsset,
   activeRacers,
   racerAvatars,
+  visibleModifierKey,
 }) => {
   const canvasRef = useRef(null)
   const imageCache = useRef({})
@@ -165,20 +169,20 @@ const TrackCanvas = ({
   const didDrag = useRef(false)
   const tRef = useRef(0)
   const scatterPositions = useRef({})
+  const visibleModifierKeyRef = useRef(visibleModifierKey)
 
   useEffect(() => { trackRef.current = track }, [track])
   useEffect(() => { selectionRef.current = selection }, [selection])
   useEffect(() => { activeRacersRef.current = activeRacers }, [activeRacers])
   useEffect(() => { racerAvatarsRef.current = racerAvatars }, [racerAvatars])
+  useEffect(() => { visibleModifierKeyRef.current = visibleModifierKey }, [visibleModifierKey])
 
   // preload track images
   useEffect(() => {
     const urls = [
-      track.overlayBackground?.url,
-      track.overlayForeground?.url,
       track.scrollingImage?.url,
-      track.stands?.url,
       track.racingLine?.url,
+      track.road?.url,
       ...track.racingLine.startModifiers.map(m => m.url),
       ...track.racingLine.finishModifiers.map(m => m.url),
       ...track.backgroundAssets.map(a => a.url),
@@ -194,11 +198,9 @@ const TrackCanvas = ({
       }
     })
   }, [
-    track.overlayBackground?.url,
-    track.overlayForeground?.url,
     track.scrollingImage?.url,
-    track.stands?.url,
     track.racingLine?.url,
+    track.road?.url,
     track.racingLine.startModifiers.map(m => m.url).join(','),
     track.racingLine.finishModifiers.map(m => m.url).join(','),
     track.backgroundAssets.map(a => a.url).join(','),
@@ -234,46 +236,43 @@ const TrackCanvas = ({
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
-      if (t.overlayBackground?.url) {
-        drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayBackground.url)])
-      }
+      drawRoad(ctx, t.road, t.racingLine, imageCache)
 
       drawScattered(ctx, t.backgroundAssets, imageCache, 42,
         sel?.type === 'asset' && sel.listKey === 'backgroundAssets' ? sel.id : null,
         'background', t.racingLine)
 
-      drawRoad(ctx, t.road, t.racingLine)
-
       if (t.scrollingImage?.url) {
-        drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.scrollingImage.url)])
-      }
-
-      if (t.stands?.url) {
-        drawStands(ctx, imageCache.current[resolveImageUrl(t.stands.url)], t.stands)
+        const img = imageCache.current[resolveImageUrl(t.scrollingImage.url)]
+        drawScrollingImage(ctx, img, t.scrollingImage)
       }
 
       // draw racing line image
       const rlImg = t.racingLine?.url
         ? imageCache.current[resolveImageUrl(t.racingLine.url)]
         : null
-      const isRacingLineSelected = sel?.type === 'racingLine'
+      const isRacingLineSelected = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
       const rlW = t.racingLine.dim[0] * t.racingLine.scale
       const rlH = t.racingLine.dim[1] * t.racingLine.scale
       if (rlImg?.naturalWidth) {
         ctx.drawImage(rlImg, t.racingLine.x - rlW / 2, t.racingLine.y - rlH / 2, rlW, rlH)
       }
 
-      // start modifiers
-      t.racingLine.startModifiers.forEach(mod => {
-        const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
-        drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id)
-      })
+      // start modifiers — only draw if startModifiers is the visible key or neither is expanded
+      if (visibleModifierKeyRef.current === 'startModifiers' || visibleModifierKeyRef.current === null) {
+        t.racingLine.startModifiers.forEach(mod => {
+          const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
+          drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id && sel.modifierKey === 'startModifiers')
+        })
+      }
 
-      // finish modifiers
-      t.racingLine.finishModifiers.forEach(mod => {
-        const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
-        drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id)
-      })
+      // finish modifiers — only draw if finishModifiers is the visible key or neither is expanded
+      if (visibleModifierKeyRef.current === 'finishModifiers') {
+        t.racingLine.finishModifiers.forEach(mod => {
+          const img = mod.url ? imageCache.current[resolveImageUrl(mod.url)] : null
+          drawModifier(ctx, img, mod, sel?.type === 'modifier' && sel.id === mod.id && sel.modifierKey === 'finishModifiers')
+        })
+      }
 
       // draw active racers
       activeRacersRef.current.forEach(racer => {
@@ -284,10 +283,6 @@ const TrackCanvas = ({
       drawScattered(ctx, t.foregroundAssets, imageCache, 99,
         sel?.type === 'asset' && sel.listKey === 'foregroundAssets' ? sel.id : null,
         'foreground', t.racingLine)
-
-      if (t.overlayForeground?.url) {
-        drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayForeground.url)])
-      }
 
       if (sel?.type === 'asset') {
         const listKey = sel.listKey
@@ -318,8 +313,8 @@ const TrackCanvas = ({
       }
 
       if (isRacingLineSelected) {
-        drawLineEditor(ctx, t.racingLine)
         drawRacingLineImage(ctx, rlImg, t.racingLine, true)
+        drawLineEditor(ctx, t.racingLine)
       }
 
       animRef.current = requestAnimationFrame(draw)
@@ -382,8 +377,8 @@ const TrackCanvas = ({
     didDrag.current = false
     const sel = selectionRef.current
     const t = trackRef.current
-
-    if (sel?.type === 'racingLine') {
+      
+    if (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment') {
       const handle = hitTestHandle(x, y, t.racingLine)
       if (handle) {
         dragState.current = { mode: 'lineHandle', handle }
@@ -449,7 +444,7 @@ const TrackCanvas = ({
     didDrag.current = false
   }, [])
 
-  const isLineEditing = selection?.type === 'racingLine' || selection?.type === 'modifier'
+  const isLineEditing = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
 
   return (
     <div className="overflow-auto rounded-lg border border-gray-700 bg-gray-950">

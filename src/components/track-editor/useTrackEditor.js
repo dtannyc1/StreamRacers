@@ -1,29 +1,5 @@
 import { useState, useCallback } from 'react'
-
-export const createDefaultTrack = (name = 'New Track') => ({
-  name,
-  road: {
-    type: 'rainbow',
-    color: '#888888',
-  },
-  racingLine: {
-    url: 'https://www.dropbox.com/scl/fi/bnou8ckx2enjsn1ntox5d/start_line.png?rlkey=jvibcvg72fxet75n5gu21bo4n&st=u9wiyegp&dl=0',
-    dim: [200, 200],
-    scale: 1,
-    x: 1550,
-    y: 974,
-    p1: [1591, 1060],
-    p2: [1497, 948],
-    startModifiers: [],
-    finishModifiers: [],
-  },
-  stands: null,
-  overlayBackground: null,
-  overlayForeground: null,
-  scrollingImage: null,
-  backgroundAssets: [],
-  foregroundAssets: [],
-})
+import { createDefaultTrack } from '../../lib/trackDefaults'
 
 export const useTrackEditor = (initialTrack = null) => {
   const [track, setTrack] = useState(() => initialTrack ?? createDefaultTrack())

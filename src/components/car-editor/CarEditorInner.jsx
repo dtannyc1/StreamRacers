@@ -109,7 +109,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
             onMouseMove={onCanvasMouseMove}
             onMouseUp={onCanvasMouseUp}
           />
-          <div className="flex flex-col gap-6 overflow-y-auto max-h-[600px] pr-1">
+          <div className="flex flex-col gap-6 pr-1">
             <AssetPanel
               assets={car.assets}
               selectedId={selectedId}
@@ -118,7 +118,12 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
               onRemove={removeAsset}
               onMoveUp={moveAssetUp}
               onMoveDown={moveAssetDown}
+              asset={selectedAsset} 
+              onUpdate={updateAsset} 
+              onSpriteUrlChange={onSpriteUrlChange}
+              toggleAspectLock={toggleAspectLock}
             />
+            {/*
             <div className="border-t border-gray-700 pt-4">
               <AssetForm 
                 asset={selectedAsset} 
@@ -127,6 +132,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
                 toggleAspectLock={toggleAspectLock}
               />
             </div>
+            */}
           </div>
         </div>
 

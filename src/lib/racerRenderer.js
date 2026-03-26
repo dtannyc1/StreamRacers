@@ -56,9 +56,21 @@ const drawAsset = (ctx, asset, img, t, xy, speed) => {
     const max = asset.maxTheta ?? Math.PI / 6
     const phase = asset.phase ?? 0
     const radius = asset.radius ?? 1
-    // oscillation frequency scales with speed
-    const freq = speed / radius
-    const angle = theta + ((max - min) / 2) * Math.sin(freq * t + phase) + (max + min) / 2
+
+    // frequency from speed
+    const freq = Math.abs(speed / radius)
+
+    // triangle wave: sawtooth via modulo, then fold into triangle
+    const period = (2 * Math.PI) / freq
+    const tp = ((t + phase / freq) % period + period) % period
+    const normalized = tp / period  // 0 to 1
+    const triangle = normalized < 0.5
+      ? normalized * 2          // 0 to 1
+      : 2 - normalized * 2      // 1 to 0
+
+    // map triangle (0 to 1) to (min to max)
+    const angle = theta + min + triangle * (max - min)
+
     ctx.translate(acx, acy)
     ctx.rotate(angle)
     ctx.translate(-acx, -acy)
