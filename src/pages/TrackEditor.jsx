@@ -368,24 +368,7 @@ const TrackEditor = ({ mode }) => {
           </div>
 
           {/* Right panel */}
-          <div className="flex flex-col gap-6 overflow-y-auto max-h-[800px] pr-1">
-
-            {/* Slot images */}
-            <div className="rounded-lg bg-gray-800 border border-gray-700 p-4 flex flex-col gap-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Slot Images</h3>
-              <SlotInput label="Overlay Background" slot={track.overlayBackground}
-                onUpdate={(v) => setSlot('overlayBackground', v)}
-                onClear={() => clearSlot('overlayBackground')} />
-              <SlotInput label="Overlay Foreground" slot={track.overlayForeground}
-                onUpdate={(v) => setSlot('overlayForeground', v)}
-                onClear={() => clearSlot('overlayForeground')} />
-              <SlotInput label="Scrolling Image" slot={track.scrollingImage}
-                onUpdate={(v) => setSlot('scrollingImage', v)}
-                onClear={() => clearSlot('scrollingImage')} />
-              <StandsForm stands={track.stands}
-                onUpdate={(v) => setSlot('stands', v)}
-                onClear={() => clearSlot('stands')} />
-            </div>
+          <div className="flex flex-col gap-6 pr-1">
 
             {/* Racing line */}
             <RacingLinePanel

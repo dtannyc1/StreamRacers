@@ -109,7 +109,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
             onMouseMove={onCanvasMouseMove}
             onMouseUp={onCanvasMouseUp}
           />
-          <div className="flex flex-col gap-6 overflow-y-auto max-h-[600px] pr-1">
+          <div className="flex flex-col gap-6 pr-1">
             <AssetPanel
               assets={car.assets}
               selectedId={selectedId}

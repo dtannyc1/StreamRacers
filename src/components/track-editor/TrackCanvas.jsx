@@ -241,11 +241,11 @@ const TrackCanvas = ({
         drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.overlayBackground.url)])
       }
 
+      drawRoad(ctx, t.road, t.racingLine)
+
       drawScattered(ctx, t.backgroundAssets, imageCache, 42,
         sel?.type === 'asset' && sel.listKey === 'backgroundAssets' ? sel.id : null,
         'background', t.racingLine)
-
-      drawRoad(ctx, t.road, t.racingLine)
 
       if (t.scrollingImage?.url) {
         drawFullScreen(ctx, imageCache.current[resolveImageUrl(t.scrollingImage.url)])

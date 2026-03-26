@@ -3,6 +3,11 @@ import { resolveImageUrl } from '../../lib/utils'
 import Tooltip from '../ToolTip'
 import RacingLineForm from './RacingLineForm'
 
+const SUBSECTION_TOOLTIPS = {
+  'Image': 'Start/finish line image',
+  'Line Segment': 'Line Segment defining the start and finish line. Yellow end point handles are drawn on the canvas for easier editing.',
+}
+
 const DebouncedUrlInput = ({ value, onChange }) => {
   const [local, setLocal] = useState(value)
   useEffect(() => { setLocal(value) }, [value])
@@ -22,8 +27,33 @@ const DebouncedUrlInput = ({ value, onChange }) => {
   )
 }
 
+const SubSection = ({ label, children, defaultCollapsed = true }) => {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed)
+  return (
+    <div className="flex flex-col gap-1">
+        <div
+          onClick={() => setCollapsed(prev => !prev)}
+          className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
+        >
+          <Tooltip text={SUBSECTION_TOOLTIPS[label]}>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label} <span className="ml-1 text-gray-500 text-xs">ⓘ</span></span>
+          </Tooltip>
+          <span className="text-xs text-gray-400">{collapsed ? '▼' : '▲'}</span>
+        </div>
+      {!collapsed && (
+        <div className="px-3 py-3 bg-gray-800/60 border border-gray-600 rounded-lg flex flex-col gap-3">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRemove, onUpdate, racingLine, collapsed, onToggle }) => {
   const label = modifierKey === 'startModifiers' ? 'Start Modifiers' : 'Finish Modifiers'
+  const tooltipText = modifierKey === 'startModifiers'
+    ? 'Images rendered when the start line is visible. Positions are locked relative to the start line image.'
+    : 'Images rendered when the finish line is visible. Positions are locked relative to the finish line image.'
 
   const handleClick = (id) => {
     if (selection?.type === 'modifier' && selection.id === id && selection.modifierKey === modifierKey) {
@@ -40,11 +70,7 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
         className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
       >
         <div className="flex items-center gap-2">
-          <Tooltip text={
-            modifierKey === 'startModifiers'
-              ? 'Images rendered when the start line is visible. Positions are locked relative to the start line image.'
-              : 'Images rendered when the finish line is visible. Positions are locked relative to the finish line image.'
-          }>
+          <Tooltip text={tooltipText}>
             <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label}</span>
             <span className="ml-1 text-gray-500 text-xs">ⓘ</span>
           </Tooltip>
@@ -130,7 +156,6 @@ const RacingLinePanel = ({
     startModifiers: true,
     finishModifiers: true,
   })
-  const isLineSelected = selection?.type === 'racingLine'
 
   useEffect(() => {
     const visibleKey = Object.entries(modifierCollapsed).find(([_, v]) => !v)?.[0] ?? null
@@ -163,6 +188,9 @@ const RacingLinePanel = ({
     img.src = resolveImageUrl(url)
   }
 
+  const crossX = Math.round((racingLine.p1[0] + racingLine.p2[0]) / 2)
+  const roadHeight = Math.round(Math.abs(racingLine.p2[1] - racingLine.p1[1]))
+
   return (
     <div className="flex flex-col gap-1">
 
@@ -178,37 +206,40 @@ const RacingLinePanel = ({
       {!sectionCollapsed && (
         <div className="flex flex-col gap-1 pl-1">
 
-          {/* Line segment + image row */}
-          <div className="flex flex-col">
-            <div
-              onClick={() => onSelect(isLineSelected ? null : { type: 'racingLine' })}
-              className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer transition-colors ${
-                isLineSelected
-                  ? 'bg-yellow-900/20 border border-yellow-500 rounded-b-none'
-                  : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
-              }`}
-            >
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-300">Line Segment + Image*</p>
-              </div>
-              <span className="text-xs text-gray-400">{isLineSelected ? '▲' : '▼'}</span>
-            </div>
+          {/* Image subsection */}
+          <SubSection label="Image">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-gray-400">Image URL</span>
+              <DebouncedUrlInput value={racingLine.url} onChange={handleUrlChange} />
+            </label>
+            <RacingLineForm
+              selection={{ type: 'racingLine' }}
+              racingLine={racingLine}
+              onUpdateRacingLine={onUpdateRacingLine}
+              onUpdateModifier={onUpdateModifier}
+              section="image"
+            />
+          </SubSection>
 
-            {isLineSelected && (
-              <div className="rounded-b-lg border border-t-0 border-yellow-500 bg-gray-800/60 px-3 py-3 flex flex-col gap-3">
-                <label className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
-                  <span className="text-xs text-gray-400">Image URL</span>
-                  <DebouncedUrlInput value={racingLine.url} onChange={handleUrlChange} />
-                </label>
-                <RacingLineForm
-                  selection={selection}
-                  racingLine={racingLine}
-                  onUpdateRacingLine={onUpdateRacingLine}
-                  onUpdateModifier={onUpdateModifier}
-                />
-              </div>
-            )}
-          </div>
+          {/* Line segment subsection */}
+          <SubSection label="Line Segment">
+            <RacingLineForm
+              selection={{ type: 'racingLine' }}
+              racingLine={racingLine}
+              onUpdateRacingLine={onUpdateRacingLine}
+              onUpdateModifier={onUpdateModifier}
+              section="lineSegment"
+            />
+            
+            {/* Details, just useful info for debugging. User doesnt need this
+            <div className="grid grid-cols-2 gap-2 text-xs rounded-lg bg-gray-700/50 p-3 mb-1">
+              <span className="text-gray-400">Crossing X</span>
+              <span className="text-white font-medium">{crossX}</span>
+              <span className="text-gray-400">Road Height</span>
+              <span className="text-white font-medium">{roadHeight}px</span>
+            </div>
+            */}
+          </SubSection>
 
           {/* Modifier lists */}
           <ModifierList
