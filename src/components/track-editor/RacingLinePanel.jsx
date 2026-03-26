@@ -27,12 +27,12 @@ const DebouncedUrlInput = ({ value, onChange }) => {
   )
 }
 
-const SubSection = ({ label, children, defaultCollapsed = true }) => {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed)
+const SubSection = ({ label, modifierCollapsed, toggleModifier, children  }) => {
+  const collapsed = modifierCollapsed[label] ?? true
   return (
     <div className="flex flex-col gap-1">
         <div
-          onClick={() => setCollapsed(prev => !prev)}
+          onClick={() => toggleModifier(label)}
           className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
         >
           <Tooltip text={SUBSECTION_TOOLTIPS[label]}>
@@ -155,6 +155,8 @@ const RacingLinePanel = ({
   const [modifierCollapsed, setModifierCollapsed] = useState({
     startModifiers: true,
     finishModifiers: true,
+    'Image': true,
+    'Line Segment': true,
   })
 
   useEffect(() => {
@@ -166,6 +168,8 @@ const RacingLinePanel = ({
     setModifierCollapsed(prev => ({
       startModifiers: true,
       finishModifiers: true,
+      'Image': true,
+      'Line Segment': true,
       [modifierKey]: !prev[modifierKey],
     }))
   }
@@ -188,9 +192,10 @@ const RacingLinePanel = ({
     img.src = resolveImageUrl(url)
   }
 
+  /*
   const crossX = Math.round((racingLine.p1[0] + racingLine.p2[0]) / 2)
   const roadHeight = Math.round(Math.abs(racingLine.p2[1] - racingLine.p1[1]))
-
+  */
   return (
     <div className="flex flex-col gap-1">
 
@@ -207,7 +212,7 @@ const RacingLinePanel = ({
         <div className="flex flex-col gap-1 pl-1">
 
           {/* Image subsection */}
-          <SubSection label="Image">
+          <SubSection label="Image" modifierCollapsed={modifierCollapsed} toggleModifier={toggleModifier}>
             <label className="flex flex-col gap-1">
               <span className="text-xs text-gray-400">Image URL</span>
               <DebouncedUrlInput value={racingLine.url} onChange={handleUrlChange} />
@@ -222,7 +227,7 @@ const RacingLinePanel = ({
           </SubSection>
 
           {/* Line segment subsection */}
-          <SubSection label="Line Segment">
+          <SubSection label="Line Segment" modifierCollapsed={modifierCollapsed} toggleModifier={toggleModifier}>
             <RacingLineForm
               selection={{ type: 'racingLine' }}
               racingLine={racingLine}

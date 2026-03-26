@@ -251,7 +251,7 @@ const TrackCanvas = ({
       const rlImg = t.racingLine?.url
         ? imageCache.current[resolveImageUrl(t.racingLine.url)]
         : null
-      const isRacingLineSelected = sel?.type === 'racingLine'
+      const isRacingLineSelected = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
       const rlW = t.racingLine.dim[0] * t.racingLine.scale
       const rlH = t.racingLine.dim[1] * t.racingLine.scale
       if (rlImg?.naturalWidth) {
@@ -377,8 +377,8 @@ const TrackCanvas = ({
     didDrag.current = false
     const sel = selectionRef.current
     const t = trackRef.current
-
-    if (sel?.type === 'racingLine') {
+      
+    if (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment') {
       const handle = hitTestHandle(x, y, t.racingLine)
       if (handle) {
         dragState.current = { mode: 'lineHandle', handle }
@@ -444,7 +444,7 @@ const TrackCanvas = ({
     didDrag.current = false
   }, [])
 
-  const isLineEditing = selection?.type === 'racingLine' || selection?.type === 'modifier'
+  const isLineEditing = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
 
   return (
     <div className="overflow-auto rounded-lg border border-gray-700 bg-gray-950">
