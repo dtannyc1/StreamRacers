@@ -118,7 +118,12 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
               onRemove={removeAsset}
               onMoveUp={moveAssetUp}
               onMoveDown={moveAssetDown}
+              asset={selectedAsset} 
+              onUpdate={updateAsset} 
+              onSpriteUrlChange={onSpriteUrlChange}
+              toggleAspectLock={toggleAspectLock}
             />
+            {/*
             <div className="border-t border-gray-700 pt-4">
               <AssetForm 
                 asset={selectedAsset} 
@@ -127,6 +132,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
                 toggleAspectLock={toggleAspectLock}
               />
             </div>
+            */}
           </div>
         </div>
 
