@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
+import Tooltip from '../ToolTip'
 import RacingLineForm from './RacingLineForm'
 
 const DebouncedUrlInput = ({ value, onChange }) => {
@@ -39,7 +40,14 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
         className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-700/50 border border-gray-600 cursor-pointer hover:border-gray-400 transition-colors select-none"
       >
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label}</span>
+          <Tooltip text={
+            modifierKey === 'startModifiers'
+              ? 'Images rendered when the start line is visible. Positions are locked relative to the start line image.'
+              : 'Images rendered when the finish line is visible. Positions are locked relative to the finish line image.'
+          }>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{label}</span>
+            <span className="ml-1 text-gray-500 text-xs">ⓘ</span>
+          </Tooltip>
           <span className="text-xs text-gray-500">{modifiers.length}</span>
         </div>
         <div className="flex items-center gap-3">

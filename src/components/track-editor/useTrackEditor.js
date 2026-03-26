@@ -28,7 +28,7 @@ export const createDefaultTrack = (name = 'New Track') => ({
     finishModifiers: [
       {
         id: crypto.randomUUID(),
-        name: 'Finish Modifier',
+        name: 'Finish Flag',
         url: 'https://www.dropbox.com/scl/fi/elrpti7l28qro4soudskz/finish_flag.png?rlkey=q8jsg8bt2dqzhqpj2litbmcsf&st=3iu1dexx&dl=0',
         dim: [200, 200],
         scale: 1,
