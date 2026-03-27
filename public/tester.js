@@ -1,6 +1,6 @@
 
 let testing = true;
-let autostart = true;
+let autostart = false;
 
 let readying;
 let broadcaster = "";
@@ -38,13 +38,7 @@ let isUpdatingRacers = true;
 let finishingVel = 1000;
 let hidden = false;
 
-//// load custom font
-//const myFont = new FontFace('Oswald Custom',
-//                          'url(https://fonts.gstatic.com/s/oswald/v53/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZosUJiZTaR.woff2)');
-//document.fonts.add(myFont);
-//myFont.load();
-
-let clientID, clientSecret, accessToken, jebaitedToken;
+let jwtToken, customRacers, customTracks;
 
 let backupButton = document.getElementById("startbutton")
 backupButton.addEventListener("click", function() {
@@ -354,6 +348,26 @@ async function loadAssets() {
         stands.img.src = "https://www.dropbox.com/scl/fi/oentkgnkqv04nyv3fvomu/stands.png?rlkey=pbjarhgbnpg7oemn3xu6ytacg&raw=1";
         defaultDrawings.stands = stands;
     }
+};
+
+function loadAllSEAssets() {
+  Promise.all([
+    SE_API.store.get('customRacers')
+        .then(data => {
+          console.log('Custom Racers: ', data);
+          customRacers = data;
+        }),
+    SE_API.store.get('customTracks')
+        .then(data => {
+          console.log('Custom Tracks: ', data);
+          customTracks = data;
+        }),
+    SE_API.store.get('jwtToken')
+        .then(data => {
+          console.log('JWT Token: ', data);
+          jwtToken = data;
+        })
+  ])
 };
 
 const options = {
@@ -681,48 +695,18 @@ window.addEventListener('onEventReceived', async function (obj) {
 
 window.addEventListener('onWidgetLoad', async function (obj) {
   	broadcaster = obj.detail.channel.username;
-  	let fieldData = obj.detail.fieldData;
-  	raceDuration = fieldData.race_duration;
-  	clientID = fieldData.client_id;
-  	clientSecret = fieldData.client_secret;
-  	jebaitedToken = fieldData.jebaited_token;
-  	trackType = fieldData.track_type;
-  	//if (fieldData.testing_field){
-    // 	testing = true;
-    //  	autostart = true;
-    //}
-  	options.headers.Authorization = 'Bearer ' + fieldData.JWT_TOKEN;
+  	raceDuration = 30;
 
   	await loadAssets();
 
-  	// get auth token?
-  	let twitchURL = 'https://id.twitch.tv/oauth2/token';
-  	fetch(twitchURL, {
-      	method: "POST",
-      	headers: {
-         	'Content-Type': 'application/x-www-form-urlencoded'
-        },
-      	body: 'client_id='+clientID+"&client_secret="+clientSecret+"&grant_type=client_credentials"
-    })
-  	.then(res => {
-      	if (res.ok){
-         	return res.json();
-        } else {
-         	return null;
-        }
-    })
-  	.then(data => {
-      	accessToken = data.access_token;
-
-        let url = "https://api.streamelements.com/kappa/v2/channels/" + broadcaster;
-        return fetch(url, {
+    let url = "https://api.streamelements.com/kappa/v2/channels/" + broadcaster;
+    await fetch(url, {
           method: "GET",
           headers: {
             Accept: "application/json",
             charset: "utf-8",
             Authorization: "Bearer undefined"
           }})
-    })
   	.then(res => {
             //console.log(res);
             if (res.ok) {
@@ -838,43 +822,12 @@ async function addRacer(name, displayColor) {
         let racer = ({});
         racer.displayColor = displayColor || "#FFFFFF";
         racer.name = name; // or event.data.nick
-        //let url = "https://api.streamelements.com/kappa/v2/channels/" + name;
-        //await fetch(url, {
-        //        method: "GET",
-        //        headers: {
-        //          Accept: "application/json",
-        //          charset: "utf-8",
-        //          Authorization: "Bearer undefined"
-        //        }})
-        //        .then(res => {
-        //        //console.log(res);
-        //        if (res.ok) {
-        //            return res.json();
-        //        } else {
-        //            return null;
-        //        }
-        //    })
-
-        let url = "https://api.twitch.tv/helix/users?login=" + name;
-       	await fetch(url, {
-                method: "GET",
-                headers: {
-                  Accept: "application/json",
-                  'Client-Id': clientID,
-                  Authorization: "Bearer " + accessToken
-                }})
-                .then(res => {
-                    if (res.ok) {
-                        return res.json();
-                    } else {
-                        return null;
-                    }
-                })
+        await getUserAvatar(name)
             .then(data => {
                 // avatar
-                if (data && data.data && data.data[0] && data.data[0].profile_image_url) {
+                if (data) {
                 	racer.avatar = new Image();
-                    racer.avatar.src = data.data[0].profile_image_url;
+                    racer.avatar.src = data;
                 } else {
                     racer.avatar = defaultDrawings.avatar;
                 }
@@ -937,32 +890,45 @@ async function addRacer(name, displayColor) {
 	}
 };
 
-function sendMessageInChat(message) {
-  	//fetch("https://api.streamelements.com/kappa/v2/bot/"+broadcasterChannelId+"/say", {
-    //  method: "POST",
-    //  headers: {
-    //    "Accept": 'application/json; charset=utf-8',
-    //    "Authorization": options["headers"]["Authorization"],
-    //    "Content-Type": "application/json"
-    //  },
-    //  body: JSON.stringify({
-    //    "message": message
-    //  })
-    //})
-    //  .then(res => {
-    //  if (res.ok) {
-    //    return res.json();
-    //  }
-    //})
-    //  .then(data => {
-    //  //console.log(data)
-    //})
-    //  .catch(err => {
-    //  console.log(err)
-    //})
+async function getUserAvatar(username) {
+  let url = "https://decapi.me/twitch/avatar/" + username;
+  return await fetch(url)
+    .then(res => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        return null;
+      }
+    })
+    .then(data => {
+      if (data) {
+        return data;
+      } else {
+        return null;
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      return null;
+    });
+}
 
-    const encodedMessage = encodeURIComponent(message);
-  	fetch(`https://api.jebaited.net/botMsg/${jebaitedToken}/${encodedMessage}`)
+function sendMessageInChat(message) {
+  	fetch("https://api.streamelements.com/kappa/v2/bot/"+broadcasterChannelId+"/say", {
+     method: "POST",
+     headers: {
+       "Accept": 'application/json; charset=utf-8',
+       "Authorization": "bearer " + jwtToken,
+       "Content-Type": "application/json"
+     },
+     body: JSON.stringify({
+       "message": message
+     })
+    })
+    .catch(err => {
+     console.log(err)
+    })
+
 };
 
 function resetRace() {
