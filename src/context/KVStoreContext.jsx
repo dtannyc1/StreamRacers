@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getRacersAndTracks, setRacers, setTracks } from '../lib/streamelements'
+import { getRacersAndTracks, setJWTToken, setRacers, setTracks } from '../lib/streamelements'
 import { useAuth } from './AuthContext'
 
 const KVStoreContext = createContext(null)
@@ -21,6 +21,9 @@ export const KVStoreProvider = ({ children }) => {
       setError(null)
       try {
         const { racers, tracks } = await getRacersAndTracks(token, channelId)
+        if (racers && tracks && token && channelId) {
+          setJWTToken(token, channelId, token) // ensure the token is saved in KV for tester.js to access
+        } 
         setRacersState(racers)
         setTracksState(tracks)
       } catch (err) {
