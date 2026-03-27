@@ -23,7 +23,10 @@ if (testing){
 
 let defaultDrawings = {};
 let racers = ({});
-let canvas = document.getElementById("maincanvas");
+let canvas = document.createElement("canvas");
+canvas.width = 1920;
+canvas.height = 1080;
+document.body.appendChild(canvas);
 let ctx = canvas.getContext("2d");
 let cameraLoc = [canvas.width*0.75, 0];
 let backgrounds = [[],[],[]];
@@ -41,12 +44,14 @@ let hidden = false;
 let jwtToken, customRacers, customTracks;
 
 let backupButton = document.getElementById("startbutton")
-backupButton.addEventListener("click", function() {
-  	console.log('click start detected')
-	if (sortedRacers.length > 0){
-        startRace();
-    }
-});
+if (backupButton) {
+  backupButton.addEventListener("click", function() {
+      console.log('click start detected')
+    if (sortedRacers.length > 0){
+          startRace();
+      }
+  });
+}
 
 let wordBank = {
   "food": ["pizza", "chocolate", "sushi", "ice cream", "burger", "pasta", "salad", "potato", "tacos", "steak", "coffee", "cake", "popcorn", "pancake", "sandwich", "cheese", "fruit", "cookies", "ramen", "grilled cheese"],
@@ -827,7 +832,7 @@ async function addRacer(name, displayColor) {
                 // avatar
                 if (data) {
                 	racer.avatar = new Image();
-                    racer.avatar.src = data;
+                  racer.avatar.src = data;
                 } else {
                     racer.avatar = defaultDrawings.avatar;
                 }
@@ -895,14 +900,12 @@ async function getUserAvatar(username) {
   return await fetch(url)
     .then(res => {
       if (res.ok) {
-        return res.json();
-      } else {
-        return null;
+        return res.text();
       }
     })
-    .then(data => {
-      if (data) {
-        return data;
+    .then(url => {
+      if (url) {
+        return url;
       } else {
         return null;
       }
