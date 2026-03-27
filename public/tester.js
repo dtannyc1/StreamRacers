@@ -369,7 +369,6 @@ function loadAllSEAssets() {
         }),
     SE_API.store.get('jwtToken')
         .then(data => {
-          console.log('JWT Token: ', data);
           jwtToken = data;
         })
   ])
@@ -703,6 +702,8 @@ window.addEventListener('onWidgetLoad', async function (obj) {
   	raceDuration = 30;
 
   	await loadAssets();
+
+    loadAllSEAssets();
 
     let url = "https://api.streamelements.com/kappa/v2/channels/" + broadcaster;
     await fetch(url, {
