@@ -21,7 +21,7 @@ export default class CarManager {
         SE_API.store.get('raceSettings'),
       ])
       this.customCarData = customData ?? {}
-      this.defaultCarData = raceSettings ? raceSettings.defaultRacer : DEFAULT_CAR_DATA
+      this.defaultCarData = raceSettings?.defaultRacer ? raceSettings.defaultRacer : DEFAULT_CAR_DATA
       console.log('Custom car data loaded:', Object.keys(this.customCarData))
       console.log('Default car data loaded:', this.defaultCarData ? 'yes' : 'no')
     } catch (err) {
