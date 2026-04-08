@@ -53,16 +53,14 @@ export default class Car {
   update(curTime, clampToStart = false, speedMultiplier = 1) {
     const dt = (curTime - this.time) / 1000
     const speed = this.vel[0] * speedMultiplier
-    const currentAngle = JSON.parse(JSON.stringify(this.theta ?? 0)) 
-
-    this._updateAssetAngles(dt, speed)
 
     this.XY[0] += speed * dt
     this.XY[1] += this.vel[1] * dt
 
     if (clampToStart && this.XY[0] > 0) {
       this.XY[0] = 0
-      this.theta = currentAngle
+    } else {
+      this._updateAssetAngles(dt, speed)
     }
 
     this.time = curTime
