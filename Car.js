@@ -53,7 +53,7 @@ export default class Car {
   update(curTime, clampToStart = false, speedMultiplier = 1) {
     const dt = (curTime - this.time) / 1000
     const speed = this.vel[0] * speedMultiplier
-    const currentAngle = this.theta ?? 0
+    const currentAngle = JSON.parse(JSON.stringify(this.theta ?? 0)) 
 
     this._updateAssetAngles(dt, speed)
 
@@ -93,22 +93,15 @@ export default class Car {
   // ── Drawing ────────────────────────────────────────────────────────────────
 
   draw(ctx, cameraLoc, racingLine) {
-    const roadMid = (racingLine.p1[1] + racingLine.p2[1]) / 2
-    const lineLen = Math.sqrt(
-        (racingLine.p2[0] - racingLine.p1[0]) ** 2 +
-        (racingLine.p2[1] - racingLine.p1[1]) ** 2
-    )
-    const ux = (racingLine.p2[0] - racingLine.p1[0]) / lineLen
-    const uy = (racingLine.p2[1] - racingLine.p1[1]) / lineLen
+    const pt1 = racingLine.p1[0] < racingLine.p2[0] ? racingLine.p1 : racingLine.p2
+    const pt2 = pt1 === racingLine.p1 ? racingLine.p2 : racingLine.p1
+    const midX = (pt1[0] + pt2[0]) / 2
 
-    const sign = uy > 0 ? 1 : -1;
-
-    // how far along the racing line is this car's Y lane?
-    const t = (this.XY[1] - roadMid)
+    const dX = (this.XY[1] - pt2[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midX
 
     ctx.translate(
-        cameraLoc[0] + this.XY[0] + t * ux * sign,
-        cameraLoc[1] + this.XY[1] + t * uy * sign
+        cameraLoc[0] + this.XY[0] + dX,
+        cameraLoc[1] + this.XY[1]
     )
 
     this._drawAssets(ctx)
