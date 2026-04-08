@@ -1,6 +1,6 @@
 
-import CarManager from "./CarManager";
-import TrackManager from "./TrackManager";
+import CarManager from "./CarManager.js";
+import TrackManager from "./TrackManager.js";
 
 const carManager = new CarManager();
 const trackManager = new TrackManager();
