@@ -53,13 +53,17 @@ export default class Car {
   update(curTime, clampToStart = false, speedMultiplier = 1) {
     const dt = (curTime - this.time) / 1000
     const speed = this.vel[0] * speedMultiplier
+    const currentAngle = this.theta ?? 0
 
     this._updateAssetAngles(dt, speed)
 
     this.XY[0] += speed * dt
     this.XY[1] += this.vel[1] * dt
 
-    if (clampToStart && this.XY[0] > 0) this.XY[0] = 0
+    if (clampToStart && this.XY[0] > 0) {
+      this.XY[0] = 0
+      this.theta = currentAngle
+    }
 
     this.time = curTime
   }
@@ -97,12 +101,14 @@ export default class Car {
     const ux = (racingLine.p2[0] - racingLine.p1[0]) / lineLen
     const uy = (racingLine.p2[1] - racingLine.p1[1]) / lineLen
 
+    const sign = uy > 0 ? 1 : -1;
+
     // how far along the racing line is this car's Y lane?
     const t = (this.XY[1] - roadMid)
 
     ctx.translate(
-        cameraLoc[0] + this.XY[0] + t * ux,
-        cameraLoc[1] + this.XY[1] + t * uy
+        cameraLoc[0] + this.XY[0] + t * ux * sign,
+        cameraLoc[1] + this.XY[1] + t * uy * sign
     )
 
     this._drawAssets(ctx)
