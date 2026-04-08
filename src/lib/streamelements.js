@@ -81,6 +81,8 @@ export const getRacersAndTracks = async (token, channelId) => {
   const [racers, tracks] = await Promise.all([
     initIfMissing('customRacers'),
     initIfMissing('customTracks'),
+    initIfMissing('raceSettings'),
+    initIfMissing('jwtToken'),
   ])
 
   return { racers, tracks }
