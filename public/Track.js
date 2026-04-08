@@ -231,10 +231,6 @@ export default class Track {
   // ── Drawing ────────────────────────────────────────────────────────────────
 
   drawBackground(ctx, cameraLoc, canvasWidth, canvasHeight) {
-    // sky
-    ctx.fillStyle = '#1a1a2e'
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
-
     // road
     this._drawRoad(ctx, canvasWidth)
 
