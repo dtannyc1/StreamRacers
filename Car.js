@@ -95,9 +95,8 @@ export default class Car {
   draw(ctx, cameraLoc, racingLine) {
     const pt1 = racingLine.p1[0] < racingLine.p2[0] ? racingLine.p1 : racingLine.p2
     const pt2 = pt1 === racingLine.p1 ? racingLine.p2 : racingLine.p1
-    const midX = (pt1[0] + pt2[0]) / 2
 
-    const dX = (this.XY[1] - pt2[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midX
+    const dX = (this.XY[1] - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1])
 
     ctx.translate(
         cameraLoc[0] + this.XY[0] + dX,
