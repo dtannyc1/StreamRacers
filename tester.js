@@ -369,7 +369,7 @@ function loadAllSEAssets() {
         }),
     SE_API.store.get('jwtToken')
         .then(data => {
-          jwtToken = data;
+          jwtToken = data.value;
         })
   ])
 };
