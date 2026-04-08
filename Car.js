@@ -30,7 +30,7 @@ export default class Car {
     return carData.assets.map(asset => ({
       ...asset,
       img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
-      currentAngle: asset.theta ?? 0,
+      theta_dot: 1,
     }))
   }
 
@@ -54,7 +54,7 @@ export default class Car {
     const dt = (curTime - this.time) / 1000
     const speed = this.vel[0] * speedMultiplier
 
-    this._updateAssetAngles(curTime / 1000, speed)
+    this._updateAssetAngles(dt, speed)
 
     this.XY[0] += speed * dt
     this.XY[1] += this.vel[1] * dt
@@ -64,26 +64,24 @@ export default class Car {
     this.time = curTime
   }
 
-  _updateAssetAngles(t, speed) {
+  _updateAssetAngles(dt, speed) {
     this.assets.forEach(asset => {
       const radius = asset.radius ?? 1
 
       if (asset.type === 'rotating') {
-        asset.currentAngle = (asset.theta ?? 0) + (speed / radius) * t
-        console.log(`Asset ${asset.name} angle: ${asset.currentAngle.toFixed(2)} radians, speed: ${speed.toFixed(2)}, radius: ${radius}`)
+        asset.theta = ((asset.theta ?? 0) + (speed / radius) * dt) % (2 * Math.PI)
 
       } else if (asset.type === 'oscillating') {
         const min = asset.minTheta ?? -Math.PI / 6
         const max = asset.maxTheta ?? Math.PI / 6
-        const phase = asset.phase ?? 0
-        const freq = Math.abs(speed / radius)
-        const period = freq > 0 ? (2 * Math.PI) / freq : Infinity
-        const tp = period < Infinity
-          ? ((t + phase / freq) % period + period) % period
-          : 0
-        const normalized = period < Infinity ? tp / period : 0
-        const triangle = normalized < 0.5 ? normalized * 2 : 2 - normalized * 2
-        asset.currentAngle = (asset.theta ?? 0) + min + triangle * (max - min)
+        asset.theta = (asset.theta ?? 0) + asset.theta_dot * (speed / radius) * dt
+        if (asset.theta_dot > 0 && asset.theta > max) {
+          asset.theta = max
+          asset.theta_dot *= -1
+        } else if (asset.theta_dot < 0 && asset.theta < min) {
+          asset.theta = min
+          asset.theta_dot *= -1
+        }
       }
     })
   }
@@ -116,7 +114,7 @@ export default class Car {
       const img = asset.img
       const [x, y] = asset.tl
       const [w, h] = asset.dim
-      const angle = asset.currentAngle ?? (asset.theta ?? 0)
+      const angle = asset.theta ?? 0
 
       ctx.save()
 
