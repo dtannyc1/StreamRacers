@@ -1,4 +1,4 @@
-import Car from "./Car"
+import Car from "./Car.js"
 
 export default class CarManager {
   constructor({ boostCooldown = 10 }) {
