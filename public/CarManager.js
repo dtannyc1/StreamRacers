@@ -22,7 +22,7 @@ export default class CarManager {
       ])
       this.customCarData = customData ?? {}
       this.defaultCarData = raceSettings?.defaultRacer ? raceSettings.defaultRacer : DEFAULT_CAR_DATA
-      console.log('Custom car data loaded:', Object.keys(this.customCarData))
+      console.log('Custom car data loaded:', this.customCarData)
       console.log('Default car data loaded:', this.defaultCarData ? 'yes' : 'no')
     } catch (err) {
       console.warn('Failed to load car data:', err)
