@@ -106,6 +106,10 @@ class Game {
       return
     }
 
+    if (this.track.racingLine) {  
+      this.cameraLoc[0] = (this.track.racingLine.p1[0] + this.track.racingLine.p2[0]) / 2
+    }
+
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
 
     if (this.testing) {
