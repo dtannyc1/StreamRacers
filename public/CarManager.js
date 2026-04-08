@@ -21,13 +21,13 @@ export default class CarManager {
         SE_API.store.get('raceSettings'),
       ])
       this.customCarData = customData ?? {}
-      this.defaultCarData = raceSettings ? raceSettings.defaultRacer : null
+      this.defaultCarData = raceSettings ? raceSettings.defaultRacer : DEFAULT_CAR_DATA
       console.log('Custom car data loaded:', Object.keys(this.customCarData))
       console.log('Default car data loaded:', this.defaultCarData ? 'yes' : 'no')
     } catch (err) {
       console.warn('Failed to load car data:', err)
       this.customCarData = {}
-      this.defaultCarData = null
+      this.defaultCarData = DEFAULT_CAR_DATA
     }
   }
 
@@ -178,4 +178,82 @@ export default class CarManager {
     this.cars = {}
     this.sortedNames = []
   }
+}
+
+const DEFAULT_CAR_DATA = {
+    "assets": [
+        {
+            "dim": [
+                80,
+                80
+            ],
+            "id": "ee1e1b96-0c0e-426a-92af-980f9c77f8b7",
+            "name": "Avatar",
+            "spriteUrl": "https://static-cdn.jtvnw.net/jtv_user_pictures/9ee9431b-96be-4490-a71c-edab7f769430-profile_image-300x300.png",
+            "theta": 0,
+            "tl": [
+                -134,
+                -130.403
+            ],
+            "type": "avatar"
+        },
+        {
+            "dim": [
+                200,
+                200
+            ],
+            "id": "3959c472-b18e-483d-952e-63b9cd1d3ace",
+            "name": "Vehicle",
+            "spriteUrl": "https://www.dropbox.com/scl/fi/erc6teenvak8bzkdgkrfr/default_vehicle.png?rlkey=oz9y6z8gr6x3b4ek7nv3s5csh&st=mnd2bytw&dl=0",
+            "theta": 0,
+            "tl": [
+                -183,
+                -160.403
+            ],
+            "type": "static"
+        },
+        {
+            "cr": [
+                -135,
+                -22.403
+            ],
+            "dim": [
+                192.4,
+                120.4
+            ],
+            "handleAngle": 0,
+            "id": "6759f5a3-e0a6-4e13-85bf-448fa086189c",
+            "name": "Left Wheel",
+            "radius": 20,
+            "spriteUrl": "https://www.dropbox.com/scl/fi/h40xha1db6oqsa7n5nibi/default_wheel1.png?rlkey=xtolfaiwu6fsj3w7f23jyt6h8&st=4cr3dmmu&dl=0",
+            "theta": 0,
+            "tl": [
+                -185,
+                -120.403
+            ],
+            "type": "rotating"
+        },
+        {
+            "cr": [
+                -40,
+                -22.403
+            ],
+            "dim": [
+                192.4,
+                120.4
+            ],
+            "handleAngle": 0,
+            "id": "42f0ccd1-79aa-43d9-9dd3-82fdef73f8cd",
+            "name": "Right Wheel",
+            "radius": 20,
+            "spriteUrl": "https://www.dropbox.com/scl/fi/avrdy5jpr2ky0xfo5h6bz/default_wheel2.png?rlkey=msdi1tkjhoot006z1n0cuic5u&st=2ess0iq9&dl=0",
+            "theta": 0,
+            "tl": [
+                -178,
+                -120.403
+            ],
+            "type": "rotating"
+        }
+    ],
+    "name": "Default Car"
 }

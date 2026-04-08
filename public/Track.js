@@ -75,7 +75,7 @@ export default class Track {
     if (this.images[url]) return this.images[url]
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.src = url
+    img.src = this._resolveImageUrl(url)
     this.images[url] = img
     return img
   }
@@ -89,6 +89,20 @@ export default class Track {
     this.racingLine?.finishModifiers?.forEach(m => this._loadImage(m.url))
     this.backgroundAssets.forEach(a => this._loadImage(a.url))
     this.foregroundAssets.forEach(a => this._loadImage(a.url))
+  }
+
+  _resolveImageUrl = (url) => {
+    if (!url) return url
+
+    // convert Dropbox share links to direct download links
+    if (url.includes('dropbox.com')) {
+      return url
+        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+        .replace('?dl=0', '')
+        .replace('&dl=0', '')
+    }
+
+    return url
   }
 
   // ── Scattered asset management ─────────────────────────────────────────────
