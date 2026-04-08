@@ -319,11 +319,9 @@ export default class Track {
     const h = rl.dim[1] * rl.scale
 
     ctx.save()
-    ctx.translate(cameraLoc[0] + worldX, 0)
 
     if (img?.naturalWidth) {
       ctx.drawImage(img, rl.x - w / 2, rl.y - h / 2, w, h)
-      console.log(`Drawing racing line at x=${cameraLoc[0] + worldX + rl.x - w / 2}, y=${rl.y - h / 2}`)
     }
 
     const modifiers = isStart ? rl.startModifiers : rl.finishModifiers
