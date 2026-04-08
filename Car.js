@@ -21,7 +21,7 @@ export default class Car {
     if (!url) return null
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.src = url
+    img.src = this._resolveImageUrl(url)
     return img
   }
 
@@ -32,6 +32,20 @@ export default class Car {
       img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
       currentAngle: asset.theta ?? 0,
     }))
+  }
+
+  _resolveImageUrl = (url) => {
+    if (!url) return url
+
+    // convert Dropbox share links to direct download links
+    if (url.includes('dropbox.com')) {
+      return url
+        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+        .replace('?dl=0', '')
+        .replace('&dl=0', '')
+    }
+
+    return url
   }
 
   // ── Update ─────────────────────────────────────────────────────────────────
