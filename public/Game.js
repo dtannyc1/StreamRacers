@@ -3,7 +3,11 @@ import Track from './Track.js'
 
 class Game {
   constructor() {
-    this.canvas = document.getElementById('maincanvas')
+    let canvas = document.createElement("canvas");
+    canvas.width = 1920;
+    canvas.height = 1080;
+    document.body.appendChild(canvas);
+    this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d')
 
     this.track = null
