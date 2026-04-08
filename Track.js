@@ -231,10 +231,6 @@ export default class Track {
   // ── Drawing ────────────────────────────────────────────────────────────────
 
   drawBackground(ctx, cameraLoc, canvasWidth, canvasHeight) {
-    // sky
-    ctx.fillStyle = '#1a1a2e'
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
-
     // road
     this._drawRoad(ctx, canvasWidth)
 
@@ -283,7 +279,7 @@ export default class Track {
       const numDiv = 10
       ctx.fillStyle = 'black'
       ctx.fillRect(0, this.roadTop - this.roadHeight * 2 / numDiv, canvasWidth,
-        this.roadHeight + this.roadHeight * 2 / numDiv)
+        this.roadHeight + this.roadHeight * 4 / numDiv)
       for (let i = 0; i < numDiv; i++) {
         ctx.fillStyle = `hsl(${Math.floor(i * 360 / numDiv)},100%,50%)`
         ctx.fillRect(0, this.roadTop + this.roadHeight * (numDiv - i - 1) / numDiv,

@@ -70,6 +70,7 @@ export default class Car {
 
       if (asset.type === 'rotating') {
         asset.currentAngle = (asset.theta ?? 0) + (speed / radius) * t
+        console.log(`Asset ${asset.name} angle: ${asset.currentAngle.toFixed(2)} radians, speed: ${speed.toFixed(2)}, radius: ${radius}`)
 
       } else if (asset.type === 'oscillating') {
         const min = asset.minTheta ?? -Math.PI / 6
