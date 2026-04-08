@@ -56,6 +56,42 @@ From there, just use ``Authorization: apikey your_apiToken_here`` on the kvstore
 - Data should be stored in a way to know which function to call, then pass in relevant image params as necessary
 - Because it's a static website, there's no way to do socket.io stuff to emit events to streamelements... User will have to manually refresh their browser source in order to get the latest data.
 
+- Loading script directly in SE is working fine, it looks something like
+```
+<script src="https://dtannyc1.github.io/StreamRacers/tester.js"></script>
+```
+
+- There are tools to get user avatars without any authorization stuff.
+```
+async function getUserAvatar(username) {
+  let url = "https://decapi.me/twitch/avatar/" + username;
+  return await fetch(url)
+    .then(res => {
+      if (res.ok) {
+        return res.text();
+      }
+    })
+    .then(url => {
+      if (url) {
+        return url;
+      } else {
+        return null;
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      return null;
+    });
+}
+```
+
+- Plenty of user data is given on message recieved
+```
+Twitch User Display Color: event.data.displayColor
+Twitch username: event.data.displayName
+Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' | 'subscriber' | 'moderator'}
+```
+
 # Notes for deployment:
 - `npm run dev` to start up local version
 - push to main to deploy it on github pages with env vars injected
