@@ -232,7 +232,7 @@ const WordBankEditor = ({ wordBank, onChange }) => {
 }
 
 const SettingsPanel = () => {
-  const { raceSettings, updateRaceSettings } = useKVStore()
+  const { raceSettings, updateRaceSettings, tracks } = useKVStore()
   const [local, setLocal] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -285,6 +285,27 @@ const SettingsPanel = () => {
           </button>
         </div>
       </div>
+
+      <CollapsibleSection title="Current Track">
+        <p className="text-xs text-gray-500">
+            The track loaded when the widget starts. If unset, a random track is chosen.
+        </p>
+        <select
+            value={settings.defaultTrack ?? ''}
+            onChange={(e) => update({ defaultTrack: e.target.value || null })}
+            className="rounded bg-gray-700 border border-gray-600 px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
+        >
+            <option value="">— Random —</option>
+            {Object.keys(tracks ?? {}).map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+        </select>
+        {settings.defaultTrack && !tracks?.[settings.defaultTrack] && (
+            <p className="text-xs text-red-400">
+            "{settings.defaultTrack}" no longer exists — it will fall back to random.
+            </p>
+        )}
+      </CollapsibleSection>
 
       <CollapsibleSection title="Testing Mode" defaultCollapsed={true}>
         <label className="flex items-center gap-3 cursor-pointer">

@@ -118,4 +118,6 @@ export const DEFAULT_RACE_SETTINGS = {
     animals: ['dog', 'cat', 'elephant', 'lion', 'tiger', 'giraffe', 'zebra', 'monkey', 'bear', 'fox'],
     fruits: ['apple', 'banana', 'orange', 'strawberry', 'grape', 'watermelon', 'kiwi', 'pineapple'],
   },
+  defaultTrack: null,
+  defaultRacer: null,
 }
