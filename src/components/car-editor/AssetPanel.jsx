@@ -11,7 +11,9 @@ const AssetPanel = ({
   asset,
   onUpdate,
   onSpriteUrlChange,
-  toggleAspectLock
+  toggleAspectLock,
+  isDefaultCar,
+  onEyedropperActivate
 }) => {
 
   const toggleAssetId = (id) => {
@@ -87,6 +89,8 @@ const AssetPanel = ({
                     onUpdate={onUpdate} 
                     onSpriteUrlChange={onSpriteUrlChange}
                     toggleAspectLock={toggleAspectLock}
+                    isDefaultCar={isDefaultCar}
+                    onEyedropperActivate={onEyedropperActivate}
                   />
                 </div>
               }

@@ -9,6 +9,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
     tl: [-134, -145 + 14.597],
     dim: [80, 80],
     theta: 0,
+    colorRemap: { enabled: false, sourceColor: '#FF001A' },
   },
   {
     id: crypto.randomUUID(),
@@ -18,6 +19,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
     tl: [-183, -175 + 14.597],
     dim: [200, 200],
     theta: 0,
+    colorRemap: { enabled: false, sourceColor: '#FF001A' },
   },
   {
     id: crypto.randomUUID(),
@@ -30,6 +32,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
     theta: 0,
     radius: 50 / 2.5,
     handleAngle: 0,
+    colorRemap: { enabled: false, sourceColor: '#FF001A' },
   },
   {
     id: crypto.randomUUID(),
@@ -42,6 +45,7 @@ export const createDefaultAssets = (avatarUrl = '') => [
     theta: 0,
     radius: 50 / 2.5,
     handleAngle: 0,
+    colorRemap: { enabled: false, sourceColor: '#FF001A' },
   },
 ]
 

@@ -5,7 +5,7 @@ import RacerRow from './RacerRow'
 import AddRacerModal from './AddRacerModal'
 
 const RacerList = () => {
-  const { racers, loading, error } = useKVStore()
+  const { racers, loading, error, raceSettings } = useKVStore()
   const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
 
@@ -13,6 +13,7 @@ const RacerList = () => {
   if (error) return <p className="text-sm text-red-400">{error}</p>
 
   const usernames = racers ? Object.keys(racers) : []
+  const defaultCar = raceSettings?.defaultRacer
 
   return (
     <>
@@ -25,6 +26,24 @@ const RacerList = () => {
           >
             + Add Racer
           </button>
+        </div>
+
+        {/* Default car */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between rounded-lg px-4 py-3 bg-gray-800 border border-gray-700">
+            <div>
+              <p className="text-sm font-medium text-white">Default Car</p>
+              <p className="text-xs text-gray-400">
+                {defaultCar?.assets?.length ?? 0} assets · used when no custom car is found
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/racer/default/car/edit')}
+              className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Edit
+            </button>
+          </div>
         </div>
 
         {usernames.length === 0 && (
