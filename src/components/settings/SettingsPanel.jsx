@@ -316,7 +316,7 @@ const SettingsPanel = () => {
             className="w-4 h-4 accent-purple-500"
           />
           <span className="text-sm text-white">Enable testing mode</span>
-          <span className="text-xs text-gray-500">(uses test racers, disables chat messages)</span>
+          <span className="text-xs text-gray-500">(uses test racers)</span>
         </label>
 
         
@@ -349,6 +349,7 @@ const SettingsPanel = () => {
       </CollapsibleSection>
 
       <CollapsibleSection title="Bot Messages during Race">
+        <p className="text-xs text-gray-500">Messages that are sent during the race. These will be sent using your account. (Leave blank to disable)</p>
         <MessageInput
           label="Race started"
           value={settings.messages.raceStarted}
