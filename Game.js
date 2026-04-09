@@ -114,7 +114,7 @@ class Game {
 
     if (this.testing) {
       for (const name of this.testRacers) {
-        await this.carManager.addRacer(name, '#FFFFFF', this.track.racingLine)
+        await this.carManager.addRacer(name, null, this.track.racingLine)
       }
     }
 
