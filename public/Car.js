@@ -94,20 +94,14 @@ export default class Car {
     const pt1 = racingLine.p1[0] < racingLine.p2[0] ? racingLine.p1 : racingLine.p2
     const pt2 = pt1 === racingLine.p1 ? racingLine.p2 : racingLine.p1
 
-    const dX = (this.XY[1] - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1])
+    const midY = (pt1[1] + pt2[1]) / 2
+    const midDx = (midY - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1])
+    const dX = (this.XY[1] - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midDx
 
     ctx.translate(
-        cameraLoc[0] + this.XY[0],
+        cameraLoc[0] + this.XY[0] + dX,
         cameraLoc[1] + this.XY[1]
     )
-
-    // for debugging: draw car front and bottom
-    ctx.strokeStyle = 'blue'
-    ctx.beginPath()
-    ctx.moveTo(0,-100)
-    ctx.lineTo(0,0)
-    ctx.lineTo(-100,0)
-    ctx.stroke()
 
     this._drawAssets(ctx)
     ctx.resetTransform()
