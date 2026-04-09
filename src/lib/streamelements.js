@@ -96,3 +96,9 @@ export const setTracks = (token, channelId, value) =>
 
 export const setJWTToken = (token, channelId) =>
   setKVKey(token, channelId, 'jwtToken', token)
+
+export const getRaceSettings = async (token, channelId) =>
+  getKVKey(token, channelId, 'raceSettings')
+
+export const setRaceSettings = async (token, channelId, value) =>
+  setKVKey(token, channelId, 'raceSettings', value)
