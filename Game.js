@@ -107,8 +107,7 @@ class Game {
     }
 
     if (this.track.racingLine) {  
-      const w = this.track.racingLine.dim[0] * this.track.racingLine.scale
-      this.cameraLoc[0] = (this.track.racingLine.p1[0] + this.track.racingLine.p2[0]) / 2 - w/2
+      this.cameraLoc[0] = (this.track.racingLine.p1[0] + this.track.racingLine.p2[0]) / 2
     }
 
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
