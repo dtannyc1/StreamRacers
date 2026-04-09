@@ -122,8 +122,8 @@ class Game {
 
     const settings = await SE_API.store.get('raceSettings').catch(() => null)
     if (settings) {
-      if (settings.joinCommands) this.joinCommands = settings.joinCommands
-      if (settings.goCommands) this.goCommands = settings.goCommands
+      if (settings.joinCommands && Array.isArray(settings.joinCommands) && settings.joinCommands.length > 0) this.joinCommands = settings.joinCommands
+      if (settings.goCommands && Array.isArray(settings.goCommands) && settings.goCommands.length > 0) this.goCommands = settings.goCommands
       if (settings.messages) this.messages = { ...this.messages, ...settings.messages }
       if (settings.testRacers) this.testRacers = settings.testRacers
       if (settings.testing !== undefined) this.testing = settings.testing
