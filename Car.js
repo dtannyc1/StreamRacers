@@ -101,6 +101,10 @@ export default class Car {
         cameraLoc[1] + this.XY[1]
     )
 
+    // for debugging: draw car origin
+    ctx.fillStyle = 'blue'
+    ctx.fillRect(-5, -5, 10, 10)
+
     this._drawAssets(ctx)
     ctx.resetTransform()
     }

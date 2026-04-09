@@ -353,6 +353,7 @@ class Game {
     // for debugging: draw camera center
     const midY = this.track.racingLine ? (this.track.racingLine.p1[1] + this.track.racingLine.p2[1]) / 2 : 0
     this.ctx.fillStyle = 'white'
+    this.ctx.fillRect(-5, midY-5, 10, 10)
     this.ctx.fillRect(this.cameraLoc[0]-5, midY-5, 10, 10)
   }
 
