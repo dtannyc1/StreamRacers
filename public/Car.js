@@ -77,17 +77,19 @@ export default class Car {
     const tg = parseInt(targetHex.slice(3, 5), 16)
     const tb = parseInt(targetHex.slice(5, 7), 16)
 
-    const tolerance = 10
+    const tolerance = 50
 
     for (let i = 0; i < data.length; i += 4) {
       if (
-        Math.abs(data[i] - sr) <= tolerance &&
-        Math.abs(data[i + 1] - sg) <= tolerance &&
-        Math.abs(data[i + 2] - sb) <= tolerance
+        Math.sqrt(
+          (data[i] - sr) ** 2 +
+          (data[i + 1] - sg) ** 2 +
+          (data[i + 2] - sb) ** 2
+        ) <= tolerance
       ) {
-        data[i] = tr
-        data[i + 1] = tg
-        data[i + 2] = tb
+        data[i] = tr + data[i] - sr
+        data[i + 1] = tg + data[i + 1] - sg
+        data[i + 2] = tb + data[i + 2] - sb
       }
     }
 
