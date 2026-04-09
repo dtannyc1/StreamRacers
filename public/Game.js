@@ -31,6 +31,14 @@ class Game {
     this.hidden = false
     this.isUpdatingRacers = false
 
+    this.joinCommands = ['!join']
+    this.goCommands = ['!go', '!potato']
+    this.messages = {
+      "boostFound": "OUI! {username} FOUND IT!",
+      "raceStarted": "Race started!",
+      "winner": "!addqwoin {username} 5",
+      "wordClue": "Guess the word I'm thinking of for a boost! The category is: {category}"
+    }
     // word boost
     this.wordBank = {
       food: ['pizza', 'chocolate', 'sushi', 'ice cream', 'burger', 'pasta', 'salad', 'potato', 'taco', 'steak', 'papaya', 'cake', 'popcorn', 'pancake', 'sandwich', 'cheese', 'fruit', 'cookie', 'ramen', 'grilled cheese'],
@@ -112,6 +120,16 @@ class Game {
 
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
 
+    const settings = await SE_API.store.get('raceSettings').then(data => data.value).catch(() => null)
+    if (settings) {
+      if (settings.joinCommands) this.joinCommands = settings.joinCommands
+      if (settings.goCommands) this.goCommands = settings.goCommands
+      if (settings.messages) this.messages = { ...this.messages, ...settings.messages }
+      if (settings.testRacers) this.testRacers = settings.testRacers
+      if (settings.testing !== undefined) this.testing = settings.testing
+      if (settings.wordBank) this.wordBank = settings.wordBank
+    }
+
     if (this.testing) {
       for (const name of this.testRacers) {
         await this.carManager.addRacer(name, null, this.track.racingLine)
@@ -163,7 +181,7 @@ class Game {
       const badges = event.data.badges
       const color = event.data.displayColor
 
-      if (this.readying && message.startsWith('!join')) {
+      if (this.readying && this.joinCommands.some(cmd => message.startsWith(cmd))) {
         await this.carManager.addRacer(name, color, this.track.racingLine)
         return
       }
@@ -188,7 +206,7 @@ class Game {
         if (this._isBroadcaster(badges)) {
           if (message.startsWith('!setuprace')) {
             this.readying = true
-          } else if (message.startsWith('!go') || message.startsWith('!potato')) {
+          } else if (this.goCommands.some(cmd => message.startsWith(cmd))) {
             if (this.carManager.sortedNames.length > 0) this.startRace()
           } else if (event.data.text.startsWith('!resetSEStore')) {
             SE_API.store.set('StreamRacersLeaderboardData', {})
@@ -202,7 +220,7 @@ class Game {
           if (boosted) {
             this.foundWord = true
             this.chosenWord.found = true
-            setTimeout(() => this.sendMessage(`OUI! ${name} FOUND IT!`), 1000)
+            setTimeout(() => this.sendMessage(this.messages?.boostFound?.replace('{username}', name)), 1000)
             SE_API.store.set('boostWord', this.chosenWord)
           }
         }
@@ -224,7 +242,7 @@ class Game {
     this.prevStandingsUpdateTime = this.raceStartTime
     this.sentClue = false
     this._chooseRandomWord()
-    this.sendMessage('Race started!')
+    this.sendMessage(this.messages?.raceStarted)
   }
 
   reset() {
@@ -277,7 +295,7 @@ class Game {
 
       if (elapsed >= this.setupDuration * 1000) {
         if (!this.sentClue) {
-          this.sendMessage(`Guess the word I'm thinking of for a boost! The category is: ${this.chosenWord?.category}`)
+          this.sendMessage(this.messages?.wordClue?.replace('{category}', this.chosenWord?.category))
           this.sentClue = true
         }
 
@@ -383,7 +401,7 @@ class Game {
   _onRaceEnd() {
     if (this.testing) return
 
-    this.sendMessage(`!addqwoin ${this.winner} 5`)
+    this.sendMessage(this.messages?.winner?.replace('{username}', this.winner))
 
     SE_API.store.get('StreamRacersLeaderboardData').then(data => {
       const date = new Date()
@@ -440,6 +458,7 @@ class Game {
   // ── Chat ───────────────────────────────────────────────────────────────────
 
   sendMessage(message) {
+    if (!message) return
   	fetch("https://api.streamelements.com/kappa/v2/bot/" + this.broadcasterChannelId + "/say", {
      method: "POST",
      headers: {
