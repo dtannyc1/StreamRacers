@@ -61,7 +61,7 @@ class Game {
     this.testRacers = [
       'apocalypse_squirrel', 'KnuthingIsReal', 'NowImABeliever',
       'albinounounou', 'neiluj04', 'pyobum', 'thecomplements',
-      'andythefrenchy', 'thesolid7', 'mamzellerylo', 'pencils45', 'cafesparrow'
+      'AndyTheFrenchy', 'thesolid7', 'CafeSparrow'
     ]
 
     this._bindEvents()
@@ -163,7 +163,7 @@ class Game {
       const badges = event.data.badges
       const color = event.data.displayColor
 
-      if (this.readying && (message.startsWith('!join') || message.startsWith('!start'))) {
+      if (this.readying && message.startsWith('!join')) {
         await this.carManager.addRacer(name, color, this.track.racingLine)
         return
       }

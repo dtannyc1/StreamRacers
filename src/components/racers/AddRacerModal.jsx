@@ -39,10 +39,10 @@ const AddRacerModal = ({ onClose }) => {
   }
 
   const handleConfirm = async () => {
-    const updatedRacers = { ...racers, [twitchUser.login]: [] }
+    const updatedRacers = { ...racers, [twitchUser.display_name]: [] }
     await updateRacers(updatedRacers)
     onClose()
-    navigate(`/racer/${twitchUser.login}/car/new`)
+    navigate(`/racer/${twitchUser.display_name}/car/new`)
   }
 
   const handleBack = () => {
