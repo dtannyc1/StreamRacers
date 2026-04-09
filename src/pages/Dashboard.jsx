@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import RacerList from '../components/racers/RacerList'
 import TrackList from '../components/tracks/TrackList'
+import SettingsPanel from '../components/settings/SettingsPanel'
 import ChannelProfile from '../components/ChannelProfile'
 import { useAuth } from '../context/AuthContext'
 import { getTwitchAccessToken } from '../lib/twitch'
@@ -60,6 +61,7 @@ const Dashboard = () => {
 
         {activeTab === 'Vehicles' && <RacerList />}
         {activeTab === 'Tracks' && <TrackList />} 
+        {activeTab === 'Settings' && <SettingsPanel />}
 
 
       </div>
