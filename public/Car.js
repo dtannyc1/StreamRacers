@@ -1,7 +1,7 @@
 export default class Car {
   constructor({ name, avatar, displayColor, xy, carData }) {
     this.name = name
-    this.displayColor = displayColor || '#FF0000'
+    this.displayColor = displayColor
     this.avatar = avatar
 
     // physics
@@ -101,6 +101,7 @@ export default class Car {
   }
 
   applyColorRemaps(displayColor) {
+    if (!displayColor) return
     this.assets.forEach(asset => {
       if (!asset.colorRemap?.enabled || !asset.img || asset.type === 'avatar') return
       const img = asset.img
