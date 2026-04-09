@@ -36,7 +36,7 @@ const RacerRow = ({ username, cars = [] }) => {
             onClick={() => navigate(`/racer/${username}/car/new`)}
             className="mt-1 cursor-pointer text-sm text-purple-400 hover:text-purple-300 transition-colors text-left"
           >
-            + Add car
+            + Add vehicle
           </button>
         </div>
       )}

@@ -5,11 +5,11 @@ import ChannelProfile from '../components/ChannelProfile'
 import { useAuth } from '../context/AuthContext'
 import { getTwitchAccessToken } from '../lib/twitch'
 
-const tabs = ['Racers', 'Tracks']
+const tabs = ['Vehicles', 'Tracks', 'Settings']
 
 const Dashboard = () => {
   const { channel, settling, clearToken } = useAuth()
-  const [activeTab, setActiveTab] = useState('Racers')
+  const [activeTab, setActiveTab] = useState('Vehicles')
 
   if (settling || !getTwitchAccessToken()) return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center gap-4">
@@ -54,12 +54,13 @@ const Dashboard = () => {
               }`}
             >
               {tab}
-            </button>
+            </button> 
           ))}
         </div>
 
-        {activeTab === 'Racers' && <RacerList />}
-        {activeTab === 'Tracks' && <TrackList />}
+        {activeTab === 'Vehicles' && <RacerList />}
+        {activeTab === 'Tracks' && <TrackList />} 
+
 
       </div>
     </div>
