@@ -27,11 +27,21 @@ export default class Car {
 
   _loadAssets(carData) {
     if (!carData?.assets?.length) return []
-    return carData.assets.map(asset => ({
-      ...asset,
-      img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
-      theta_dot: 1,
-    }))
+    return carData.assets.map(asset => {
+
+      let modifiedAsset = {
+        ...asset,
+        img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
+        theta_0: asset.theta ?? 0,
+        theta_dot: 1,
+      }
+
+      if (asset.type === 'oscillating') {
+        modifiedAsset.theta = asset.theta + Math.sin(asset.phase ?? 0) * ((asset.maxTheta ?? 0) - (asset.minTheta ?? 0)) / 2 + ((asset.minTheta ?? 0) + (asset.maxTheta ?? 0)) / 2
+      }
+      
+      return modifiedAsset
+    })
   }
 
   _resolveImageUrl = (url) => {
@@ -77,11 +87,11 @@ export default class Car {
         const min = asset.minTheta ?? -Math.PI / 6
         const max = asset.maxTheta ?? Math.PI / 6
         asset.theta = (asset.theta ?? 0) + asset.theta_dot * (speed / radius) * dt
-        if (asset.theta_dot > 0 && asset.theta > max) {
-          asset.theta = max
+        if (asset.theta_dot > 0 && asset.theta - asset.theta_0 > max) {
+          asset.theta = max + asset.theta_0
           asset.theta_dot *= -1
-        } else if (asset.theta_dot < 0 && asset.theta < min) {
-          asset.theta = min
+        } else if (asset.theta_dot < 0 && asset.theta - asset.theta_0 < min) {
+          asset.theta = min + asset.theta_0
           asset.theta_dot *= -1
         }
       }
