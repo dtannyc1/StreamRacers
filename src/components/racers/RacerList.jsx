@@ -18,16 +18,7 @@ const RacerList = () => {
   return (
     <>
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-400">{usernames.length} racer{usernames.length !== 1 ? 's' : ''}</p>
-          <button
-            onClick={() => setShowModal(true)}
-            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
-          >
-            + Add Racer
-          </button>
-        </div>
-
+        
         {/* Default car */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between rounded-lg px-4 py-3 bg-gray-800 border border-gray-700">
@@ -44,6 +35,16 @@ const RacerList = () => {
               Edit
             </button>
           </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-400">{usernames.length} Custom Racer{usernames.length !== 1 ? 's' : ''}</p>
+          <button
+            onClick={() => setShowModal(true)}
+            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+          >
+            + Add Racer
+          </button>
         </div>
 
         {usernames.length === 0 && (
