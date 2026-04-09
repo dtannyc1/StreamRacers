@@ -114,6 +114,7 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
     - Add limiting options for global vehicles
     - Add percentage chance of change
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
+- Give an option to update/correct a username. it should just do the lookup again, then replace the username with the corrected username and save the data to streamelements
 
 ## Track 
 - Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent.
@@ -125,7 +126,8 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - Add default settings
   - Default Track Name
   - Race Join words
-  - Race Start words
+  - Race Start word(s)
+  - Race reset words
   - Boost? Boost Words?
 
 ## Instructions
