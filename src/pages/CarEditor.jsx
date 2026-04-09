@@ -4,10 +4,11 @@ import { useKVStore } from '../context/KVStoreContext'
 import { getTwitchUser } from '../lib/twitch'
 import { createDefaultCar } from '../lib/carDefaults'
 import CarEditorInner from '../components/car-editor/CarEditorInner'
+import { getImageUrl } from '../lib/imageLibrary'
 
 const CarEditor = ({ mode }) => {
   const { username, carIndex } = useParams()
-  const { racers } = useKVStore()
+  const { racers, raceSettings, updateRaceSettings } = useKVStore()
 
   const [initialCar, setInitialCar] = useState(null)
   const [avatarUrl, setAvatarUrl] = useState('')
@@ -19,6 +20,12 @@ const CarEditor = ({ mode }) => {
       const existingAvatarUrl = car?.assets?.find(a => a.type === 'avatar')?.spriteUrl ?? ''
       setAvatarUrl(existingAvatarUrl)
       setInitialCar(car ?? null)
+      setReady(true)
+      return
+    }
+
+    if (mode === 'default') {
+      setInitialCar(raceSettings?.defaultRacer ?? createDefaultCar())
       setReady(true)
       return
     }
@@ -38,7 +45,17 @@ const CarEditor = ({ mode }) => {
     </div>
   )
 
-  return <CarEditorInner mode={mode} username={username} carIndex={carIndex} initialCar={initialCar} avatarUrl={avatarUrl} />
+  return <CarEditorInner 
+            mode={mode} 
+            username={username} 
+            carIndex={carIndex} 
+            initialCar={initialCar} 
+            avatarUrl={mode === 'default' ? getImageUrl('placeholder-avatar') : avatarUrl} 
+            isDefaultCar={mode === 'default'}
+            onSaveDefault={async (car) => {
+              await updateRaceSettings({ ...raceSettings, defaultRacer: car })
+            }}
+          />
 }
 
 export default CarEditor

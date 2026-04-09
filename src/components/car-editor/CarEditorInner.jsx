@@ -7,8 +7,9 @@ import AssetPanel from './AssetPanel'
 import AssetForm from './AssetForm'
 import { sanitizeDeep, validateCar } from '../../lib/sanitize'
 
-const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => {
+const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDefaultCar, onSaveDefault }) => {
   const { racers, updateRacers } = useKVStore()
+  const [eyedropperAssetId, setEyedropperAssetId] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const navigate = useNavigate()
 
@@ -49,6 +50,13 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
 
     setSaveError(null)
     const sanitizedCar = sanitizeDeep(car)
+
+    if (isDefaultCar) {
+      await onSaveDefault(sanitizedCar)
+      navigate('/')
+      return
+    }
+
     const updated = { ...racers }
 
     if (mode === 'new-user' || mode === 'new-car') {
@@ -61,6 +69,20 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
 
     await updateRacers(updated)
     navigate('/')
+  }
+
+  const handleEyedropperActivate = (assetId) => {
+    setEyedropperAssetId(assetId)
+  }
+
+  const handleEyedropperPick = (assetId, hex) => {
+    updateAsset(assetId, {
+      colorRemap: {
+        ...car.assets.find(a => a.id === assetId)?.colorRemap,
+        sourceColor: hex,
+      }
+    })
+    setEyedropperAssetId(null)
   }
 
   return (
@@ -108,6 +130,9 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
             onMouseDown={onCanvasMouseDown}
             onMouseMove={onCanvasMouseMove}
             onMouseUp={onCanvasMouseUp}
+            isDefaultCar={isDefaultCar}
+            eyedropperAssetId={eyedropperAssetId}
+            onEyedropperPick={handleEyedropperPick}
           />
           <div className="flex flex-col gap-6 pr-1">
             <AssetPanel
@@ -122,6 +147,8 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl }) => 
               onUpdate={updateAsset} 
               onSpriteUrlChange={onSpriteUrlChange}
               toggleAspectLock={toggleAspectLock}
+              isDefaultCar={isDefaultCar}
+              onEyedropperActivate={handleEyedropperActivate}
             />
             {/*
             <div className="border-t border-gray-700 pt-4">

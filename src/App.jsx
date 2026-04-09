@@ -52,6 +52,7 @@ const AppRoutes = () => {
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/racer/new" element={<ProtectedRoute><CarEditor mode="new-user" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/new" element={<ProtectedRoute><CarEditor mode="new-car" /></ProtectedRoute>} />
+        <Route path="/racer/default/car/edit" element={<ProtectedRoute><CarEditor mode="default" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/:carIndex/edit" element={<ProtectedRoute><CarEditor mode="edit" /></ProtectedRoute>} />
         <Route path="/track/new" element={<ProtectedRoute><TrackEditor mode="new" /></ProtectedRoute>} />
         <Route path="/track/:trackName/edit" element={<ProtectedRoute><TrackEditor mode="edit" /></ProtectedRoute>} />

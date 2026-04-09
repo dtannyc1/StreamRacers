@@ -215,6 +215,9 @@ const CarCanvas = ({
   onMouseDown,
   onMouseMove,
   onMouseUp,
+  isDefaultCar,
+  eyedropperAssetId,
+  onEyedropperPick,
 }) => {
   const canvasRef = useRef(null)
   const animRef = useRef(null)
@@ -306,37 +309,56 @@ const CarCanvas = ({
   }, [])
 
   const handleMouseDown = useCallback((e) => {
-    const { x, y, scale } = getCanvasPos(e)
-    const mx = x - ORIGIN[0]
-    const my = y - ORIGIN[1]
+    if (!eyedropperAssetId) {
+      const { x, y, scale } = getCanvasPos(e)
+      const mx = x - ORIGIN[0]
+      const my = y - ORIGIN[1]
 
-    dragStartPos.current = { x, y }
-    didDrag.current = false
+      dragStartPos.current = { x, y }
+      didDrag.current = false
 
-    const corner = hitTestCorner(mx, my, selectedAsset)
-    const isCR = !corner && hitTestCR(mx, my, selectedAsset)
-    const isRadius = !corner && !isCR && hitTestRadius(mx, my, selectedAsset)
+      const corner = hitTestCorner(mx, my, selectedAsset)
+      const isCR = !corner && hitTestCR(mx, my, selectedAsset)
+      const isRadius = !corner && !isCR && hitTestRadius(mx, my, selectedAsset)
 
-    draggingCR.current = isCR
-    draggingRadius.current = isRadius
+      draggingCR.current = isCR
+      draggingRadius.current = isRadius
 
-    onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius)
-  }, [onMouseDown, getCanvasPos, selectedAsset])
+      onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius)
+    }
+  }, [onMouseDown, getCanvasPos, selectedAsset, eyedropperAssetId])
 
   const handleMouseMove = useCallback((e) => {
-    const { x, y } = getCanvasPos(e)
-    if (dragStartPos.current) {
-      const dx = x - dragStartPos.current.x
-      const dy = y - dragStartPos.current.y
-      if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
-        didDrag.current = true
+    if (!eyedropperAssetId) {
+      const { x, y } = getCanvasPos(e)
+      if (dragStartPos.current) {
+        const dx = x - dragStartPos.current.x
+        const dy = y - dragStartPos.current.y
+        if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+          didDrag.current = true
+        }
       }
-    }
     // pass canvas-space position relative to origin
-    onMouseMove(e, x - ORIGIN[0], y - ORIGIN[1])
-  }, [onMouseMove, getCanvasPos])
+      onMouseMove(e, x - ORIGIN[0], y - ORIGIN[1])
+    }
+  }, [onMouseMove, getCanvasPos, eyedropperAssetId])
 
   const handleMouseUp = useCallback((e) => {
+    if (eyedropperAssetId) {
+      const { x, y } = getCanvasPos(e)
+      const ctx = canvasRef.current.getContext('2d')
+      const pixel = ctx.getImageData(Math.round(x), Math.round(y), 1, 1).data
+      const hex = '#' + [pixel[0], pixel[1], pixel[2]]
+        .map(v => v.toString(16).padStart(2, '0'))
+        .join('')
+        .toUpperCase()
+      onEyedropperPick(eyedropperAssetId, hex)
+      dragStartPos.current = null
+      didDrag.current = false
+      draggingCR.current = false
+      draggingRadius.current = false
+      return
+    }
     if (!didDrag.current) {
       const { x, y } = getCanvasPos(e)
       const mx = x - ORIGIN[0]
@@ -361,7 +383,7 @@ const CarCanvas = ({
     draggingCR.current = false
     draggingRadius.current = false
     onMouseUp(e)
-  }, [assets, selectedAsset, onSelectAsset, onMouseUp, getCanvasPos])
+  }, [eyedropperAssetId, onEyedropperPick, assets, selectedAsset, onSelectAsset, onMouseUp, getCanvasPos])
 
   return (
     <canvas
@@ -371,7 +393,7 @@ const CarCanvas = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className="w-full rounded-lg border border-gray-700 cursor-crosshair bg-sky-300"
+      className={`w-full rounded-lg border border-gray-700 bg-sky-300 ${eyedropperAssetId ? 'cursor-crosshair' : ''}`}
     />
   )
 }

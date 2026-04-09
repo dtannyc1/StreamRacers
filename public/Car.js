@@ -32,6 +32,7 @@ export default class Car {
       let modifiedAsset = {
         ...asset,
         img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
+        remappedImg: null,
         theta_0: asset.theta ?? 0,
         theta_dot: 1,
       }
@@ -56,6 +57,59 @@ export default class Car {
     }
 
     return url
+  }
+
+  _remapImageColor(img, sourceHex, targetHex) {
+    const offscreen = document.createElement('canvas')
+    offscreen.width = img.naturalWidth
+    offscreen.height = img.naturalHeight
+    const ctx = offscreen.getContext('2d')
+    ctx.drawImage(img, 0, 0)
+
+    const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height)
+    const data = imageData.data
+
+    const sr = parseInt(sourceHex.slice(1, 3), 16)
+    const sg = parseInt(sourceHex.slice(3, 5), 16)
+    const sb = parseInt(sourceHex.slice(5, 7), 16)
+
+    const tr = parseInt(targetHex.slice(1, 3), 16)
+    const tg = parseInt(targetHex.slice(3, 5), 16)
+    const tb = parseInt(targetHex.slice(5, 7), 16)
+
+    const tolerance = 10
+
+    for (let i = 0; i < data.length; i += 4) {
+      if (
+        Math.abs(data[i] - sr) <= tolerance &&
+        Math.abs(data[i + 1] - sg) <= tolerance &&
+        Math.abs(data[i + 2] - sb) <= tolerance
+      ) {
+        data[i] = tr
+        data[i + 1] = tg
+        data[i + 2] = tb
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0)
+
+    const remapped = new Image()
+    remapped.src = offscreen.toDataURL()
+    return remapped
+  }
+
+  applyColorRemaps(displayColor) {
+    this.assets.forEach(asset => {
+      if (!asset.colorRemap?.enabled || !asset.img || asset.type === 'avatar') return
+      const img = asset.img
+      if (img.complete && img.naturalWidth) {
+        asset.remappedImg = this._remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
+      } else {
+        img.onload = () => {
+          asset.remappedImg = this._remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
+        }
+      }
+    })
   }
 
   // ── Update ─────────────────────────────────────────────────────────────────
@@ -119,7 +173,7 @@ export default class Car {
 
   _drawAssets(ctx) {
     this.assets.forEach(asset => {
-      const img = asset.img
+      const img = (asset.colorRemap?.enabled && asset.remappedImg) ? asset.remappedImg : asset.img
       const [x, y] = asset.tl
       const [w, h] = asset.dim
       const angle = asset.theta ?? 0

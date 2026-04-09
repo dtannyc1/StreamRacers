@@ -39,6 +39,13 @@ export const IMAGE_LIBRARY = {
       name: 'Scrolling Lines',
       url: 'https://www.dropbox.com/scl/fi/hn1n4o8t737jxiqs5wse4/yellow_lines.png?rlkey=gxe6nyrkb66sblqoj1t8fnndr&st=83eyetrq&dl=0',
     }
+  ],
+  avatars: [
+    {
+      id: 'placeholder-avatar',
+      name: 'Placeholder Avatar',
+      url: 'https://static-cdn.jtvnw.net/jtv_user_pictures/9ee9431b-96be-4490-a71c-edab7f769430-profile_image-300x300.png',
+    }
   ]
 }
 

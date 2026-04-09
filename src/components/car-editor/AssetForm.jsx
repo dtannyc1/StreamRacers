@@ -64,7 +64,7 @@ const Row = ({ children }) => (
   <div className="grid grid-cols-2 gap-2">{children}</div>
 )
 
-const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock }) => {
+const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDefaultCar, onEyedropperActivate }) => {
   if (!asset) return (
     <p className="text-xs text-gray-500 text-center py-4">Select an asset to edit it.</p>
   )
@@ -275,6 +275,44 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock }) => 
             value={toDeg(asset.phase ?? 0)}
             onChange={(v) => u({ phase: toRad(v) })}
           />
+        </div>
+      )}
+
+      {isDefaultCar && asset.type !== 'avatar' && (
+        <div className="flex flex-col gap-3 border-t border-gray-700 pt-4">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Color Remapping</p>
+          <p className="text-xs text-gray-500">
+            Replaces a specific color in this image with each racer's display color at runtime.
+          </p>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={asset.colorRemap?.enabled ?? false}
+              onChange={(e) => u({ colorRemap: { ...asset.colorRemap, enabled: e.target.checked } })}
+              className="w-4 h-4 accent-purple-500"
+            />
+            <span className="text-sm text-white">Enable color remapping</span>
+          </label>
+          {asset.colorRemap?.enabled && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs text-gray-400">Source color to replace</span>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-8 h-8 rounded border border-gray-600 flex-shrink-0"
+                  style={{ backgroundColor: asset.colorRemap?.sourceColor ?? '#FF001A' }}
+                />
+                <button
+                  onClick={() => onEyedropperActivate(asset.id)}
+                  className="flex items-center gap-2 rounded-lg bg-gray-700 border border-gray-600 px-3 py-1.5 text-xs text-white hover:border-purple-500 transition-colors"
+                >
+                  <span>Pick color from canvas</span>
+                </button>
+                <span className="text-xs text-gray-500 font-mono">
+                  {asset.colorRemap?.sourceColor ?? '#FF001A'}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
