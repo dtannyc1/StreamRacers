@@ -120,7 +120,7 @@ class Game {
 
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
 
-    const settings = await SE_API.store.get('raceSettings').then(data => data.value).catch(() => null)
+    const settings = await SE_API.store.get('raceSettings').catch(() => null)
     if (settings) {
       if (settings.joinCommands) this.joinCommands = settings.joinCommands
       if (settings.goCommands) this.goCommands = settings.goCommands
