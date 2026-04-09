@@ -74,6 +74,8 @@ export default class CarManager {
       carData,
     })
 
+    car.applyColorRemaps(displayColor)
+
     this.cars[username] = car
     this._insertSorted(username)
     console.log(`${username} joined the race!`)
