@@ -61,7 +61,7 @@ class Game {
     this.testRacers = [
       'apocalypse_squirrel', 'KnuthingIsReal', 'NowImABeliever',
       'albinounounou', 'neiluj04', 'pyobum', 'thecomplements',
-      'andythefrenchy', 'thesolid7',
+      'andythefrenchy', 'thesolid7', 'mamzellerylo', 'pencils45', 'cafesparrow'
     ]
 
     this._bindEvents()
