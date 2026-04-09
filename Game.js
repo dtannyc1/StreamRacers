@@ -181,7 +181,7 @@ class Game {
       const badges = event.data.badges
       const color = event.data.displayColor
 
-      if (this.readying && this.joinCommands.some(cmd => message.startsWith(cmd))) {
+      if (this.readying && this.joinCommands.some(cmd => message.startsWith(cmd.toLowerCase()))) {
         await this.carManager.addRacer(name, color, this.track.racingLine)
         return
       }
