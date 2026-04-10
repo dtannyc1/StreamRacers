@@ -252,9 +252,6 @@ export default class Track {
       }
     }
     ctx.restore()
-
-    // start line
-    this._drawRacingLine(ctx, cameraLoc, 0, true)
   }
 
   drawForeground(ctx, cameraLoc, canvasWidth, finishX) {
@@ -265,11 +262,6 @@ export default class Track {
       if (img?.naturalWidth) ctx.drawImage(img, item.x, item.y, item.w, item.h)
     }
     ctx.restore()
-
-    if (finishX !== null) {
-      this._drawRacingLine(ctx, cameraLoc, finishX, false)
-      this._drawStands(ctx, cameraLoc, finishX)
-    }
   }
 
   _drawRoad(ctx, canvasWidth) {
@@ -319,6 +311,7 @@ export default class Track {
     const h = rl.dim[1] * rl.scale
 
     ctx.save()
+    ctx.translate(cameraLoc[0] + worldX, cameraLoc[1])
 
     if (img?.naturalWidth) {
       ctx.drawImage(img, rl.x - w / 2, rl.y - h / 2, w, h)
