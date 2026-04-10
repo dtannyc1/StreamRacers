@@ -373,11 +373,13 @@ class Game {
     this.track.drawBackground(this.ctx, this.cameraLoc, this.canvas.width, this.canvas.height)
     
     let offsetCameraLoc = [this.cameraLoc[0] - this.resetCameraLoc[0], this.cameraLoc[1]]
+
+    const elapsed = this.raceStartTime ? Date.now() - this.raceStartTime : 0
     if (this.finishX !== null) {
       // draw finish line + stands
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, this.finishX, false)
       this.track._drawStands(this.ctx, offsetCameraLoc, this.finishX)
-    } else if (this.readying || (elapsed >= this.setupDuration * 1000)){
+    } else if (this.readying || (elapsed <= this.setupDuration * 1000)){
       // draw start line
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, 0, true)
     }
