@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
 import Tooltip from '../ToolTip'
 import RacingLineForm from './RacingLineForm'
+import UploadButton from '../UploadButton'
 
 const SUBSECTION_TOOLTIPS = {
   'Image': 'Start/finish line image',
@@ -221,6 +222,12 @@ const RacingLinePanel = ({
             <label className="flex flex-col gap-1">
               <span className="text-xs text-gray-400">Image URL</span>
               <DebouncedUrlInput value={racingLine.url} onChange={handleUrlChange} />
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-gray-400">Or upload an image</span>
+                <UploadButton
+                  onUploaded={(url) => handleUrlChange(url)}
+                />
+              </label>
             </label>
             <RacingLineForm
               selection={{ type: 'racingLine' }}

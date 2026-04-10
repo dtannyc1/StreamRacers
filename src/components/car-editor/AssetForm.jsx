@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../context/AuthContext'
 import UploadButton from '../UploadButton'
 
 const DebouncedUrlInput = ({ value, onChange, disabled }) => {
@@ -67,7 +66,6 @@ const Row = ({ children }) => (
 )
 
 const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDefaultCar, onEyedropperActivate }) => {
-  const { token, channel } = useAuth()
   if (!asset) return (
     <p className="text-xs text-gray-500 text-center py-4">Select an asset to edit it.</p>
   )
@@ -140,8 +138,6 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
           <label className="flex flex-col gap-1">
             <span className="text-xs text-gray-400">Or upload an image</span>
             <UploadButton
-              token={token}
-              channelId={channel?._id}
               onUploaded={(url) => onSpriteUrlChange(asset.id, url)}
             />
           </label>

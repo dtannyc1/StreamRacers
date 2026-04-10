@@ -48,7 +48,11 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
             </Tooltip>
             <div className="flex items-center gap-3">
               <button
-                onClick={(e) => { e.stopPropagation(); onAdd(listKey) }}
+                onClick={(e) => { 
+                  e.stopPropagation()
+                  setCollapsed(prev => ({ ...prev, [listKey]: false }))
+                  onAdd(listKey)
+                }}
                 className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
               >
                 + Add

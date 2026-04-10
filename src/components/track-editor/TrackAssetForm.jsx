@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
+import UploadButton from '../UploadButton'
 
 const NumInput = ({ label, value, onChange, step = 1, min }) => (
   <label className="flex flex-col gap-1">
@@ -70,6 +71,13 @@ const TrackAssetForm = ({ asset, listKey, onUpdate }) => {
       <label className="flex flex-col gap-1">
         <span className="text-xs text-gray-400">Image URL</span>
         <DebouncedUrlInput value={asset.url} onChange={handleUrlChange} />
+        
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-gray-400">Or upload an image</span>
+          <UploadButton
+            onUploaded={(url) => handleUrlChange(url)}
+          />
+        </label>
       </label>
 
       <div className="grid grid-cols-2 gap-2">

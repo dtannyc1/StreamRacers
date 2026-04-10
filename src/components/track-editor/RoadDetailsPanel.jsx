@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
 import Tooltip from '../ToolTip'
+import UploadButton from '../UploadButton'
 
 const SUBSECTION_TOOLTIPS = {
   'Road Type': 'Choose between a colorful rainbow road, a solid color road, or a custom image road.',
@@ -152,6 +153,13 @@ const RoadDetailsPanel = ({ track, setRoad, setSlot, clearSlot }) => {
                 <label className="flex flex-col gap-1">
                   <span className="text-xs text-gray-400">Image URL</span>
                   <DebouncedUrlInput value={road.url} onChange={handleRoadUrlChange} />
+
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-400">Or upload an image</span>
+                    <UploadButton
+                      onUploaded={(url) => handleRoadUrlChange(url)}
+                    />
+                  </label>
                 </label>
                 <Row>
                   <NumInput label="X" value={road.x ?? 0} onChange={(v) => setRoad({ x: v })} />
@@ -195,6 +203,12 @@ const RoadDetailsPanel = ({ track, setRoad, setSlot, clearSlot }) => {
                   </button>
                 )}
               </div>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-gray-400">Or upload an image</span>
+                <UploadButton
+                  onUploaded={(url) => handleScrollingUrlChange(url)}
+                />
+              </label>
             </label>
             {scrollingImage?.url && (
               <>

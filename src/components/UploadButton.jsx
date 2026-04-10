@@ -1,7 +1,10 @@
 import { uploadImage } from "../lib/streamelements"
 import { useState, useRef } from "react"
+import { useAuth } from "../context/AuthContext"
 
-const UploadButton = ({ token, channelId, onUploaded }) => {
+const UploadButton = ({ onUploaded }) => {
+  const { token, channel } = useAuth()
+  const channelId = channel?._id
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(null)
   const inputRef = useRef(null)
