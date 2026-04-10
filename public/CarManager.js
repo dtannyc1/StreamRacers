@@ -174,7 +174,7 @@ export default class CarManager {
   }
 
   getStandings() {
-    return [...this.sortedNames].sort(
+    return Object.keys(this.cars).sort(
       (a, b) => (this.cars[b]?.XY[0] ?? 0) - (this.cars[a]?.XY[0] ?? 0)
     )
   }

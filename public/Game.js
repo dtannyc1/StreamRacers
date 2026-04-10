@@ -278,10 +278,6 @@ class Game {
 
   _loop() {
     const curTime = Date.now()
-    if (this.lastTime && ((curTime - this.lastTime) / 1000) > 0.05) {
-      console.log('dt: ', (curTime - this.lastTime) / 1000)
-    }
-    this.lastTime = curTime
     this._update(curTime)
     this._draw()
 
@@ -301,6 +297,14 @@ class Game {
   }
 
   _update(curTime) {
+    this.carManager.update(curTime, {
+      readying: this.readying,
+      raceStartTime: this.raceStartTime,
+      setupDuration: this.setupDuration,
+      finishX: this.finishX,
+      finishingVel: this.finishingVel,
+    })
+    
     if (!this.readying && this.raceStartTime) {
       const elapsed = curTime - this.raceStartTime
 
@@ -357,13 +361,6 @@ class Game {
       }
     }
 
-    this.carManager.update(curTime, {
-      readying: this.readying,
-      raceStartTime: this.raceStartTime,
-      setupDuration: this.setupDuration,
-      finishX: this.finishX,
-      finishingVel: this.finishingVel,
-    })
   }
 
   // ── Drawing ────────────────────────────────────────────────────────────────
