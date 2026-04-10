@@ -125,8 +125,8 @@ export default class CarManager {
       }
 
       if (XY[0] > maxXPos) {
-        maxXPos = car.XY[0]
-        maxXVel = car.vel[0]
+        maxXPos = XY[0]
+        maxXVel = vel[0]
       }
     }
     this.maxXPos = maxXPos
