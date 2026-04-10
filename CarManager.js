@@ -108,25 +108,27 @@ export default class CarManager {
       const car = this.cars[name]
       if (!car) continue
 
-      let XY, vel;
+      let data;
 
       if (readying) {
-        [XY, vel] = car.update(curTime, true, 1)
+        data = car.update(curTime, true, 1)
 
       } else if (curTime - raceStartTime < setupDuration * 1000) {
-        [XY, vel] = car.update(curTime, true, 5)
+        data = car.update(curTime, true, 5)
 
       } else {
         car.vel[0] += (Math.random() - 1 / 3) * car.acc[0]
         car.vel[1] += (Math.random() - 1 / 3) * car.acc[1]
         if (car.vel[0] < 0) car.vel[0] = 0
         if (finishX && car.XY[0] > finishX) car.vel[0] = finishingVel
-        [XY, vel] = car.update(curTime, false, 1)
+        data = car.update(curTime, false, 1)
       }
 
-      if (XY[0] > maxXPos) {
-        maxXPos = XY[0]
-        maxXVel = vel[0]
+      if (data && Array.isArray(data) && data[0][0] > maxXPos) {
+        maxXPos = data[0][0]
+        maxXVel = data[1][0]
+      } else {
+        console.log('Unexpected data from car update:', data)
       }
     }
     this.maxXPos = maxXPos

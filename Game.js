@@ -278,7 +278,7 @@ class Game {
 
   _loop() {
     const curTime = Date.now()
-    if (this.lastTime) {
+    if (this.lastTime && ((curTime - this.lastTime) / 1000) > 0.05) {
       console.log('dt: ', (curTime - this.lastTime) / 1000)
     }
     this.lastTime = curTime
