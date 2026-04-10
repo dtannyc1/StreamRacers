@@ -104,14 +104,12 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
 
 ## Racer
-- Rename section to "User Specific Vehicles"
-- Add default Vehicle
-  - All streamers should have a default racer for all users
-  - This default should be used instead of the static one coded in?
-  - Allow for color changing options
+- Add more options for color changer
+  - use a slider to adjust tolerance. Swap to the complimentary color to show the effect well. 
+  - Make sure to undo the color swap when color picker is enabled
 - Add global vehicles
   - Allows for some vehicles to be used for all users
-    - Add limiting options for global vehicles
+    - Add limiting options for global vehicles (ie one user per race has this vehicle)
     - Add percentage chance of change
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
 - Give an option to update/correct a username. it should just do the lookup again, then replace the username with the corrected username and save the data to streamelements
@@ -124,13 +122,12 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   
 ## Settings
 - Add default settings
-  - Default Track Name
-  - Race Join words
-  - Race Start word(s)
   - Race reset words
-  - Boost? Boost Words?
+  - Enable/disable boost functionality
 
 ## Instructions
-- Add js file that can be easily added to StreamElements?
-  - See if a direct import is possible...
-  - Need to figure out how to add automated dropdown menu options for track selection
+- Add easy instructions for what to copy into SE
+
+## Home Page
+- What is this page and how do you use it?
+  - Add animation to home page with sample cars. demo should swap between maps/cars randomly
