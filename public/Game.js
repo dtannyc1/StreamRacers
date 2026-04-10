@@ -278,6 +278,10 @@ class Game {
 
   _loop() {
     const curTime = Date.now()
+    if (this.lastTime) {
+      console.log('dt: ', (curTime - this.lastTime) / 1000)
+    }
+    this.lastTime = curTime
     this._update(curTime)
     this._draw()
 
