@@ -14,7 +14,7 @@ import Tooltip from '../components/ToolTip'
 
 const TrackEditor = ({ mode }) => {
   const { trackName } = useParams()
-  const { tracks, updateTracks, racers: customRacers } = useKVStore()
+  const { tracks, updateTracks, racers: customRacers, raceSettings } = useKVStore()
   const navigate = useNavigate()
 
   const [selection, setSelection] = useState(null)
@@ -103,16 +103,15 @@ const TrackEditor = ({ mode }) => {
     if (!customRacers) return
 
     const activeUsernames = new Set(activeRacers.map(r => r.username))
-    const available = Object.entries(customRacers)
-      .filter(([username, cars]) =>
-        Array.isArray(cars) && cars.length > 0 && !activeUsernames.has(username)
-      )
-      .map(([username]) => username)
+    const available = [...new Set((Object.keys(customRacers)).concat(['pencils45', 'Twitch'])
+      .filter((username) =>
+        !activeUsernames.has(username)
+      ))]
 
     if (available.length === 0) return
 
     const username = available[Math.floor(Math.random() * available.length)]
-    const racer = spawnRacer(username, customRacers, track.racingLine)
+    const racer = spawnRacer(username, {...customRacers, 'DEFAULT': raceSettings?.defaultRacer }, track.racingLine)
     if (!racer) return
 
     if (!racerAvatars[username]) {
