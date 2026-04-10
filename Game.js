@@ -278,6 +278,10 @@ class Game {
 
   _loop() {
     const curTime = Date.now()
+    if (this.lastTime) {
+      console.log('dt: ', (curTime - this.lastTime) / 1000)
+    }
+    this.lastTime = curTime
     this._update(curTime)
     this._draw()
 
@@ -322,9 +326,9 @@ class Game {
           this.prevStandingsUpdateTime = curTime
         }
 
+        const { maxXPos, maxXVel } = this.carManager.getMaxPosition()
         // determine finish line position
         if (!this.finishX && (this.raceDuration + this.setupDuration) * 1000 - elapsed < 5000) {
-          const { maxXPos, maxXVel } = this.carManager.getMaxPosition()
           this.finishX = this.canvas.width - this.cameraLoc[0] + 5 * maxXVel - 800
         }
 
@@ -332,7 +336,6 @@ class Game {
         this.stopRace = this.carManager.isAllPastCanvas(this.cameraLoc, this.canvas.width)
 
         // update camera
-        const { maxXPos } = this.carManager.getMaxPosition()
         const newCameraX = this.finishX
           ? Math.max(
               -maxXPos + 300 + (this.canvas.width - 500) * Math.min(1, (elapsed - this.setupDuration * 1000) / (this.raceDuration * 1000)),
@@ -379,7 +382,7 @@ class Game {
       // draw finish line + stands
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, this.finishX, false)
       this.track._drawStands(this.ctx, offsetCameraLoc, this.finishX)
-    } else if (this.readying || (elapsed <= this.setupDuration * 1000)){
+    } else if (this.readying || (elapsed <= this.setupDuration * 2000)){
       // draw start line
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, 0, true)
     }
