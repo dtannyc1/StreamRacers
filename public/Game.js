@@ -379,7 +379,7 @@ class Game {
       // draw finish line + stands
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, this.finishX, false)
       this.track._drawStands(this.ctx, offsetCameraLoc, this.finishX)
-    } else if (this.readying || (elapsed <= this.setupDuration * 1000)){
+    } else if (this.readying || (elapsed <= this.setupDuration * 2000)){
       // draw start line
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, 0, true)
     }
