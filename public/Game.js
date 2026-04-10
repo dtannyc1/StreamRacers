@@ -373,10 +373,10 @@ class Game {
     this.track.drawBackground(this.ctx, this.cameraLoc, this.canvas.width, this.canvas.height)
     
     let offsetCameraLoc = [this.cameraLoc[0] - this.resetCameraLoc[0], this.cameraLoc[1]]
-    if (finishX !== null) {
+    if (this.finishX !== null) {
       // draw finish line + stands
-      this.track._drawRacingLine(this.ctx, offsetCameraLoc, finishX, false)
-      this.track._drawStands(this.ctx, offsetCameraLoc, finishX)
+      this.track._drawRacingLine(this.ctx, offsetCameraLoc, this.finishX, false)
+      this.track._drawStands(this.ctx, offsetCameraLoc, this.finishX)
     } else if (this.readying || (elapsed >= this.setupDuration * 1000)){
       // draw start line
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, 0, true)
