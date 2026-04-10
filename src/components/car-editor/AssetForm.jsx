@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import UploadButton from '../UploadButton'
 
 const DebouncedUrlInput = ({ value, onChange, disabled }) => {
   const [local, setLocal] = useState(value)
@@ -133,6 +134,14 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
           disabled={asset.type === 'avatar'}
           onChange={(v) => onSpriteUrlChange(asset.id, v)}
         />
+        {asset.type !== 'avatar' && (
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-gray-400">Or upload an image</span>
+            <UploadButton
+              onUploaded={(url) => onSpriteUrlChange(asset.id, url)}
+            />
+          </label>
+        )}
       </label>
 
       <label className="flex flex-col gap-1">

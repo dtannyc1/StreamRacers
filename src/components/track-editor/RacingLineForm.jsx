@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
-import Tooltip from '../ToolTip'
+import UploadButton from '../UploadButton'
 
 const NumInput = ({ label, value, onChange, step = 1 }) => (
   <label className="flex flex-col gap-1">
@@ -111,6 +111,13 @@ const ModifierSection = ({ selection, racingLine, onUpdateModifier }) => {
       <label className="flex flex-col gap-1">
         <span className="text-xs text-gray-400">Image URL</span>
         <DebouncedUrlInput value={mod.url} onChange={handleUrlChange} />
+
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-gray-400">Or upload an image</span>
+          <UploadButton
+            onUploaded={(url) => handleUrlChange(url)}
+          />
+        </label>
       </label>
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Position</p>

@@ -203,7 +203,7 @@ export const useCarEditor = (initialCar = null) => {
     img.onload = () => {
       const h = 200
       const w = (img.naturalWidth / img.naturalHeight) * h
-      updateAsset(id, { dim: [w, h], baseDim: [w, h], aspectLocked: true })
+      updateAsset(id, { dim: [w, h], tl: [-w, -h], baseDim: [w, h], aspectLocked: true })
     }
     img.src = resolveImageUrl(url)
   }, [updateAsset])

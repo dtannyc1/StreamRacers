@@ -102,3 +102,22 @@ export const getRaceSettings = async (token, channelId) =>
 
 export const setRaceSettings = async (token, channelId, value) =>
   setKVKey(token, channelId, 'raceSettings', value)
+
+export const uploadImage = async (token, channelId, file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await fetch(`https://api.streamelements.com/kappa/v2/uploads/${channelId}`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    }
+  })
+
+  if (!res.ok) throw new Error(`Upload failed (${res.status})`)
+  const data = await res.json()
+  if (!data.url) throw new Error('No URL returned from upload')
+  return data.url
+}
