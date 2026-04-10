@@ -12,9 +12,16 @@ export const pickRandomRacer = (customRacers) => {
 
 export const spawnRacer = (username, customRacers, racingLine) => {
   const cars = customRacers[username]
-  if (!cars?.length) return null
+  let car;
 
-  const car = cars[Math.floor(Math.random() * cars.length)]
+  if (!cars?.length) {
+    if (!customRacers['DEFAULT']) {
+      return null
+    }
+    car = customRacers['DEFAULT']
+  } else {
+    car = cars[Math.floor(Math.random() * cars.length)]
+  }
 
   const yMin = Math.min(racingLine.p1[1], racingLine.p2[1])
   const yMax = Math.max(racingLine.p1[1], racingLine.p2[1])

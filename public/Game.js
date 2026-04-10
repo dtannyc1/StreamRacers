@@ -14,6 +14,7 @@ class Game {
     this.carManager = null
 
     this.cameraLoc = [this.canvas.width * 0.75, 0]
+    this.resetCameraLoc = [this.canvas.width * 0.75, 0]
 
     // race state
     this.readying = false
@@ -116,6 +117,7 @@ class Game {
 
     if (this.track.racingLine) {  
       this.cameraLoc[0] = (this.track.racingLine.p1[0] + this.track.racingLine.p2[0]) / 2
+      this.resetCameraLoc[0] = (this.track.racingLine.p1[0] + this.track.racingLine.p2[0]) / 2
     }
 
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
@@ -245,14 +247,14 @@ class Game {
     this.sendMessage(this.messages?.raceStarted)
   }
 
-  reset() {
+  async reset() {
     this.winner = null
     this.finishX = null
     this.leaderboard = []
     this.standings = []
     this.prevStandingsUpdateTime = 0
     this.raceStartTime = null
-    this.cameraLoc = [this.canvas.width * 0.75, 0]
+    this.cameraLoc = [...this.resetCameraLoc]
     this.finishingVel = 1000
     this.stopRace = false
     this.readying = true
@@ -264,6 +266,11 @@ class Game {
     if (!this.isUpdatingRacers) {
       this.isUpdatingRacers = true
       requestAnimationFrame(this._loop.bind(this))
+    }
+    if (this.testing) {
+      for (const name of this.testRacers) {
+        await this.carManager.addRacer(name, null, this.track.racingLine)
+      }
     }
   }
 
@@ -339,8 +346,8 @@ class Game {
 
       } else {
         // setup phase — camera pans to start line
-        const newCameraX = this.canvas.width * 0.75 -
-          ((this.canvas.width * 0.75 - 300) / this.setupDuration) * (elapsed / 1000)
+        const newCameraX = this.resetCameraLoc[0] -
+          ((this.resetCameraLoc[0] - 300) / this.setupDuration) * (elapsed / 1000)
         const dX = newCameraX - this.cameraLoc[0]
         this.cameraLoc[0] = newCameraX
         this.track.updateScatteredArt(dX, this.cameraLoc, this.canvas.width, this.finishX)
@@ -364,6 +371,17 @@ class Game {
 
     this._drawStandings()
     this.track.drawBackground(this.ctx, this.cameraLoc, this.canvas.width, this.canvas.height)
+    
+    let offsetCameraLoc = [this.cameraLoc[0] - this.resetCameraLoc[0], this.cameraLoc[1]]
+    if (finishX !== null) {
+      // draw finish line + stands
+      this.track._drawRacingLine(this.ctx, offsetCameraLoc, finishX, false)
+      this.track._drawStands(this.ctx, offsetCameraLoc, finishX)
+    } else if (this.readying || (elapsed >= this.setupDuration * 1000)){
+      // draw start line
+      this.track._drawRacingLine(this.ctx, offsetCameraLoc, 0, true)
+    }
+    
     this.carManager.draw(this.ctx, this.cameraLoc, this.track.racingLine)
     this.track.drawForeground(this.ctx, this.cameraLoc, this.canvas.width, this.finishX)
   }
