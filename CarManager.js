@@ -10,6 +10,7 @@ export default class CarManager {
     this.avatarCache = {}
     this.maxXPos = 0
     this.maxXVel = 0
+    this.finishers = []
 
     this.loadCustomCarData();
   }
@@ -157,14 +158,14 @@ export default class CarManager {
   }
 
   getFinishers(finishX, curTime) {
-    const finishers = []
+    if (!finishX) return []
     for (const car of Object.values(this.cars)) {
       const prevX = car.XY[0] - car.vel[0] * (curTime - car.time) / 1000
       if (finishX && car.XY[0] > finishX && prevX <= finishX) {
-        finishers.push(car.name)
+        this.finishers.push(car.name)
       }
     }
-    return finishers.sort((a, b) => this.cars[b].XY[0] - this.cars[a].XY[0])
+    return [...new Set(this.finishers)] 
   }
 
   isAllPastCanvas(cameraLoc, canvasWidth) {
@@ -184,6 +185,7 @@ export default class CarManager {
   reset() {
     this.cars = {}
     this.sortedNames = []
+    this.finishers = []
   }
 }
 
