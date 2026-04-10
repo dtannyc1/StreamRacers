@@ -100,9 +100,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
-## General changes
-- allow for image uploads. put them on imgur, add the correct link afterwards. note a restriction of 50 images per hour and file size limits. make sure to show errors where necessary.
-
 ## Racer
 - Add more options for color changer
   - use a slider to adjust tolerance. Swap to the complimentary color to show the effect well. 
