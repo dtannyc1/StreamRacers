@@ -165,6 +165,7 @@ export default class Car {
 
   update(curTime, clampToStart = false, speedMultiplier = 1) {
     const dt = (curTime - this.time) / 1000
+    if (dt <= 0) return [this.XY, this.vel]
     const speed = this.vel[0] * speedMultiplier
 
     this.XY[0] += speed * dt

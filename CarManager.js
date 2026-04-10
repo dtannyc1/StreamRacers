@@ -127,9 +127,7 @@ export default class CarManager {
       if (data && Array.isArray(data) && data[0][0] > maxXPos) {
         maxXPos = data[0][0]
         maxXVel = data[1][0]
-      } else {
-        console.log('Unexpected data from car update:', data)
-      }
+      } 
     }
     this.maxXPos = maxXPos
     this.maxXVel = maxXVel
