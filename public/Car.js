@@ -177,6 +177,8 @@ export default class Car {
     }
 
     this.time = curTime
+
+    return [this.XY, this.vel]
   }
 
   _updateAssetAngles(dt, speed) {

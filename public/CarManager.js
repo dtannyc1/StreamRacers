@@ -8,6 +8,8 @@ export default class CarManager {
     this.customCarData = {}
     this.defaultCarData = null
     this.avatarCache = {}
+    this.maxXPos = 0
+    this.maxXVel = 0
 
     this.loadCustomCarData();
   }
@@ -99,25 +101,36 @@ export default class CarManager {
 
   update(curTime, gameState) {
     const { readying, raceStartTime, setupDuration, finishX, finishingVel } = gameState
-
+    
+    let maxXPos = 0
+    let maxXVel = 0
     for (const name of this.sortedNames) {
       const car = this.cars[name]
       if (!car) continue
 
+      let XY, vel;
+
       if (readying) {
-        car.update(curTime, true, 1)
+        [XY, vel] = car.update(curTime, true, 1)
 
       } else if (curTime - raceStartTime < setupDuration * 1000) {
-        car.update(curTime, true, 5)
+        [XY, vel] = car.update(curTime, true, 5)
 
       } else {
         car.vel[0] += (Math.random() - 1 / 3) * car.acc[0]
         car.vel[1] += (Math.random() - 1 / 3) * car.acc[1]
         if (car.vel[0] < 0) car.vel[0] = 0
         if (finishX && car.XY[0] > finishX) car.vel[0] = finishingVel
-        car.update(curTime, false, 1)
+        [XY, vel] = car.update(curTime, false, 1)
+      }
+
+      if (XY[0] > maxXPos) {
+        maxXPos = car.XY[0]
+        maxXVel = car.vel[0]
       }
     }
+    this.maxXPos = maxXPos
+    this.maxXVel = maxXVel
   }
 
   // ── Drawing ────────────────────────────────────────────────────────────────
@@ -140,15 +153,7 @@ export default class CarManager {
   // ── Race state queries ─────────────────────────────────────────────────────
 
   getMaxPosition() {
-    let maxXPos = 0
-    let maxXVel = 0
-    for (const car of Object.values(this.cars)) {
-      if (car.XY[0] > maxXPos) {
-        maxXPos = car.XY[0]
-        maxXVel = car.vel[0]
-      }
-    }
-    return { maxXPos, maxXVel }
+    return { maxXPos: this.maxXPos, maxXVel: this.maxXVel }
   }
 
   getFinishers(finishX, curTime) {

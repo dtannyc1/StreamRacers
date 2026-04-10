@@ -322,9 +322,9 @@ class Game {
           this.prevStandingsUpdateTime = curTime
         }
 
+        const { maxXPos, maxXVel } = this.carManager.getMaxPosition()
         // determine finish line position
         if (!this.finishX && (this.raceDuration + this.setupDuration) * 1000 - elapsed < 5000) {
-          const { maxXPos, maxXVel } = this.carManager.getMaxPosition()
           this.finishX = this.canvas.width - this.cameraLoc[0] + 5 * maxXVel - 800
         }
 
@@ -332,7 +332,6 @@ class Game {
         this.stopRace = this.carManager.isAllPastCanvas(this.cameraLoc, this.canvas.width)
 
         // update camera
-        const { maxXPos } = this.carManager.getMaxPosition()
         const newCameraX = this.finishX
           ? Math.max(
               -maxXPos + 300 + (this.canvas.width - 500) * Math.min(1, (elapsed - this.setupDuration * 1000) / (this.raceDuration * 1000)),
