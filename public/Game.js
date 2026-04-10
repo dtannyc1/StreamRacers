@@ -304,7 +304,7 @@ class Game {
       finishX: this.finishX,
       finishingVel: this.finishingVel,
     })
-    
+
     if (!this.readying && this.raceStartTime) {
       const elapsed = curTime - this.raceStartTime
 
@@ -369,7 +369,6 @@ class Game {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (this.hidden) return
 
-    this._drawStandings()
     this.track.drawBackground(this.ctx, this.cameraLoc, this.canvas.width, this.canvas.height)
     
     let offsetCameraLoc = [this.cameraLoc[0] - this.resetCameraLoc[0], this.cameraLoc[1]]
@@ -386,6 +385,7 @@ class Game {
     
     this.carManager.draw(this.ctx, this.cameraLoc, this.track.racingLine)
     this.track.drawForeground(this.ctx, this.cameraLoc, this.canvas.width, this.finishX)
+    this._drawStandings()
   }
 
   _drawStandings() {
