@@ -33,6 +33,7 @@ export default class Car {
         ...asset,
         img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
         remappedImg: null,
+        theta: asset.theta ?? 0,
         theta_0: asset.theta ?? 0,
         theta_dot: 1,
       }
