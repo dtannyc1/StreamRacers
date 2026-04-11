@@ -122,6 +122,10 @@ export default class CarManager {
         car.vel[1] += (Math.random() - 1 / 3) * car.acc[1]
         if (car.vel[0] < 0) car.vel[0] = 0
         if (finishX && car.XY[0] > finishX) car.vel[0] = finishingVel
+        // check if car just crossed the finish line
+        if (finishX && car.XY[0] + car.vel[0] * (curTime - car.time) / 1000 > finishX && car.XY[0] <= finishX) {
+          this.finishers.push(car.name)
+        }
         data = car.update(curTime, false, 1)
       }
 
@@ -157,15 +161,8 @@ export default class CarManager {
     return { maxXPos: this.maxXPos, maxXVel: this.maxXVel }
   }
 
-  getFinishers(finishX, curTime) {
-    if (!finishX) return []
-    for (const car of Object.values(this.cars)) {
-      const prevX = car.XY[0] - car.vel[0] * (curTime - car.time) / 1000
-      if (finishX && car.XY[0] > finishX && prevX <= finishX) {
-        this.finishers.push(car.name)
-      }
-    }
-    return [...new Set(this.finishers)] 
+  getFinishers() {
+    return [...new Set(this.finishers)] // de-dup in case
   }
 
   isAllPastCanvas(cameraLoc, canvasWidth) {
