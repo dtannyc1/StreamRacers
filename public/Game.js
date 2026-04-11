@@ -317,7 +317,7 @@ class Game {
         // update finishers
         const finishers = this.carManager.getFinishers()
         if (finishers.length > 0) {
-          this.leaderboard = this.leaderboard.concat(finishers)
+          this.leaderboard = finishers
           if (!this.winner) {
             this.winner = this.leaderboard[0]
             this.finishingVel = this.carManager.cars[this.winner]?.vel[0] ?? 1000
