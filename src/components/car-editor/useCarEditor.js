@@ -25,6 +25,7 @@ export const useCarEditor = (initialCar = null) => {
       type: 'static',
       tl: [0, 0],
       dim: [100, 100],
+      colorRemap: { enabled: false, sourceColor: '#FF001A' },
     }
     setCar(prev => ({ ...prev, assets: [...prev.assets, newAsset] }))
     setSelectedId(newAsset.id)

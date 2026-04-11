@@ -156,6 +156,7 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
               // initialize CR to center of the asset
               patch.cr = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
               patch.radius = Math.min(asset.dim[0], asset.dim[1]) / 4
+              patch.theta = 0
               patch.handleAngle = 0
             }
 
