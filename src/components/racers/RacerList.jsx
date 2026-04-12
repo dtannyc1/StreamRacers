@@ -12,7 +12,9 @@ const RacerList = () => {
   if (loading) return <p className="text-sm text-gray-400">Loading racers...</p>
   if (error) return <p className="text-sm text-red-400">{error}</p>
 
-  const usernames = racers ? Object.keys(racers) : []
+  const usernames = racers
+    ? Object.keys(racers).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    : []
   const defaultCar = raceSettings?.defaultRacer
 
   return (
