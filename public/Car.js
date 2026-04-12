@@ -276,17 +276,27 @@ export default class Car {
         cameraLoc[0] + this.XY[0] + dX,
         cameraLoc[1] + this.XY[1]
     )
+    const now = performance.now()
 
-    this._drawAssets(ctx)
+    this._drawAssets(ctx, now)
     ctx.resetTransform()
     }
 
-  _drawAssets(ctx) {
+  _drawAssets(ctx, now) {
     this.assets.forEach(asset => {
-      const img = (asset.colorRemap?.enabled && asset.remappedImg) ? asset.remappedImg : asset.img
+      // resolve drawable — gif frame canvas takes priority, then remapped, then original
+      const drawable = asset.frames
+        ? this._getCurrentFrame(asset, now)
+        : (asset.colorRemap?.enabled && asset.remappedImg) ? asset.remappedImg : asset.img
+
       const [x, y] = asset.tl
       const [w, h] = asset.dim
       const angle = asset.theta ?? 0
+
+      // for static images check naturalWidth, for gif canvases just check existence
+      const ready = drawable instanceof HTMLCanvasElement
+        ? !!drawable
+        : drawable?.naturalWidth
 
       ctx.save()
 
@@ -299,7 +309,7 @@ export default class Car {
         ctx.beginPath()
         ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2)
         ctx.clip()
-        if (img?.naturalWidth) ctx.drawImage(img, x, y, w, h)
+        if (ready) ctx.drawImage(drawable, x, y, w, h)
 
       } else if (asset.type === 'static') {
         if (angle !== 0) {
@@ -307,14 +317,14 @@ export default class Car {
           ctx.rotate(angle)
           ctx.translate(-(x + w / 2), -(y + h / 2))
         }
-        if (img?.naturalWidth) ctx.drawImage(img, x, y, w, h)
+        if (ready) ctx.drawImage(drawable, x, y, w, h)
 
       } else if (asset.type === 'rotating' || asset.type === 'oscillating') {
         const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
         ctx.translate(cx, cy)
         ctx.rotate(angle)
         ctx.translate(-cx, -cy)
-        if (img?.naturalWidth) ctx.drawImage(img, x, y, w, h)
+        if (ready) ctx.drawImage(drawable, x, y, w, h)
       }
 
       ctx.restore()
