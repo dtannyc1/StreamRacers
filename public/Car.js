@@ -1,4 +1,4 @@
-import { parseGIF, decompressFrames } from 'https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct-js.mjs'
+import { parseGIF, decompressFrames } from 'https://cdn.jsdelivr.net/npm/gifuct-js/+esm'
 
 export default class Car {
   constructor({ name, avatar, displayColor, xy, carData }) {
