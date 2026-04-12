@@ -1,3 +1,5 @@
+import { parseGIF, decompressFrames } from 'https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct-js.mjs'
+
 export default class Car {
   constructor({ name, avatar, displayColor, xy, carData }) {
     this.name = name
@@ -28,22 +30,77 @@ export default class Car {
   _loadAssets(carData) {
     if (!carData?.assets?.length) return []
     return carData.assets.map(asset => {
-
-      let modifiedAsset = {
+      const isGif = asset.spriteUrl?.toLowerCase().endsWith('.gif')
+      const assetObj = {
         ...asset,
-        img: asset.type === 'avatar' ? this.avatar : this._loadImage(asset.spriteUrl),
-        remappedImg: null,
-        theta: asset.theta ?? 0,
-        theta_0: asset.theta ?? 0,
-        theta_dot: 1,
+        img: null,
+        frames: null,
+        frameIndex: 0,
+        lastFrameTime: 0,
+        currentAngle: asset.theta ?? 0,
       }
 
-      if (asset.type === 'oscillating') {
-        modifiedAsset.theta = asset.theta + Math.sin(asset.phase ?? 0) * ((asset.maxTheta ?? 0) - (asset.minTheta ?? 0)) / 2 + ((asset.minTheta ?? 0) + (asset.maxTheta ?? 0)) / 2
+      if (asset.type === 'avatar') {
+        assetObj.img = this.avatar
+      } else if (isGif) {
+        // load async, populate frames when ready
+        this._loadGIF(asset.spriteUrl).then(frames => {
+          assetObj.frames = frames
+          assetObj.lastFrameTime = performance.now()
+        }).catch(err => {
+          console.warn(`Failed to load GIF ${asset.spriteUrl}:`, err)
+        })
+      } else {
+        assetObj.img = this._loadImage(asset.spriteUrl)
+        assetObj.remappedImg = null
+        assetObj.theta = asset.theta ?? 0
+        assetObj.theta_0 = asset.theta ?? 0
+        assetObj.theta_dot = 1
+
+        if (asset.type === 'oscillating') {
+          assetObj.theta = asset.theta + Math.sin(asset.phase ?? 0) * ((asset.maxTheta ?? 0) - (asset.minTheta ?? 0)) / 2 + ((asset.minTheta ?? 0) + (asset.maxTheta ?? 0)) / 2
+        }
       }
-      
-      return modifiedAsset
+
+      return assetObj
     })
+  }
+
+  async _loadGIF(url) {
+    const res = await fetch(url)
+    const buffer = await res.arrayBuffer()
+    const gif = parseGIF(buffer)
+    const frames = decompressFrames(gif, true)
+
+    // convert each frame to an offscreen canvas
+    return frames.map(frame => {
+      const canvas = document.createElement('canvas')
+      canvas.width = frame.dims.width
+      canvas.height = frame.dims.height
+      const ctx = canvas.getContext('2d')
+      const imageData = ctx.createImageData(frame.dims.width, frame.dims.height)
+      imageData.data.set(frame.patch)
+      ctx.putImageData(imageData, 0, 0)
+      return {
+        canvas,
+        delay: frame.delay > 0 ? frame.delay : 100, // delay in ms, default 100
+      }
+    })
+  }
+
+  // for gifs, get the current frame to display based on elapsed time
+  _getCurrentFrame(asset, now) {
+    if (!asset.frames?.length) return null
+
+    const elapsed = now - asset.lastFrameTime
+    const frame = asset.frames[asset.frameIndex]
+
+    if (elapsed >= frame.delay) {
+      asset.frameIndex = (asset.frameIndex + 1) % asset.frames.length
+      asset.lastFrameTime = now
+    }
+
+    return asset.frames[asset.frameIndex].canvas
   }
 
   _resolveImageUrl = (url) => {
