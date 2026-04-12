@@ -8,7 +8,9 @@ const TrackList = () => {
   if (loading) return <p className="text-sm text-gray-400">Loading tracks...</p>
   if (error) return <p className="text-sm text-red-400">{error}</p>
 
-  const trackNames = tracks ? Object.keys(tracks) : []
+  const trackNames = tracks 
+    ? Object.keys(tracks).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) 
+    : []
 
   const handleDelete = async (name) => {
     if (!confirm(`Delete "${name}"?`)) return
