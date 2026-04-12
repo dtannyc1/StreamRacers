@@ -229,14 +229,19 @@ export default class Car {
     this.XY[0] += speed * dt
     this.XY[1] += this.vel[1] * dt
 
-    if (clampToStart && this.XY[0] > 0) {
+    const clamped = clampToStart && this.XY[0] > 0
+    if (clamped) {
       this.XY[0] = 0
+      // freeze gif frames by advancing lastFrameTime to keep elapsed = 0
+      const now = performance.now()
+      this.assets.forEach(asset => {
+        if (asset.frames) asset.lastFrameTime = now
+      })
     } else {
       this._updateAssetAngles(dt, speed)
     }
 
     this.time = curTime
-
     return [this.XY, this.vel]
   }
 
