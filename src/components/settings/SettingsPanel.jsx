@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 import { DEFAULT_RACE_SETTINGS } from '../../context/KVStoreContext'
+import { getTwitchUser } from '../../lib/twitch'
+
+const resolveUsername = async (input) => {
+  try {
+    const user = await getTwitchUser(input.trim())
+    return user.display_name  // Twitch display name
+  } catch {
+    return input.trim() // fall back to raw input if lookup fails
+  }
+}
 
 const CollapsibleSection = ({ title, children, defaultCollapsed = true }) => {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
@@ -22,13 +32,20 @@ const CollapsibleSection = ({ title, children, defaultCollapsed = true }) => {
   )
 }
 
-const EditableList = ({ items, onChange, placeholder }) => {
+const EditableList = ({ items, onChange, placeholder, onResolve }) => {
   const [newItem, setNewItem] = useState('')
+  const [resolving, setResolving] = useState(false)
 
-  const add = () => {
+  const add = async () => {
     const trimmed = newItem.trim()
-    if (!trimmed || items.includes(trimmed)) return
-    onChange([...items, trimmed])
+    if (!trimmed) return
+
+    setResolving(true)
+    const resolved = onResolve ? await onResolve(trimmed) : trimmed
+    setResolving(false)
+
+    if (!resolved || items.map(i => i.toLowerCase()).includes(resolved.toLowerCase())) return
+    onChange([...items, resolved])
     setNewItem('')
   }
 
@@ -61,13 +78,15 @@ const EditableList = ({ items, onChange, placeholder }) => {
           onChange={(e) => setNewItem(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && add()}
           placeholder={placeholder}
-          className="flex-1 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+          disabled={resolving}
+          className="flex-1 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 disabled:opacity-40"
         />
         <button
           onClick={add}
-          className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+          disabled={resolving}
+          className="text-xs text-purple-400 hover:text-purple-300 disabled:opacity-40 transition-colors"
         >
-          + Add
+          {resolving ? '...' : '+ Add'}
         </button>
       </div>
     </div>
@@ -321,11 +340,12 @@ const SettingsPanel = () => {
 
         
         <CollapsibleSection title="Test Racers">
-            <p className="text-xs text-gray-500">Racers added automatically when testing mode is on. (Usernames are case-sensitive)</p>
+            <p className="text-xs text-gray-500">Racers added automatically when testing mode is on.</p>
             <EditableList
-            items={settings.testRacers}
-            onChange={(v) => update({ testRacers: v })}
-            placeholder="username"
+              items={settings.testRacers}
+              onChange={(v) => update({ testRacers: v })}
+              placeholder="username"
+              onResolve={resolveUsername}
             />
         </CollapsibleSection>
       </CollapsibleSection>
@@ -349,7 +369,7 @@ const SettingsPanel = () => {
       </CollapsibleSection>
 
       <CollapsibleSection title="Bot Messages during Race">
-        <p className="text-xs text-gray-500">Messages that are sent during the race. These will be sent using your account. (Leave blank to disable)</p>
+        <p className="text-xs text-gray-500">Messages that are sent during the race. These will be sent via the Streamelements chat bot. (Leave blank to disable)</p>
         <MessageInput
           label="Race started"
           value={settings.messages.raceStarted}
