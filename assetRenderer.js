@@ -12,12 +12,12 @@ export const resolveDrawable = (asset, now) => {
   return asset.img
 }
 
-export const drawAsset = (ctx, asset, drawable, overrideAngle = null) => {
+export const drawAsset = (ctx, asset, drawable) => {
   if (!isReady(drawable)) return
 
   const [x, y] = asset.tl
   const [w, h] = asset.dim
-  const angle = overrideAngle ?? asset.currentAngle ?? (asset.theta ?? 0)
+  const angle = asset.theta ?? 0
 
   ctx.save()
 
