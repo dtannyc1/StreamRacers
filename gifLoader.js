@@ -54,6 +54,20 @@ export const loadAssetImage = async (asset, avatar) => {
   }
   const img = new Image()
   img.crossOrigin = 'anonymous'
-  img.src = asset.spriteUrl
+  img.src = resolveImageUrl(asset.spriteUrl)
   return { img, frames: null }
 }
+
+const resolveImageUrl = (url) => {
+    if (!url) return url
+
+    // convert Dropbox share links to direct download links
+    if (url.includes('dropbox.com')) {
+      return url
+        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+        .replace('?dl=0', '')
+        .replace('&dl=0', '')
+    }
+
+    return url
+  }
