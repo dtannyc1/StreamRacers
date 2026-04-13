@@ -88,60 +88,6 @@ const drawCornerHandles = (ctx, x, y, w, h) => {
   ctx.restore()
 }
 
-/*const drawAsset = (ctx, asset, img, t, isSelected) => {
-  if (!img) return
-  const [x, y] = asset.tl
-  const [w, h] = asset.dim
-  const theta = asset.theta ?? 0
-
-  ctx.save()
-
-  if (asset.type === 'avatar') {
-    ctx.beginPath()
-    ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2)
-    ctx.clip()
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  } else if (asset.type === 'static') {
-    if (theta !== 0) {
-      const cx = x + w / 2
-      const cy = y + h / 2
-      ctx.translate(cx, cy)
-      ctx.rotate(theta)
-      ctx.translate(-cx, -cy)
-    }
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  } else if (asset.type === 'rotating') {
-    const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const angle = theta + 2 * Math.PI * t * 2
-    ctx.translate(cx, cy)
-    ctx.rotate(angle)
-    ctx.translate(-cx, -cy)
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  } else if (asset.type === 'oscillating') {
-    const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const min = asset.minTheta ?? -Math.PI / 6
-    const max = asset.maxTheta ?? Math.PI / 6
-    const phase = asset.phase ?? 0
-    const angle = theta + ((max - min) / 2) * Math.sin(t * 3 + phase) + (max + min) / 2
-    ctx.translate(cx, cy)
-    ctx.rotate(angle)
-    ctx.translate(-cx, -cy)
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  }
-
-  if (isSelected) {
-    ctx.restore()
-    ctx.save()
-    ctx.strokeStyle = '#a855f7'
-    ctx.lineWidth = 2
-    ctx.setLineDash([4, 4])
-    ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
-  }
-
-  ctx.restore()
-}
-*/
-
 const drawAlignmentLines = (ctx) => {
   ctx.save()
   ctx.strokeStyle = '#facc15'
