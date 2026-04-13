@@ -14,13 +14,12 @@ export const resolveDrawable = (asset, now) => {
 
 export const drawAsset = (ctx, asset, drawable) => {
   if (!isReady(drawable)) {
-    console.log('Drawable not ready for asset:', asset)
     return
   }
 
   const [x, y] = asset.tl
   const [w, h] = asset.dim
-  const angle = asset.theta ?? 0
+  const angle = asset.cur_theta ?? asset.theta ?? 0
 
   ctx.save()
 
@@ -95,4 +94,26 @@ export const remapImageColor = (img, sourceHex, targetHex) => {
   const remapped = new Image()
   remapped.src = offscreen.toDataURL()
   return remapped
+}
+
+export const updateAssetAngles = (asset, dt, speed) => {
+  const radius = asset.radius ?? 1
+
+  if (asset.type === 'rotating') {
+    asset.cur_theta = ((asset.cur_theta ?? 0) + (speed / radius) * dt) % (2 * Math.PI)
+
+  } else if (asset.type === 'oscillating') {
+    const min = asset.minTheta ?? -Math.PI / 6
+    const max = asset.maxTheta ?? Math.PI / 6
+    asset.theta = asset.theta ?? 0
+    asset.theta_dot = asset.theta_dot ?? 1
+    asset.cur_theta = (asset.cur_theta ?? 0) + asset.theta_dot * (speed / radius) * dt
+    if (asset.theta_dot > 0 && asset.cur_theta - asset.theta > max) {
+      asset.cur_theta = max + asset.theta
+      asset.theta_dot *= -1
+    } else if (asset.theta_dot < 0 && asset.cur_theta - asset.theta < min) {
+      asset.cur_theta = min + asset.theta
+      asset.theta_dot *= -1
+    }
+  }
 }

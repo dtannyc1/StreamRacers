@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
-import { drawAsset, resolveDrawable } from '../../shared/assetRenderer'
+import { drawAsset, resolveDrawable, updateAssetAngles } from '../../shared/assetRenderer'
 
 export const CANVAS_W = 600
 export const CANVAS_H = 400
@@ -249,6 +249,8 @@ const CarCanvas = ({
     const ctx = canvas.getContext('2d')
 
     const draw = (timestamp) => {
+      const dt = timestamp / 1000 - tRef.current
+
       tRef.current = timestamp / 1000
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
 
@@ -274,29 +276,25 @@ const CarCanvas = ({
       drawAlignmentLines(ctx)
 
       assets.forEach(asset => {
+        const isSelected = asset.id === selectedId
+        updateAssetAngles(asset, dt, 200)
         const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
         asset.img = imagesRef.current[url]
         const drawable = resolveDrawable(asset, tRef.current * 1000)
-        drawAsset(ctx, asset, drawable)
-      })
+        drawAsset(ctx, {...asset, cur_theta: isSelected ? 0 : (asset.cur_theta ?? 0)}, drawable)
 
-      // for the selected asset highlight, draw it separately after:
-      if (selectedId) {
-        const selected = assets.find(a => a.id === selectedId)
-        if (selected) {
-          const drawable = resolveDrawable(selected, tRef.current * 1000)
-          drawAsset(ctx, selected, drawable)
+        if (isSelected) {
           // draw selection outline
           ctx.save()
           ctx.strokeStyle = '#a855f7'
           ctx.lineWidth = 2
           ctx.setLineDash([4, 4])
-          const [x, y] = selected.tl
-          const [w, h] = selected.dim
+          const [x, y] = asset.tl
+          const [w, h] = asset.dim
           ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
           ctx.restore()
         }
-      }
+      })
 
       if (selectedAsset) {
         const [x, y] = selectedAsset.tl
