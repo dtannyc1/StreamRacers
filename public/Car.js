@@ -2,7 +2,7 @@ import { loadAssetImage, pauseGIFs } from './gifLoader.js'
 import { drawAllAssets, remapImageColor } from './assetRenderer.js'
 
 export default class Car {
-  constructor({ name, avatar, displayColor, xy, carData }) {
+  constructor({ name, avatar, displayColor, xy }) {
     this.name = name
     this.displayColor = displayColor
     this.avatar = avatar
@@ -14,8 +14,6 @@ export default class Car {
     this.time = Date.now()
     this.showBoost = false
     this.lastBoost = null
-
-    this.assets = this._loadAssets(carData)
   }
 
   static async create({ name, avatar, displayColor, xy, carData }) {
