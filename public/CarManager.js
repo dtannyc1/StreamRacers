@@ -69,7 +69,7 @@ export default class CarManager {
     const yMax = Math.max(racingLine.p1[1], racingLine.p2[1])
     const y = yMin + Math.random() * (yMax - yMin)
 
-    const car = new Car({
+    const car = await Car.create({
       name: username,
       avatar,
       displayColor,

@@ -1,4 +1,5 @@
-import { parseGIF, decompressFrames } from 'https://cdn.jsdelivr.net/npm/gifuct-js/+esm'
+import { loadAssetImage, pauseGIFs } from './gifLoader.js'
+import { drawAllAssets, remapImageColor } from './assetRenderer.js'
 
 export default class Car {
   constructor({ name, avatar, displayColor, xy, carData }) {
@@ -17,6 +18,12 @@ export default class Car {
     this.assets = this._loadAssets(carData)
   }
 
+  static async create({ name, avatar, displayColor, xy, carData }) {
+    const car = new Car({ name, avatar, displayColor, xy })
+    car.assets = await car._loadAllAssets(carData)
+    return car
+  }
+
   // ── Asset loading ──────────────────────────────────────────────────────────
 
   _loadImage(url) {
@@ -27,80 +34,20 @@ export default class Car {
     return img
   }
 
-  _loadAssets(carData) {
+  async _loadAllAssets(carData) {
     if (!carData?.assets?.length) return []
-    return carData.assets.map(asset => {
-      const isGif = asset.spriteUrl?.toLowerCase().endsWith('.gif')
-      const assetObj = {
+    return await Promise.all(carData.assets.map(async asset => {
+      const { img, frames } = await loadAssetImage(asset, this.avatar)
+      return {
         ...asset,
-        img: null,
-        frames: null,
+        img,
+        frames,
         frameIndex: 0,
-        lastFrameTime: 0,
+        lastFrameTime: performance.now(),
+        remappedImg: null,
         currentAngle: asset.theta ?? 0,
       }
-
-      if (asset.type === 'avatar') {
-        assetObj.img = this.avatar
-      } else if (isGif) {
-        // load async, populate frames when ready
-        this._loadGIF(asset.spriteUrl).then(frames => {
-          assetObj.frames = frames
-          assetObj.lastFrameTime = performance.now()
-        }).catch(err => {
-          console.warn(`Failed to load GIF ${asset.spriteUrl}:`, err)
-        })
-      } else {
-        assetObj.img = this._loadImage(asset.spriteUrl)
-        assetObj.remappedImg = null
-        assetObj.theta = asset.theta ?? 0
-        assetObj.theta_0 = asset.theta ?? 0
-        assetObj.theta_dot = 1
-
-        if (asset.type === 'oscillating') {
-          assetObj.theta = asset.theta + Math.sin(asset.phase ?? 0) * ((asset.maxTheta ?? 0) - (asset.minTheta ?? 0)) / 2 + ((asset.minTheta ?? 0) + (asset.maxTheta ?? 0)) / 2
-        }
-      }
-
-      return assetObj
-    })
-  }
-
-  async _loadGIF(url) {
-    const res = await fetch(url)
-    const buffer = await res.arrayBuffer()
-    const gif = parseGIF(buffer)
-    const frames = decompressFrames(gif, true)
-
-    // convert each frame to an offscreen canvas
-    return frames.map(frame => {
-      const canvas = document.createElement('canvas')
-      canvas.width = frame.dims.width
-      canvas.height = frame.dims.height
-      const ctx = canvas.getContext('2d')
-      const imageData = ctx.createImageData(frame.dims.width, frame.dims.height)
-      imageData.data.set(frame.patch)
-      ctx.putImageData(imageData, 0, 0)
-      return {
-        canvas,
-        delay: frame.delay > 0 ? frame.delay : 100, // delay in ms, default 100
-      }
-    })
-  }
-
-  // for gifs, get the current frame to display based on elapsed time
-  _getCurrentFrame(asset, now) {
-    if (!asset.frames?.length) return null
-
-    const elapsed = now - asset.lastFrameTime
-    const frame = asset.frames[asset.frameIndex]
-
-    if (elapsed >= frame.delay) {
-      asset.frameIndex = (asset.frameIndex + 1) % asset.frames.length
-      asset.lastFrameTime = now
-    }
-
-    return asset.frames[asset.frameIndex].canvas
+    }))
   }
 
   _resolveImageUrl = (url) => {
@@ -115,93 +62,6 @@ export default class Car {
     }
 
     return url
-  }
-
-  _remapImageColor(img, sourceHex, targetHex) {
-    const offscreen = document.createElement('canvas');
-    offscreen.width = img.naturalWidth;
-    offscreen.height = img.naturalHeight;
-    const ctx = offscreen.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-
-    const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
-    const data = imageData.data;
-
-    // --- Conversion Math ---
-    const hexToRgb = (hex) => ({
-        r: parseInt(hex.slice(1, 3), 16),
-        g: parseInt(hex.slice(3, 5), 16),
-        b: parseInt(hex.slice(5, 7), 16)
-    });
-
-    const rgbToLab = (r, g, b) => {
-        let [vr, vg, vb] = [r / 255, g / 255, b / 255].map(v => 
-            v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92
-        );
-        let x = (vr * 0.4124 + vg * 0.3576 + vb * 0.1805) * 100;
-        let y = (vr * 0.2126 + vg * 0.7152 + vb * 0.0722) * 100;
-        let z = (vr * 0.0193 + vg * 0.1192 + vb * 0.9505) * 100;
-
-        const f = (t) => t > 0.008856 ? Math.pow(t, 1/3) : (7.787 * t) + (16/116);
-        return [(116 * f(y/100)) - 16, 500 * (f(x/95.047) - f(y/100)), 200 * (f(y/100) - f(z/108.883))];
-    };
-
-    const labToRgb = (l, a, b_) => {
-        let y = (l + 16) / 116;
-        let x = a / 500 + y;
-        let z = y - b_ / 200;
-
-        const fInv = (t) => t > 0.20689 ? Math.pow(t, 3) : (t - 16/116) / 7.787;
-        let r = (fInv(x) * 95.047) / 100, gy = (fInv(y) * 100) / 100, b = (fInv(z) * 108.883) / 100;
-
-        let vr = r * 3.2406 + gy * -1.5372 + b * -0.4986;
-        let vg = r * -0.9689 + gy * 1.8758 + b * 0.0415;
-        let vb = r * 0.0557 + gy * -0.2040 + b * 1.0570;
-
-        return [vr, vg, vb].map(v => 
-            Math.round(Math.max(0, Math.min(1, v > 0.0031308 ? 1.055 * Math.pow(v, 1/2.4) - 0.055 : 12.92 * v)) * 255)
-        );
-    };
-
-    // --- Pre-calculate Shifting Logic ---
-    const sRgb = hexToRgb(sourceHex);
-    const tRgb = hexToRgb(targetHex);
-    const sLab = rgbToLab(sRgb.r, sRgb.g, sRgb.b);
-    const tLab = rgbToLab(tRgb.r, tRgb.g, tRgb.b);
-
-    // The shift in LAB space
-    const dL = tLab[0] - sLab[0];
-    const dA = tLab[1] - sLab[1];
-    const dB = tLab[2] - sLab[2];
-
-    const tolerance = 18; // Delta E threshold
-
-    for (let i = 0; i < data.length; i += 4) {
-        const cLab = rgbToLab(data[i], data[i+1], data[i+2]);
-        
-        const deltaE = Math.sqrt(
-            Math.pow(cLab[0] - sLab[0], 2) +
-            Math.pow(cLab[1] - sLab[1], 2) +
-            Math.pow(cLab[2] - sLab[2], 2)
-        );
-
-        if (deltaE <= tolerance) {
-            // Apply the shift in Lab space
-            const newRgb = labToRgb(
-                cLab[0] + dL, 
-                cLab[1] + dA, 
-                cLab[2] + dB
-            );
-            data[i] = newRgb[0];
-            data[i+1] = newRgb[1];
-            data[i+2] = newRgb[2];
-        }
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-    const remapped = new Image();
-    remapped.src = offscreen.toDataURL();
-    return remapped;
   }
 
   applyColorRemaps(displayColor) {
@@ -232,11 +92,7 @@ export default class Car {
     const clamped = clampToStart && this.XY[0] > 0
     if (clamped) {
       this.XY[0] = 0
-      // freeze gif frames by advancing lastFrameTime to keep elapsed = 0
-      const now = performance.now()
-      this.assets.forEach(asset => {
-        if (asset.frames) asset.lastFrameTime = now
-      })
+      pauseGIFs(this.assets, performance.now())
     } else {
       this._updateAssetAngles(dt, speed)
     }
@@ -285,54 +141,23 @@ export default class Car {
 
     this._drawAssets(ctx, now)
     ctx.resetTransform()
-    }
+  }
 
   _drawAssets(ctx, now) {
+    drawAllAssets(ctx, this.assets, now)
+  }
+
+  applyColorRemaps(displayColor) {
     this.assets.forEach(asset => {
-      // resolve drawable — gif frame canvas takes priority, then remapped, then original
-      const drawable = asset.frames
-        ? this._getCurrentFrame(asset, now)
-        : (asset.colorRemap?.enabled && asset.remappedImg) ? asset.remappedImg : asset.img
-
-      const [x, y] = asset.tl
-      const [w, h] = asset.dim
-      const angle = asset.theta ?? 0
-
-      // for static images check naturalWidth, for gif canvases just check existence
-      const ready = drawable instanceof HTMLCanvasElement
-        ? !!drawable
-        : drawable?.naturalWidth
-
-      ctx.save()
-
-      if (asset.type === 'avatar') {
-        if (angle !== 0) {
-          ctx.translate(x + w / 2, y + h / 2)
-          ctx.rotate(angle)
-          ctx.translate(-(x + w / 2), -(y + h / 2))
-        }
-        ctx.beginPath()
-        ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2)
-        ctx.clip()
-        if (ready) ctx.drawImage(drawable, x, y, w, h)
-
-      } else if (asset.type === 'static') {
-        if (angle !== 0) {
-          ctx.translate(x + w / 2, y + h / 2)
-          ctx.rotate(angle)
-          ctx.translate(-(x + w / 2), -(y + h / 2))
-        }
-        if (ready) ctx.drawImage(drawable, x, y, w, h)
-
-      } else if (asset.type === 'rotating' || asset.type === 'oscillating') {
-        const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-        ctx.translate(cx, cy)
-        ctx.rotate(angle)
-        ctx.translate(-cx, -cy)
-        if (ready) ctx.drawImage(drawable, x, y, w, h)
+      if (!asset.colorRemap?.enabled || !asset.img || asset.type === 'avatar') return
+      const apply = () => {
+        asset.remappedImg = remapImageColor(asset.img, asset.colorRemap.sourceColor, displayColor)
       }
-
-      ctx.restore()
+      if (asset.img.complete && asset.img.naturalWidth) {
+        apply()
+      } else {
+        asset.img.onload = apply
+      }
     })
   }
 
