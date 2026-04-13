@@ -43,7 +43,6 @@ export default class Car {
         frameIndex: 0,
         lastFrameTime: performance.now(),
         remappedImg: null,
-        currentAngle: asset.theta ?? 0,
       }
     }))
   }

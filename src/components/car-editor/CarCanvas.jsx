@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
-import { drawAsset, resolveDrawable, updateAssetAngles } from '../../shared/assetRenderer'
+import { drawAsset, resolveDrawable } from '../../shared/assetRenderer'
+import { preloadCarImages, updateAssetAngles } from '../../lib/racerRenderer'
 
 export const CANVAS_W = 600
 export const CANVAS_H = 400
@@ -223,25 +224,18 @@ const CarCanvas = ({
 }) => {
   const canvasRef = useRef(null)
   const animRef = useRef(null)
-  const tRef = useRef(0)
-  const imagesRef = useRef({})
+  const assetsRef = useRef({})
   const dragStartPos = useRef(null)
   const didDrag = useRef(false)
   const draggingCR = useRef(false)
   const draggingRadius = useRef(false)
+  const prevSelectedAsset = useRef(null)
 
   useEffect(() => {
-    assets.forEach(asset => {
-      const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
-      if (!url) return
-      // always re-fetch if the url isn't in cache
-      if (!imagesRef.current[url]) {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.src = url
-        imagesRef.current[url] = img
-      }
-    })
+    async function loadCarImages() {
+      await preloadCarImages({ assets }, avatarUrl, assetsRef)
+    }
+    loadCarImages()
   }, [assets.map(a => resolveImageUrl(a.type === 'avatar' ? avatarUrl : a.spriteUrl)).join(','), avatarUrl])
 
   useEffect(() => {
@@ -249,9 +243,6 @@ const CarCanvas = ({
     const ctx = canvas.getContext('2d')
 
     const draw = (timestamp) => {
-      const dt = timestamp / 1000 - tRef.current
-
-      tRef.current = timestamp / 1000
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
 
       ctx.strokeStyle = '#1f2937'
@@ -277,10 +268,9 @@ const CarCanvas = ({
 
       assets.forEach(asset => {
         const isSelected = asset.id === selectedId
-        updateAssetAngles(asset, dt, 200)
-        const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
-        asset.img = imagesRef.current[url]
-        const drawable = resolveDrawable(asset, tRef.current * 1000)
+        updateAssetAngles(asset, assetsRef, timestamp)
+        const curAsset = assetsRef.current[asset.id]
+        const drawable = resolveDrawable(curAsset, timestamp)
         drawAsset(ctx, {...asset, cur_theta: isSelected ? 0 : (asset.cur_theta ?? 0)}, drawable)
 
         if (isSelected) {
@@ -311,6 +301,8 @@ const CarCanvas = ({
       ctx.restore()
       animRef.current = requestAnimationFrame(draw)
     }
+
+    prevSelectedAsset.current = selectedAsset
 
     animRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(animRef.current)
