@@ -214,7 +214,7 @@ const CarCanvas = ({
 
       assets.forEach(asset => {
         const isSelected = asset.id === selectedId
-        updateAssetAngles(asset, assetsRef, timestamp)
+        updateAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
         const curAsset = assetsRef.current[asset.id]
         const drawable = resolveDrawable(curAsset, timestamp)
         drawAsset(ctx, {...asset, cur_theta: isSelected ? 0 : (asset.cur_theta ?? 0)}, drawable)

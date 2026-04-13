@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
-import { drawRacer } from '../../lib/racerRenderer'
+import { drawRacer, updateAssetAngles } from '../../lib/racerRenderer'
 
 const CANVAS_W = 1920
 const CANVAS_H = 1080
@@ -207,22 +207,6 @@ const TrackCanvas = ({
     track.foregroundAssets.map(a => a.url).join(','),
   ])
 
-  // preload racer images when activeRacers changes
-  useEffect(() => {
-    activeRacers.forEach(racer => {
-      const avatarUrl = racerAvatars[racer.username] ?? ''
-      racer.car.assets.forEach(asset => {
-        const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
-        if (url && !imageCache.current[url]) {
-          const img = new Image()
-          img.crossOrigin = 'anonymous'
-          img.src = url
-          imageCache.current[url] = img
-        }
-      })
-    })
-  }, [activeRacers, racerAvatars])
-
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -274,10 +258,10 @@ const TrackCanvas = ({
         })
       }
 
-      // draw active racers
+      // update + draw active racers
       activeRacersRef.current.forEach(racer => {
-        const avatarUrl = racerAvatarsRef.current[racer.username] ?? ''
-        drawRacer(ctx, racer, avatarUrl, imageCache.current, tRef.current)
+        racer.car.assets.forEach(asset => updateAssetAngles(asset, asset.initialLoadTime, timestamp))
+        drawRacer(ctx, racer, timestamp)
       })
 
       drawScattered(ctx, t.foregroundAssets, imageCache, 99,

@@ -20,19 +20,19 @@ export const preloadCarImages = async (car, avatarUrl, assetListRef) => {
   }))
 }
 
-export const drawRacer = (ctx, racer, avatarUrl, loadedAssets, t) => {
-  if (!loadedAssets?.length) return
-  const now = t * 1000  // convert seconds to ms for frame timing
+export const drawRacer = (ctx, racer, now) => {
+  if (!racer?.car?.assets) return
   ctx.save()
-  drawAllAssets(ctx, loadedAssets, now)
+  ctx.translate(racer.xy[0], racer.xy[1])
+  drawAllAssets(ctx, racer.car.assets, now)
   ctx.restore()
 }
 
-// for use only in React editor
-export const updateAssetAngles = (asset, assetListRef, timestamp) => {
+// for use only in React car editor
+export const updateAssetAngles = (asset, initTime, timestamp) => {
   const radius = asset.radius ?? 1
   const speed = 200
-  const dt = (timestamp - assetListRef.current[asset.id].initialLoadTime) / 1000
+  const dt = (timestamp - initTime) / 1000
 
   if (asset.type === 'rotating') {
     asset.cur_theta = (speed / radius) * dt % (2 * Math.PI)

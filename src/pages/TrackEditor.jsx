@@ -26,7 +26,7 @@ const TrackEditor = ({ mode }) => {
   const activeRacersRef = useRef(activeRacers)
   const lastTimeRef = useRef(null)
   const animRef = useRef(null)
-  const racerImageCache = useRef({})
+  const racerAssetsRef = useRef({})
 
   const initialTrack = mode === 'edit'
     ? tracks?.[decodeURIComponent(trackName)]
@@ -118,12 +118,16 @@ const TrackEditor = ({ mode }) => {
       try {
         const twitchUser = await getTwitchUser(username)
         setRacerAvatars(prev => ({ ...prev, [username]: twitchUser.profile_image_url }))
-        preloadCarImages(racer.car, twitchUser.profile_image_url, racerImageCache.current)
+        await preloadCarImages(racer.car, twitchUser.profile_image_url, racerAssetsRef)
+        racer.car.assets = racer.car.assets.map(asset => racerAssetsRef.current[asset.id] || asset)
+        racerAssetsRef.current = {}
       } catch {
         // proceed without avatar
       }
     } else {
-      preloadCarImages(racer.car, racerAvatars[username], racerImageCache.current)
+      await preloadCarImages(racer.car, racerAvatars[username], racerAssetsRef)
+      racer.car.assets = racer.car.assets.map(asset => racerAssetsRef.current[asset.id] || asset)
+      racerAssetsRef.current = {}
     }
 
     setActiveRacers(prev => sortRacersByY([...prev, racer]))
