@@ -52,7 +52,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
 
     if (isDefaultCar) {
       await onSaveDefault(sanitizedCar)
-      navigate('/')
+      navigate('/dashboard')
       return
     }
 
@@ -67,7 +67,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     }
 
     await updateRacers(updated)
-    navigate('/')
+    navigate('/dashboard')
   }
 
   const handleEyedropperActivate = (assetId) => {
@@ -91,7 +91,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
               ← Back

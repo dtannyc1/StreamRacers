@@ -5,8 +5,9 @@ import SettingsPanel from '../components/settings/SettingsPanel'
 import ChannelProfile from '../components/ChannelProfile'
 import { useAuth } from '../context/AuthContext'
 import { getTwitchAccessToken } from '../lib/twitch'
+import Instructions from '../components/instructions/instructions'
 
-const tabs = ['Vehicles', 'Tracks', 'Settings']
+const tabs = ['Vehicles', 'Tracks', 'Settings', 'Setup Guide']
 
 const Dashboard = () => {
   const { channel, settling, clearToken } = useAuth()
@@ -62,6 +63,7 @@ const Dashboard = () => {
         {activeTab === 'Vehicles' && <RacerList />}
         {activeTab === 'Tracks' && <TrackList />} 
         {activeTab === 'Settings' && <SettingsPanel />}
+        {activeTab === 'Setup Guide' && <Instructions />}
 
 
       </div>

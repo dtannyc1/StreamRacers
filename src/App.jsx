@@ -4,6 +4,7 @@ import { KVStoreProvider } from './context/KVStoreContext'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import CarEditor from './pages/CarEditor'
+import Home from './pages/Home'
 import TrackEditor from './pages/TrackEditor'
 import TwitchCallback from './pages/TwitchCallback'
 import Modal from './components/Modal'
@@ -48,8 +49,9 @@ const AppRoutes = () => {
         />
       )}
       <Routes>
-        <Route path="/login" element={(token && !settling) ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/login" element={(token && !settling) ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/racer/new" element={<ProtectedRoute><CarEditor mode="new-user" /></ProtectedRoute>} />
         <Route path="/racer/:username/car/new" element={<ProtectedRoute><CarEditor mode="new-car" /></ProtectedRoute>} />
         <Route path="/racer/default/car/edit" element={<ProtectedRoute><CarEditor mode="default" /></ProtectedRoute>} />

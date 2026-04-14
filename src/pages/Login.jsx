@@ -22,7 +22,7 @@ const Login = () => {
       <div className="w-full max-w-lg flex flex-col gap-8">
 
         <div>
-          <h1 className="text-3xl font-bold text-purple-400">Stream Racer Vehicle and Track Editor</h1>
+          <h1 className="text-3xl font-bold text-purple-400">StreamRacers Vehicle and Track Editor</h1>
           <p className="text-gray-400 mt-2">Connect your StreamElements account to get started.</p>
         </div>
 

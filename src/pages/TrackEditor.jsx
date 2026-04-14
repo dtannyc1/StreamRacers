@@ -201,7 +201,7 @@ const TrackEditor = ({ mode }) => {
             <button
               onClick={() => {
                 if (animRef.current) cancelAnimationFrame(animRef.current)
-                navigate('/')
+                navigate('/dashboard')
               }}
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
@@ -218,7 +218,7 @@ const TrackEditor = ({ mode }) => {
             <div className="flex items-center gap-4">
               <p className="text-sm text-green-400">Saved! Remember to refresh your browser source in OBS.</p>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 className="rounded-lg bg-gray-700 px-5 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
               >
                 Back to Dashboard

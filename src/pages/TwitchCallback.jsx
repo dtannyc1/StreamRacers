@@ -12,7 +12,7 @@ const TwitchCallback = () => {
 
     if (accessToken) {
       saveTwitchAccessToken(accessToken)
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } else {
       navigate('/login', { replace: true })
     }
