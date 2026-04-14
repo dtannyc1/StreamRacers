@@ -13,11 +13,13 @@ export const resolveDrawable = (asset, now) => {
 }
 
 export const drawAsset = (ctx, asset, drawable) => {
-  if (!isReady(drawable)) return
+  if (!isReady(drawable)) {
+    return
+  }
 
   const [x, y] = asset.tl
   const [w, h] = asset.dim
-  const angle = asset.theta ?? 0
+  let angle = asset.theta ?? 0
 
   ctx.save()
 
@@ -41,6 +43,7 @@ export const drawAsset = (ctx, asset, drawable) => {
     ctx.drawImage(drawable, x, y, w, h)
 
   } else if (asset.type === 'rotating' || asset.type === 'oscillating') {
+    angle = asset.cur_theta ? asset.cur_theta + angle : angle
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
     ctx.translate(cx, cy)
     ctx.rotate(angle)
