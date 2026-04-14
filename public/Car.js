@@ -44,6 +44,8 @@ export default class Car {
         frameIndex: 0,
         lastFrameTime: performance.now(),
         remappedImg: null,
+        theta_0: asset.theta ?? 0,
+        theta_dot: asset.theta_dot ?? 1,
       }
     }))
   }
