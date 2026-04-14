@@ -208,6 +208,7 @@ const TrackCanvas = ({
     track.foregroundAssets.map(a => a.url).join(','),
   ])
 
+  // draw loop
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -262,7 +263,6 @@ const TrackCanvas = ({
       // update + draw active racers
       activeRacersRef.current.forEach(racer => {
         incrementCarAssetAngles(racer.car, dt, racer.vel[0]) 
-        //racer.car.assets.forEach(asset => updateAssetAngles(asset, asset.initialLoadTime, timestamp))
         drawRacer(ctx, racer, timestamp)
       })
 
