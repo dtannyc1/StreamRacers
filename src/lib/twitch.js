@@ -3,7 +3,7 @@ const TWITCH_ACCESS_TOKEN_KEY = 'twitch_access_token'
 
 const REDIRECT_URI = import.meta.env.DEV
   ? 'http://localhost:5173/StreamRacers/auth/twitch/callback'
-  : 'https://dtannyc1.github.io/StreamRacers/auth/twitch/callback'
+  : 'https://streamracers.onrender.com/auth/twitch/callback'
 
 export const getTwitchAccessToken = () =>
   localStorage.getItem(TWITCH_ACCESS_TOKEN_KEY)
