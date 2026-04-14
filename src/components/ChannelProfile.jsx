@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import BuyMeACoffee from './BuyMeACoffee';
 
 const ChannelProfile = ({ channel, onClear }) => {
   const { username, avatar, displayName } = channel;
@@ -29,12 +30,15 @@ const ChannelProfile = ({ channel, onClear }) => {
           </div>
         </div>
       </div>
-      <button
-        onClick={onClear}
-        className="text-sm text-white h-fit cursor-pointer hover:text-red-400 hover:bg-gray-700 transition-colors rounded-lg bg-gray-800 border border-gray-700 px-4 py-3"
-      >
-        Logout
-      </button>
+      <div className="flex items-center gap-4">
+        <BuyMeACoffee py={3} px={4}/>
+        <button
+          onClick={onClear}
+          className="text-sm text-white h-fit cursor-pointer hover:text-red-400 hover:bg-gray-700 transition-colors rounded-lg bg-gray-800 border border-gray-700 px-4 py-3"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   )
 }

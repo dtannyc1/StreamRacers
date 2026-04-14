@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BuyMeACoffee from '../components/BuyMeACoffee'
 
 const Home = () => {
   const { token } = useAuth()
@@ -13,6 +14,7 @@ const Home = () => {
         <nav className="flex items-center justify-between px-8 py-4 border-b border-gray-800">
           <h1 className="text-xl font-bold text-purple-400">StreamRacers</h1>
           <div className="flex items-center gap-4">
+            <BuyMeACoffee py={2} px={4} />
             <button
               onClick={() => navigate(token ? '/dashboard' : '/login')}
               className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
@@ -32,6 +34,9 @@ const Home = () => {
             <p className="text-lg text-gray-400 max-w-2xl">
               StreamRacers is a Twitch overlay game using StreamElements that allows viewers to race to the finish line. 
               What do the winners get? Bragging rights and the glory of being the fastest in chat.
+            </p>
+            <p className="text-lg text-gray-400 max-w-2xl">
+              Your style. Your artwork. 
               Customize cars and tracks to create a unique experience for your community.
               Your data is hosted on your StreamElements account and is never shared with any other third parties. 
             </p>
@@ -87,6 +92,7 @@ const Home = () => {
           </div> */}
         </div>
 
+        
       </div>
 
     </div>
