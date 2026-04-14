@@ -29,7 +29,9 @@ export const drawRacer = (ctx, racer, now) => {
 }
 
 // for use only in React car editor
-export const updateAssetAngles = (asset, initTime, timestamp) => {
+// Assumes speed has not changed at all from 200
+// This does not work for general race
+export const resetAssetAngles = (asset, initTime, timestamp) => {
   const radius = asset.radius ?? 1
   const speed = 200
   const dt = (timestamp - initTime) / 1000

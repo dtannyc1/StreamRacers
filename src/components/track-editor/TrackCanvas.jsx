@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
-import { drawRacer, updateAssetAngles } from '../../lib/racerRenderer'
+import { drawRacer } from '../../lib/racerRenderer'
+import { incrementCarAssetAngles } from '../../shared/racerLogic'
 
 const CANVAS_W = 1920
 const CANVAS_H = 1080
@@ -212,7 +213,7 @@ const TrackCanvas = ({
     const ctx = canvas.getContext('2d')
 
     const draw = (timestamp) => {
-      tRef.current = timestamp / 1000
+      const dt = (timestamp / 1000) - tRef.current
       const t = trackRef.current
       const sel = selectionRef.current
 
@@ -260,7 +261,8 @@ const TrackCanvas = ({
 
       // update + draw active racers
       activeRacersRef.current.forEach(racer => {
-        racer.car.assets.forEach(asset => updateAssetAngles(asset, asset.initialLoadTime, timestamp))
+        incrementCarAssetAngles(racer.car, dt, racer.vel[0]) 
+        //racer.car.assets.forEach(asset => updateAssetAngles(asset, asset.initialLoadTime, timestamp))
         drawRacer(ctx, racer, timestamp)
       })
 
@@ -300,6 +302,7 @@ const TrackCanvas = ({
         drawRacingLineImage(ctx, rlImg, t.racingLine, true)
         drawLineEditor(ctx, t.racingLine)
       }
+      tRef.current = timestamp / 1000
 
       animRef.current = requestAnimationFrame(draw)
     }

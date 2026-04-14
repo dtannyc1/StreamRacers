@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
 import { drawAsset, resolveDrawable } from '../../shared/assetRenderer'
-import { preloadCarImages, updateAssetAngles } from '../../lib/racerRenderer'
+import { preloadCarImages, resetAssetAngles } from '../../lib/racerRenderer'
 
 export const CANVAS_W = 600
 export const CANVAS_H = 400
@@ -214,7 +214,7 @@ const CarCanvas = ({
 
       assets.forEach(asset => {
         const isSelected = asset.id === selectedId
-        updateAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
+        resetAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
         const curAsset = assetsRef.current[asset.id]
         const drawable = resolveDrawable(curAsset, timestamp)
         drawAsset(ctx, {...asset, cur_theta: isSelected ? 0 : (asset.cur_theta ?? 0)}, drawable)

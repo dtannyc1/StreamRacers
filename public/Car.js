@@ -1,5 +1,6 @@
 import { loadAssetImage, pauseGIFs } from './gifLoader.js'
 import { drawAllAssets, remapImageColor } from './assetRenderer.js'
+import { updateRacerPos } from './racerLogic.js'
 
 export default class Car {
   constructor({ name, avatar, displayColor, xy }) {
@@ -79,45 +80,7 @@ export default class Car {
   // ── Update ─────────────────────────────────────────────────────────────────
 
   update(curTime, clampToStart = false, speedMultiplier = 1) {
-    const dt = (curTime - this.time) / 1000
-    if (dt <= 0) return [this.XY, this.vel]
-    const speed = this.vel[0] * speedMultiplier
-
-    this.XY[0] += speed * dt
-    this.XY[1] += this.vel[1] * dt
-
-    const clamped = clampToStart && this.XY[0] > 0
-    if (clamped) {
-      this.XY[0] = 0
-      pauseGIFs(this.assets, performance.now())
-    } else {
-      this._updateAssetAngles(dt, speed)
-    }
-
-    this.time = curTime
-    return [this.XY, this.vel]
-  }
-
-  _updateAssetAngles(dt, speed) {
-    this.assets.forEach(asset => {
-      const radius = asset.radius ?? 1
-
-      if (asset.type === 'rotating') {
-        asset.theta = ((asset.theta ?? 0) + (speed / radius) * dt) % (2 * Math.PI)
-
-      } else if (asset.type === 'oscillating') {
-        const min = asset.minTheta ?? -Math.PI / 6
-        const max = asset.maxTheta ?? Math.PI / 6
-        asset.theta = (asset.theta ?? 0) + asset.theta_dot * (speed / radius) * dt
-        if (asset.theta_dot > 0 && asset.theta - asset.theta_0 > max) {
-          asset.theta = max + asset.theta_0
-          asset.theta_dot *= -1
-        } else if (asset.theta_dot < 0 && asset.theta - asset.theta_0 < min) {
-          asset.theta = min + asset.theta_0
-          asset.theta_dot *= -1
-        }
-      }
-    })
+    return updateRacerPos(this, curTime, clampToStart, speedMultiplier)
   }
 
   // ── Drawing ────────────────────────────────────────────────────────────────
