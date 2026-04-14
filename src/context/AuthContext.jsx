@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null)
     setChannel(null)
     setAuthError(null)
+    window.location.href = '/'
   }
 
   const dismissAuthError = () => setAuthError(null)
