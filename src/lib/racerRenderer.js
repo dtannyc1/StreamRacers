@@ -23,10 +23,10 @@ export const preloadCarImages = async (car, avatarUrl, assetListRef) => {
 }
 
 export const drawRacer = (ctx, racer, now) => {
-  if (!racer?.car?.assets) return
+  if (!racer?.assets) return
   ctx.save()
-  ctx.translate(racer.xy[0], racer.xy[1])
-  drawAllAssets(ctx, racer.car.assets, now)
+  ctx.translate(racer.XY[0], racer.XY[1])
+  drawAllAssets(ctx, racer.assets, now)
   ctx.restore()
 }
 

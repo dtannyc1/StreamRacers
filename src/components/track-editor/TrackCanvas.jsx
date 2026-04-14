@@ -262,7 +262,6 @@ const TrackCanvas = ({
 
       // update + draw active racers
       activeRacersRef.current.forEach(racer => {
-        incrementCarAssetAngles(racer.car, dt, racer.vel[0]) 
         drawRacer(ctx, racer, timestamp)
       })
 

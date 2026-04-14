@@ -6,11 +6,12 @@ import TrackCanvas from '../components/track-editor/TrackCanvas'
 import TrackAssetList from '../components/track-editor/TrackAssetList'
 import RacingLinePanel from '../components/track-editor/RacingLinePanel'
 import { sanitizeDeep, isValidHttpUrl } from '../lib/sanitize'
-import { spawnRacer, updateRacers, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
+import { spawnRacer, isRacerDone, sortRacersByY } from '../lib/racerSimulation'
 import { preloadCarImages } from '../lib/racerRenderer'
 import { getTwitchUser } from '../lib/twitch'
 import RoadDetailsPanel from '../components/track-editor/RoadDetailsPanel'
 import Tooltip from '../components/ToolTip'
+import { updateRacerPos } from '../shared/racerLogic'
 
 const TrackEditor = ({ mode }) => {
   const { trackName } = useParams()
@@ -24,7 +25,6 @@ const TrackEditor = ({ mode }) => {
   const [activeRacers, setActiveRacers] = useState([])
   const [racerAvatars, setRacerAvatars] = useState({})
   const activeRacersRef = useRef(activeRacers)
-  const lastTimeRef = useRef(null)
   const animRef = useRef(null)
   const racerAssetsRef = useRef({})
 
@@ -51,17 +51,17 @@ const TrackEditor = ({ mode }) => {
 
   useEffect(() => {
     if (activeRacers.length === 0) {
-      lastTimeRef.current = null
       return
     }
 
-    const tick = (timestamp) => {
-      const dt = lastTimeRef.current ? (timestamp - lastTimeRef.current) / 1000 : 0
-      lastTimeRef.current = timestamp
-
-      setActiveRacers(prev => {
-        const updated = updateRacers(prev, dt)
-        return updated.filter(r => !isRacerDone(r))
+    const tick = () => {
+      const t = Date.now()
+      setActiveRacers(racers => {
+        racers.forEach(racer => {
+          updateRacerPos(racer, t, false, 1)
+        })
+        // const updated = updateRacers(prev, dt)
+        return racers.filter(r => !isRacerDone(r))
       })
 
       animRef.current = requestAnimationFrame(tick)
@@ -117,16 +117,16 @@ const TrackEditor = ({ mode }) => {
     if (!racerAvatars[username]) {
       try {
         const twitchUser = await getTwitchUser(username)
+        await preloadCarImages(racer, twitchUser.profile_image_url, racerAssetsRef)
         setRacerAvatars(prev => ({ ...prev, [username]: twitchUser.profile_image_url }))
-        await preloadCarImages(racer.car, twitchUser.profile_image_url, racerAssetsRef)
-        racer.car.assets = racer.car.assets.map(asset => racerAssetsRef.current[asset.id] || asset)
+        racer.assets = racer.assets.map(asset => racerAssetsRef.current[asset.id] || asset)
         racerAssetsRef.current = {}
       } catch {
         // proceed without avatar
       }
     } else {
-      await preloadCarImages(racer.car, racerAvatars[username], racerAssetsRef)
-      racer.car.assets = racer.car.assets.map(asset => racerAssetsRef.current[asset.id] || asset)
+      await preloadCarImages(racer, racerAvatars[username], racerAssetsRef)
+      racer.assets = racer.assets.map(asset => racerAssetsRef.current[asset.id] || asset)
       racerAssetsRef.current = {}
     }
 
@@ -199,7 +199,10 @@ const TrackEditor = ({ mode }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => {
+                if (animRef.current) cancelAnimationFrame(animRef.current)
+                navigate('/')
+              }}
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
               ← Back
