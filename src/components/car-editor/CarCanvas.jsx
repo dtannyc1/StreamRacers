@@ -213,6 +213,7 @@ const CarCanvas = ({
       drawAlignmentLines(ctx)
 
       assets.forEach(asset => {
+        if (!assetsRef.current[asset.id]) return // image not loaded yet
         const isSelected = asset.id === selectedId
         resetAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
         const curAsset = assetsRef.current[asset.id]
