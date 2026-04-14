@@ -4,8 +4,7 @@ import { useKVStore } from '../../context/KVStoreContext'
 import { useCarEditor } from './useCarEditor'
 import CarCanvas from './CarCanvas'
 import AssetPanel from './AssetPanel'
-import AssetForm from './AssetForm'
-import { sanitizeDeep, validateCar } from '../../lib/sanitize'
+import { sanitizeCarData, sanitizeDeep, validateCar } from '../../lib/sanitize'
 
 const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDefaultCar, onSaveDefault }) => {
   const { racers, updateRacers } = useKVStore()
@@ -49,7 +48,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     }
 
     setSaveError(null)
-    const sanitizedCar = sanitizeDeep(car)
+    const sanitizedCar = sanitizeCarData(sanitizeDeep(car))
 
     if (isDefaultCar) {
       await onSaveDefault(sanitizedCar)

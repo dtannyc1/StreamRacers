@@ -1,100 +1,62 @@
-import { resolveImageUrl } from './utils'
+import { drawAllAssets } from '../shared/assetRenderer'
+import { loadAssetImage } from '../shared/gifLoader'
 
-const loadImage = (url, cache) => {
-  if (!url) return null
-  const resolved = resolveImageUrl(url)
-  if (!cache[resolved]) {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.src = resolved
-    cache[resolved] = img
-  }
-  return cache[resolved]
+export const preloadCarImages = async (car, avatarUrl, assetListRef) => {
+  const initTime = performance.now()
+  // assetList is the mutable array to populate
+  await Promise.all(car.assets.map(async (asset, i) => {
+    const avatarImg = new Image()
+    avatarImg.crossOrigin = 'anonymous'
+    avatarImg.src = avatarUrl
+    const { img: loadedImg, frames } = await loadAssetImage(asset, avatarImg)
+    assetListRef.current[asset.id] = {
+      ...asset,
+      img: loadedImg,
+      frames,
+      frameIndex: 0,
+      lastFrameTime: performance.now(),
+      initialLoadTime: initTime,
+      theta_0: asset.theta ?? 0,
+      theta_dot: asset.theta_dot ?? 1,
+    }
+  }))
 }
 
-const drawAsset = (ctx, asset, img, t, xy, speed) => {
-  if (!img?.naturalWidth) return
-
-  const [rx, ry] = xy
-  const [x, y] = [rx + asset.tl[0], ry + asset.tl[1]]
-  const [w, h] = asset.dim
-  const theta = asset.theta ?? 0
-
+export const drawRacer = (ctx, racer, now) => {
+  if (!racer?.assets) return
   ctx.save()
-
-  if (asset.type === 'avatar' || asset.type === 'static') {
-    if (theta !== 0) {
-      const cx = x + w / 2
-      const cy = y + h / 2
-      ctx.translate(cx, cy)
-      ctx.rotate(theta)
-      ctx.translate(-cx, -cy)
-    }
-    if (asset.type === 'avatar') {
-      ctx.beginPath()
-      ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2)
-      ctx.clip()
-    }
-    ctx.drawImage(img, x, y, w, h)
-
-  } else if (asset.type === 'rotating') {
-    const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const acx = rx + cx
-    const acy = ry + cy
-    const radius = asset.radius ?? 1
-    const angle = theta + (speed / radius) * t
-    ctx.translate(acx, acy)
-    ctx.rotate(angle)
-    ctx.translate(-acx, -acy)
-    ctx.drawImage(img, x, y, w, h)
-
-  } else if (asset.type === 'oscillating') {
-    const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const acx = rx + cx
-    const acy = ry + cy
-    const min = asset.minTheta ?? -Math.PI / 6
-    const max = asset.maxTheta ?? Math.PI / 6
-    const phase = asset.phase ?? 0
-    const radius = asset.radius ?? 1
-
-    // frequency from speed
-    const freq = Math.abs(speed / radius)
-
-    // triangle wave: sawtooth via modulo, then fold into triangle
-    const period = (2 * Math.PI) / freq
-    const tp = ((t + phase / freq) % period + period) % period
-    const normalized = tp / period  // 0 to 1
-    const triangle = normalized < 0.5
-      ? normalized * 2          // 0 to 1
-      : 2 - normalized * 2      // 1 to 0
-
-    // map triangle (0 to 1) to (min to max)
-    const angle = theta + min + triangle * (max - min)
-
-    ctx.translate(acx, acy)
-    ctx.rotate(angle)
-    ctx.translate(-acx, -acy)
-    ctx.drawImage(img, x, y, w, h)
-  }
-
+  ctx.translate(racer.XY[0], racer.XY[1])
+  drawAllAssets(ctx, racer.assets, now)
   ctx.restore()
 }
 
-export const preloadCarImages = (car, avatarUrl, cache) => {
-  car.assets.forEach(asset => {
-    const url = asset.type === 'avatar' ? avatarUrl : asset.spriteUrl
-    loadImage(url, cache)
-  })
-}
+// for use only in React car editor
+// Assumes speed has not changed at all from 200
+// This does not work for general race
+export const resetAssetAngles = (asset, initTime, timestamp) => {
+  const radius = asset.radius ?? 1
+  const speed = 200
+  const dt = (timestamp - initTime) / 1000
 
-export const drawRacer = (ctx, racer, avatarUrl, imageCache, t) => {
-  const { car, xy, vel } = racer
-  const speed = vel?.[0] ?? 200
-  if (!car?.assets) return
+  if (asset.type === 'rotating') {
+    asset.cur_theta = (speed / radius) * dt % (2 * Math.PI)
 
-  car.assets.forEach(asset => {
-    const url = asset.type === 'avatar' ? avatarUrl : asset.spriteUrl
-    const img = loadImage(url, imageCache)
-    drawAsset(ctx, asset, img, t, xy, speed)
-  })
+  } else if (asset.type === 'oscillating') {
+    const slope = (speed / radius) 
+    const min = asset.minTheta ?? 0
+    const max = asset.maxTheta ?? 0
+    const amplitude = (max - min) / 2
+    const period = (4 * amplitude) / slope
+    const center = (max + min) / 2
+    const xshift = (asset.phase ?? 0) * period / (2 * Math.PI)
+
+    const timeWithPhase = (dt + xshift) % period
+    let triangle = Math.abs((timeWithPhase / period) * 4 - 2) - 1
+    
+    let thetad = Math.cos(2 * Math.PI * (dt + xshift) / period)
+    let theta_dot = thetad > 0 ? 1 : -1
+
+    asset.cur_theta = center + amplitude * triangle
+    asset.theta_dot = theta_dot
+  }
 }

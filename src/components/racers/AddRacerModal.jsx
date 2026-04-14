@@ -29,6 +29,10 @@ const AddRacerModal = ({ onClose }) => {
     setError(null)
     try {
       const user = await getTwitchUser(trimmed)
+      if (racers?.[user.display_name]) {
+        setError(`"${user.display_name}" is already in your racer list.`)
+        return
+      }
       setTwitchUser(user)
       setStep(STEPS.CONFIRM)
     } catch (err) {

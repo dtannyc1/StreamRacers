@@ -1,5 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
+import { drawAsset, resolveDrawable } from '../../shared/assetRenderer'
+import { preloadCarImages, resetAssetAngles } from '../../lib/racerRenderer'
 
 export const CANVAS_W = 600
 export const CANVAS_H = 400
@@ -86,59 +88,6 @@ const drawCornerHandles = (ctx, x, y, w, h) => {
   ctx.restore()
 }
 
-const drawAsset = (ctx, asset, img, t, isSelected) => {
-  if (!img) return
-  const [x, y] = asset.tl
-  const [w, h] = asset.dim
-  const theta = asset.theta ?? 0
-
-  ctx.save()
-
-  if (asset.type === 'avatar') {
-    ctx.beginPath()
-    ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2)
-    ctx.clip()
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  } else if (asset.type === 'static') {
-    if (theta !== 0) {
-      const cx = x + w / 2
-      const cy = y + h / 2
-      ctx.translate(cx, cy)
-      ctx.rotate(theta)
-      ctx.translate(-cx, -cy)
-    }
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  } else if (asset.type === 'rotating') {
-    const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const angle = theta + 2 * Math.PI * t * 2
-    ctx.translate(cx, cy)
-    ctx.rotate(angle)
-    ctx.translate(-cx, -cy)
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  } else if (asset.type === 'oscillating') {
-    const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
-    const min = asset.minTheta ?? -Math.PI / 6
-    const max = asset.maxTheta ?? Math.PI / 6
-    const phase = asset.phase ?? 0
-    const angle = theta + ((max - min) / 2) * Math.sin(t * 3 + phase) + (max + min) / 2
-    ctx.translate(cx, cy)
-    ctx.rotate(angle)
-    ctx.translate(-cx, -cy)
-    if (img.naturalWidth) ctx.drawImage(img, x, y, w, h)
-  }
-
-  if (isSelected) {
-    ctx.restore()
-    ctx.save()
-    ctx.strokeStyle = '#a855f7'
-    ctx.lineWidth = 2
-    ctx.setLineDash([4, 4])
-    ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
-  }
-
-  ctx.restore()
-}
-
 const drawAlignmentLines = (ctx) => {
   ctx.save()
   ctx.strokeStyle = '#facc15'
@@ -221,25 +170,18 @@ const CarCanvas = ({
 }) => {
   const canvasRef = useRef(null)
   const animRef = useRef(null)
-  const tRef = useRef(0)
-  const imagesRef = useRef({})
+  const assetsRef = useRef({})
   const dragStartPos = useRef(null)
   const didDrag = useRef(false)
   const draggingCR = useRef(false)
   const draggingRadius = useRef(false)
+  const prevSelectedAsset = useRef(null)
 
   useEffect(() => {
-    assets.forEach(asset => {
-      const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
-      if (!url) return
-      // always re-fetch if the url isn't in cache
-      if (!imagesRef.current[url]) {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.src = url
-        imagesRef.current[url] = img
-      }
-    })
+    async function loadCarImages() {
+      await preloadCarImages({ assets }, avatarUrl, assetsRef)
+    }
+    loadCarImages()
   }, [assets.map(a => resolveImageUrl(a.type === 'avatar' ? avatarUrl : a.spriteUrl)).join(','), avatarUrl])
 
   useEffect(() => {
@@ -247,7 +189,6 @@ const CarCanvas = ({
     const ctx = canvas.getContext('2d')
 
     const draw = (timestamp) => {
-      tRef.current = timestamp / 1000
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
 
       ctx.strokeStyle = '#1f2937'
@@ -272,10 +213,24 @@ const CarCanvas = ({
       drawAlignmentLines(ctx)
 
       assets.forEach(asset => {
-        const url = resolveImageUrl(asset.type === 'avatar' ? avatarUrl : asset.spriteUrl)
-        const img = imagesRef.current[url]
-        const t = ((draggingCR.current || draggingRadius.current) && asset.id === selectedId) ? 0 : tRef.current
-        drawAsset(ctx, asset, img, t, asset.id === selectedId)
+        if (!assetsRef.current[asset.id]) return // image not loaded yet
+        const isSelected = asset.id === selectedId
+        resetAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
+        const curAsset = assetsRef.current[asset.id]
+        const drawable = resolveDrawable(curAsset, timestamp)
+        drawAsset(ctx, {...asset, cur_theta: isSelected ? 0 : (asset.cur_theta ?? 0)}, drawable)
+
+        if (isSelected) {
+          // draw selection outline
+          ctx.save()
+          ctx.strokeStyle = '#a855f7'
+          ctx.lineWidth = 2
+          ctx.setLineDash([4, 4])
+          const [x, y] = asset.tl
+          const [w, h] = asset.dim
+          ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
+          ctx.restore()
+        }
       })
 
       if (selectedAsset) {
@@ -293,6 +248,8 @@ const CarCanvas = ({
       ctx.restore()
       animRef.current = requestAnimationFrame(draw)
     }
+
+    prevSelectedAsset.current = selectedAsset
 
     animRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(animRef.current)

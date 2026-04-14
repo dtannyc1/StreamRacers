@@ -5,8 +5,8 @@
   "type": "module",
   "homepage": "https://dtannyc1.github.io/StreamRacers/",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "cp src/shared/*.js public/ && vite",
+    "build": "cp src/shared/*.js public/ && vite build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

@@ -1,0 +1,18 @@
+
+export const CAR_ASSET_SCHEMA = {
+  id: '',
+  name: '',
+  spriteUrl: '',
+  type: '',
+  baseDim: [],
+  tl: [],
+  dim: [],
+  cr: [],
+  theta: 0,
+  minTheta: 0,
+  maxTheta: 0,
+  phase: 0,
+  radius: 0,
+  handleAngle: 0,
+  colorRemap: { enabled: false, sourceColor: '#FF001A' },
+}

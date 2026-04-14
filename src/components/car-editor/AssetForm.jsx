@@ -92,6 +92,28 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
     }
   }
 
+  const handleTypeChange = (e) => {
+    const newType = e.target.value
+    const patch = { type: newType }
+
+    if ((newType === 'rotating' || newType === 'oscillating') && !asset.cr) {
+      // initialize CR to center of the asset
+      patch.cr = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
+      patch.radius = Math.min(asset.dim[0], asset.dim[1]) / 4
+      patch.theta = 0
+      patch.handleAngle = 0
+    }
+
+    if (newType === 'oscillating' && asset.minTheta == null) {
+      patch.minTheta = -Math.PI / 6
+      patch.maxTheta = Math.PI / 6
+      patch.phase = 0
+      patch.theta_dot = 1
+    }
+
+    u(patch)
+  }
+
   // base dimensions for scale reference (100% = current dim)
   const baseW = asset.baseDim?.[0] ?? asset.dim[0]
   const baseH = asset.baseDim?.[1] ?? asset.dim[1]
@@ -148,26 +170,7 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
         <span className="text-xs text-gray-400">Type</span>
         <select
           value={asset.type}
-          onChange={(e) => {
-            const newType = e.target.value
-            const patch = { type: newType }
-
-            if ((newType === 'rotating' || newType === 'oscillating') && !asset.cr) {
-              // initialize CR to center of the asset
-              patch.cr = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
-              patch.radius = Math.min(asset.dim[0], asset.dim[1]) / 4
-              patch.theta = 0
-              patch.handleAngle = 0
-            }
-
-            if (newType === 'oscillating' && asset.minTheta == null) {
-              patch.minTheta = -Math.PI / 6
-              patch.maxTheta = Math.PI / 6
-              patch.phase = 0
-            }
-
-            u(patch)
-          }}
+          onChange={handleTypeChange}
           className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
         >
           <option value="avatar">Avatar</option>

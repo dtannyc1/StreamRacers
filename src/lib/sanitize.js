@@ -1,3 +1,5 @@
+import { CAR_ASSET_SCHEMA } from "../constants/schemas"
+
 // strip all html tags and null bytes
 export const sanitizeString = (str) =>
   str.replace(/<[^>]*>/g, '').replace(/\0/g, '').trim()
@@ -36,4 +38,22 @@ export const validateCar = (car) => {
     }
   }
   return null
+}
+
+const stripToSchema = (rawData, schema) => {
+  const clean = {};
+  Object.keys(schema).forEach(key => {
+    if (rawData.hasOwnProperty(key)) {
+      clean[key] = rawData[key];
+    }
+  });
+  return clean;
+}
+
+export const sanitizeCarData = (rawCarData) => {
+  const cleanCarData = { ...rawCarData, assets: [] }
+  if (Array.isArray(rawCarData.assets)) {
+    cleanCarData.assets = rawCarData.assets.map(asset => stripToSchema(asset, CAR_ASSET_SCHEMA))
+  } 
+  return cleanCarData
 }
