@@ -23,7 +23,7 @@ const Instructions = () => {
   const [copied, setCopied] = useState(false)
 
   const currentOrigin = window.location.origin;
-  const scriptTag = `<script type="module" src="${currentOrigin}/StreamRacers/Game.js"></script>`
+  const scriptTag = `<script type="module" src="${currentOrigin}/Game.js"></script>`
 
   const handleCopy = async () => {
     try {
