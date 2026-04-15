@@ -40,7 +40,8 @@ class Game {
       "boostFound": "OUI! {username} FOUND IT!",
       "raceStarted": "Race started!",
       "winner": "!addqwoin {username} 5",
-      "wordClue": "Guess the word I'm thinking of for a boost! The category is: {category}"
+      "wordClue": "Guess the word I'm thinking of for a boost! The category is: {category}",
+      "raceSaved": "Race results saved!",
     }
     // word boost
     this.wordBank = {
@@ -215,8 +216,10 @@ class Game {
             this.readying = true
           } else if (this.goCommands.some(cmd => message.startsWith(cmd))) {
             if (this.carManager.sortedNames.length > 0) this.startRace()
-          } else if (event.data.text.startsWith('!resetSEStore')) {
-            SE_API.store.set('StreamRacersLeaderboardData', {})
+          } else if (event.data.text.startsWith('!resetSEStoreRaceData')) {
+            // to clear all history and leaderboard data in StreamElements store
+            SE_API.store.set('StreamRacersLeaderboardData', {});
+            SE_API.store.set('raceHistory', []);
           }
         }
       }
@@ -428,25 +431,20 @@ class Game {
 
     this.sendMessage(this.messages?.winner?.replace('{username}', this.winner))
 
-    SE_API.store.get('StreamRacersLeaderboardData').then(data => {
-      const date = new Date()
-      const day = date.getDate().toString().padStart(2, '0')
-      const month = (date.getMonth() + 1).toString().padStart(2, '0')
-      const year = date.getFullYear().toString()
-      const dayKey = year + month + day
-      const monthKey = year + month
-
-      data[dayKey] ||= {}
-      data[monthKey] ||= {}
-
-      for (let i = 0; i < Math.min(this.leaderboard.length, 10); i++) {
-        const points = Math.min(this.leaderboard.length, 10) - i
-        data[dayKey][this.leaderboard[i]] = (data[dayKey][this.leaderboard[i]] ?? 0) + points
-        data[monthKey][this.leaderboard[i]] = (data[monthKey][this.leaderboard[i]] ?? 0) + points
-      }
-
-      SE_API.store.set('StreamRacersLeaderboardData', data)
-    })
+    const now = new Date();
+    const date = now.toLocaleDateString();
+    const time = now.toLocaleTimeString();
+    SE_API.store.get('raceHistory').then(raceHistory => {
+        const result = {
+            date: date,
+            time: time,
+            racers: this.leaderboard,
+        };
+        raceHistory.push(result);
+        SE_API.store.set('raceHistory', raceHistory).then(() => {
+            sendMessageInChat(this.messages?.raceSaved);
+        });
+    });
   }
 
   // ── Word boost ─────────────────────────────────────────────────────────────
