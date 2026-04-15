@@ -115,6 +115,12 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - Add toggle to enable/disable track scrolling
   - need to change how bg/fg assets are rendered...
   - need to fix scrolling asset rendering
+- Organize background assets into layers? 
+  - Change logic to accept a depth range, min max slider, value from 0-10, use that for parallaxFactor instead
+
+- Add road assets
+  - drawn under cars but scrolls like the scrolling layer
+  - Note: can't add these to background assets with negative heights because of parallax speed
   
 ## Settings
 - Add more default settings
