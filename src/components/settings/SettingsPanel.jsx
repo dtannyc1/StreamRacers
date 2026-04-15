@@ -409,18 +409,22 @@ const SettingsPanel = () => {
           value={settings.messages.raceStarted}
           onChange={(v) => updateMessages({ raceStarted: v })}
         />
-        <MessageInput
-          label="Word boost found"
-          value={settings.messages.boostFound}
-          onChange={(v) => updateMessages({ boostFound: v })}
-          hint="{username}"
-        />
-        <MessageInput
-          label="Word clue"
-          value={settings.messages.wordClue}
-          onChange={(v) => updateMessages({ wordClue: v })}
-          hint="{category}"
-        />
+        {settings.enableBoostWords &&
+          <>
+            <MessageInput
+              label="Word boost found"
+              value={settings.messages.boostFound}
+              onChange={(v) => updateMessages({ boostFound: v })}
+              hint="{username}"
+            />
+            <MessageInput
+              label="Word clue"
+              value={settings.messages.wordClue}
+              onChange={(v) => updateMessages({ wordClue: v })}
+              hint="{category}"
+            />
+          </>
+        }
         <MessageInput
           label="Winner reward command"
           value={settings.messages.winner}
@@ -429,13 +433,15 @@ const SettingsPanel = () => {
         />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Boost Word Bank">
-        <p className="text-xs text-gray-500">Categories and words used for the boost word game. Click the arrow next to a category name to expand it.</p>
-        <WordBankEditor
-          wordBank={settings.wordBank}
-          onChange={(v) => update({ wordBank: v })}
-        />
-      </CollapsibleSection>
+      { settings.enableBoostWords &&
+        <CollapsibleSection title="Boost Word Bank">
+          <p className="text-xs text-gray-500">Categories and words used for the boost word game. Click the arrow next to a category name to expand it.</p>
+          <WordBankEditor
+            wordBank={settings.wordBank}
+            onChange={(v) => update({ wordBank: v })}
+          />
+        </CollapsibleSection>
+      }
 
     </div>
   )

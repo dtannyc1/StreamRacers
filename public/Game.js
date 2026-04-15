@@ -35,6 +35,7 @@ class Game {
     this.joinCommands = ['!join']
     this.goCommands = ['!go', '!potato']
     this.resetCommands = ['!reset']
+    this.enableBoostWords = false
     this.messages = {
       "boostFound": "OUI! {username} FOUND IT!",
       "raceStarted": "Race started!",
@@ -133,6 +134,7 @@ class Game {
       if (settings.testing !== undefined) this.testing = settings.testing
       if (settings.wordBank) this.wordBank = settings.wordBank
       if (settings.raceDuration) this.raceDuration = settings.raceDuration
+      this.enableBoostWords = settings.enableBoostWords ?? this.enableBoostWords
     }
 
     if (this.testing) {
@@ -219,7 +221,7 @@ class Game {
         }
       }
 
-      if (!this.readying && this.chosenWord) {
+      if (!this.readying && this.chosenWord && this.enableBoostWords) {
         if (this._containsChosenWord(message) && message.length < 2 * this.chosenWord.word.length) {
           const boosted = this.carManager.applyBoost(name)
           if (boosted) {
@@ -450,6 +452,7 @@ class Game {
   // ── Word boost ─────────────────────────────────────────────────────────────
 
   _chooseRandomWord() {
+    if (!this.enableBoostWords) return
     if (this.foundWord) {
       this._chooseNewWord()
       return
@@ -464,6 +467,7 @@ class Game {
   }
 
   _chooseNewWord() {
+    if (!this.enableBoostWords) return
     const keys = Object.keys(this.wordBank)
     const key = keys[Math.floor(Math.random() * keys.length)]
     const words = this.wordBank[key]

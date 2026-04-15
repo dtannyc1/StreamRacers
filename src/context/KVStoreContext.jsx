@@ -101,6 +101,7 @@ export const DEFAULT_RACE_SETTINGS = {
   joinCommands: ['!join', '!start'],
   goCommands: ['!go', '!potato'],
   resetCommands: ['!reset'],
+  enableBoostWords: false,
   testRacers: [
     'apocalypse_squirrel', 'KnuthingIsReal', 'NowImABeliever',
     'albinounounou', 'Neiluj04', 'Pyobum', 'TheComplements',
