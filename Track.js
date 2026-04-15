@@ -205,7 +205,7 @@ export default class Track {
 
       // remove off-screen, maybe add new ones
       const remove = this.activeBackgrounds[layer]
-        .map((item, i) => item.x + cameraLoc[0] < -500 ? i : -1)
+        .map((item, i) => item.x + cameraLoc[0] < (-Math.abs(item.w ?? 400) - 100) ? i : -1)
         .filter(i => i >= 0)
 
       for (const i of remove.reverse()) {
@@ -219,7 +219,7 @@ export default class Track {
 
     // foreground — no parallax, just remove and replace
     const fgRemove = this.activeForegrounds
-      .map((item, i) => item.x + cameraLoc[0] < -500 ? i : -1)
+      .map((item, i) => item.x + cameraLoc[0] < (-Math.abs(item.w ?? 400) - 100) ? i : -1)
       .filter(i => i >= 0)
 
     for (const i of fgRemove.reverse()) {
