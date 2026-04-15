@@ -118,12 +118,7 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   
 ## Settings
 - Add more default settings
-  - Race reset words
   - Enable/disable boost functionality
 
-## Instructions
-- Add easy instructions for what to copy into SE
-
 ## Home Page
-- What is this page and how do you use it?
-  - Add animation to home page with sample cars. demo should swap between maps/cars randomly
+- Add animation to home page with sample cars. demo should swap between maps/cars randomly

@@ -34,6 +34,7 @@ class Game {
 
     this.joinCommands = ['!join']
     this.goCommands = ['!go', '!potato']
+    this.resetCommands = ['!reset']
     this.messages = {
       "boostFound": "OUI! {username} FOUND IT!",
       "raceStarted": "Race started!",
@@ -126,10 +127,12 @@ class Game {
     if (settings) {
       if (settings.joinCommands && Array.isArray(settings.joinCommands) && settings.joinCommands.length > 0) this.joinCommands = settings.joinCommands
       if (settings.goCommands && Array.isArray(settings.goCommands) && settings.goCommands.length > 0) this.goCommands = settings.goCommands
+      if (settings.resetCommands && Array.isArray(settings.resetCommands) && settings.resetCommands.length > 0) this.resetCommands = settings.resetCommands
       if (settings.messages) this.messages = { ...this.messages, ...settings.messages }
       if (settings.testRacers) this.testRacers = settings.testRacers
       if (settings.testing !== undefined) this.testing = settings.testing
       if (settings.wordBank) this.wordBank = settings.wordBank
+      if (settings.raceDuration) this.raceDuration = settings.raceDuration
     }
 
     if (this.testing) {
@@ -198,7 +201,7 @@ class Game {
             this.hidden = true
             this.reset()
           }
-        } else if (message.startsWith('!reset')) {
+        } else if (this.resetCommands.some(cmd => message.startsWith(cmd.toLowerCase()))) {
           if (this.stopRace) {
             this.reset()
             this.sendMessage('Race reset')

@@ -32,7 +32,7 @@ const CollapsibleSection = ({ title, children, defaultCollapsed = true }) => {
   )
 }
 
-const EditableList = ({ items, onChange, placeholder, onResolve }) => {
+const EditableList = ({ items = [], onChange, placeholder, onResolve }) => {
   const [newItem, setNewItem] = useState('')
   const [resolving, setResolving] = useState(false)
 
@@ -104,6 +104,19 @@ const MessageInput = ({ label, value, onChange, hint }) => (
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
+    />
+  </label>
+)
+
+const NumInput = ({ label, value, onChange, step = 1 }) => (
+  <label className="flex flex-col gap-1">
+    <span className="text-xs text-gray-400">{label}</span>
+    <input
+      type="number"
+      step={step}
+      value={Math.round(value * 100) / 100}
+      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+      className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
     />
   </label>
 )
@@ -326,6 +339,18 @@ const SettingsPanel = () => {
         )}
       </CollapsibleSection>
 
+      <CollapsibleSection title="Race Duration">
+        <p className="text-xs text-gray-500">
+            How long an individual race lasts.
+        </p>
+        <NumInput
+          label="Race Duration (seconds)"
+          value={settings.raceDuration}
+          onChange={(v) => update({ raceDuration: v })}
+          step={5}
+        />
+      </CollapsibleSection>
+
       <CollapsibleSection title="Testing Mode" defaultCollapsed={true}>
         <label className="flex items-center gap-3 cursor-pointer">
           <input
@@ -365,6 +390,15 @@ const SettingsPanel = () => {
           items={settings.goCommands}
           onChange={(v) => update({ goCommands: v })}
           placeholder="!go"
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Reset Commands">
+        <p className="text-xs text-gray-500">Moderator commands that restart the race.</p>
+        <EditableList
+          items={settings.resetCommands}
+          onChange={(v) => update({ resetCommands: v })}
+          placeholder="!reset"
         />
       </CollapsibleSection>
 
