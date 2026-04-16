@@ -161,6 +161,7 @@ const CarCanvas = ({
   selectedAsset,
   avatarUrl,
   onSelectAsset,
+  onDeselectAsset,
   onMouseDown,
   onMouseMove,
   onMouseUp,
@@ -331,7 +332,12 @@ const CarCanvas = ({
           const [aw, ah] = asset.dim
           return mx >= ax && mx <= ax + aw && my >= ay && my <= ay + ah
         })
-        onSelectAsset(hit?.id ?? null)
+        
+        if (!selectedId) {
+          onSelectAsset(hit?.id ?? null)
+        } else if (!hit) {
+          onDeselectAsset()
+        }
       }
     }
 
@@ -350,7 +356,12 @@ const CarCanvas = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className={`w-full rounded-lg border border-gray-700 bg-sky-300 ${eyedropperAssetId ? 'cursor-crosshair' : ''}`}
+      className={`w-full h-auto rounded-lg border border-gray-700
+                  max-w-full object-contain
+                  max-h-[calc(100dvh-1rem-42px-1.5rem)]
+                  sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                  xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                  ${eyedropperAssetId ? 'cursor-crosshair' : ''}`}
     />
   )
 }

@@ -9,6 +9,7 @@ import { sanitizeCarData, sanitizeDeep, validateCar } from '../../lib/sanitize'
 const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDefaultCar, onSaveDefault }) => {
   const { racers, updateRacers } = useKVStore()
   const [eyedropperAssetId, setEyedropperAssetId] = useState(null)
+  const [ drawerOpen, setDrawerOpen ] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const navigate = useNavigate()
 
@@ -84,8 +85,21 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     setEyedropperAssetId(null)
   }
 
+  const handleSelectAsset = (assetId) => {
+    setSelectedId(assetId)
+    setDrawerOpen(true)
+  }
+
+  const handleDrawerClose = () => {
+    setSelectedId(null)
+    setDrawerOpen(false)
+  }
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2">
+    <div 
+      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2"
+      onClick={() => handleDrawerClose()}
+    >
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
 
         <div className="flex items-center justify-between">
@@ -120,24 +134,35 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
         </div>
 
         <div className="grid grid-cols-[1fr_280px] gap-6">
-          <CarCanvas
-            assets={car.assets}
-            selectedId={selectedId}
-            selectedAsset={selectedAsset}
-            avatarUrl={avatarUrl}
-            onSelectAsset={setSelectedId}
-            onMouseDown={onCanvasMouseDown}
-            onMouseMove={onCanvasMouseMove}
-            onMouseUp={onCanvasMouseUp}
-            isDefaultCar={isDefaultCar}
-            eyedropperAssetId={eyedropperAssetId}
-            onEyedropperPick={handleEyedropperPick}
-          />
-          <div className="flex flex-col gap-6 pr-1">
+          <div
+            className="h-fit"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CarCanvas
+              assets={car.assets}
+              selectedId={selectedId}
+              selectedAsset={selectedAsset}
+              avatarUrl={avatarUrl}
+              onSelectAsset={handleSelectAsset}
+              onDeselectAsset={handleDrawerClose}
+              onMouseDown={onCanvasMouseDown}
+              onMouseMove={onCanvasMouseMove}
+              onMouseUp={onCanvasMouseUp}
+              isDefaultCar={isDefaultCar}
+              eyedropperAssetId={eyedropperAssetId}
+              onEyedropperPick={handleEyedropperPick}
+            />
+          </div>
+          <div 
+            className="flex flex-col gap-6 -mr-2 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             <AssetPanel
               assets={car.assets}
               selectedId={selectedId}
-              onSelect={setSelectedId}
+              onSelect={handleSelectAsset}
+              onDeselect={handleDrawerClose}
+              drawerOpen={drawerOpen}
               onAdd={addAsset}
               onRemove={removeAsset}
               onMoveUp={moveAssetUp}

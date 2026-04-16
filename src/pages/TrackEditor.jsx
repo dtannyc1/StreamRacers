@@ -267,37 +267,48 @@ const TrackEditor = ({ mode }) => {
           </div>
 
           {/* Right panel */}
-          <div className="flex flex-col gap-3 pr-1">
+          <div className="flex flex-col gap-3 -mr-2 h-full 
+                    custom-scrollbar rounded-lg overflow-y-auto
+                    max-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                    min-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:min-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:min-h-[calc(100dvh-4rem-42px-1.5rem)]"
+          >
+            <div
+              className="flex flex-col gap-3 mr-2"
+            >
+              <RoadDetailsPanel
+                track={track}
+                setRoad={setRoad}
+                setSlot={setSlot}
+                clearSlot={clearSlot}
+              />
 
-            <RoadDetailsPanel
-              track={track}
-              setRoad={setRoad}
-              setSlot={setSlot}
-              clearSlot={clearSlot}
-            />
+              {/* Racing line */}
+              <RacingLinePanel
+                racingLine={track.racingLine}
+                selection={selection}
+                onSelect={setSelection}
+                onUpdateRacingLine={updateRacingLine}
+                onAddModifier={handleAddModifier}
+                onRemoveModifier={handleRemoveModifier}
+                onUpdateModifier={updateModifier}
+                onVisibleModifierKeyChange={setVisibleModifierKey}
+              />
 
-            {/* Racing line */}
-            <RacingLinePanel
-              racingLine={track.racingLine}
-              selection={selection}
-              onSelect={setSelection}
-              onUpdateRacingLine={updateRacingLine}
-              onAddModifier={handleAddModifier}
-              onRemoveModifier={handleRemoveModifier}
-              onUpdateModifier={updateModifier}
-              onVisibleModifierKeyChange={setVisibleModifierKey}
-            />
-
-            {/* Asset lists */}
-            <TrackAssetList
-              track={track}
-              selectedAssetId={selection?.type === 'asset' ? selection.id : null}
-              selectedListKey={selection?.type === 'asset' ? selection.listKey : null}
-              onSelect={handleSelectAsset}
-              onAdd={handleAddAsset}
-              onRemove={handleRemoveAsset}
-              onUpdate={updateAsset}
-            />
+              {/* Asset lists */}
+              <TrackAssetList
+                track={track}
+                selectedAssetId={selection?.type === 'asset' ? selection.id : null}
+                selectedListKey={selection?.type === 'asset' ? selection.listKey : null}
+                onSelect={handleSelectAsset}
+                onAdd={handleAddAsset}
+                onRemove={handleRemoveAsset}
+                onUpdate={updateAsset}
+              />
+            </div>
           </div>
         </div>
       </div>
