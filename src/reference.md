@@ -105,6 +105,7 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - move actual editing window to a sidebar
   - shrink assets to minimum possible height, remove extra data
   - make lists scrollable so that the canvas is locked in place
+- Add drag and drop to change layer position
 
 ## Racer
 - Add more options for color changer

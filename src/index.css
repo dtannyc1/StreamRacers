@@ -5,6 +5,19 @@
   --font-cookie: "Cookie", cursive; 
 }
 
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: oklch(13% 0.028 261.692);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(43.8% 0.218 303.724);
+    border-radius: 4px;
+  }
+}
+
 button {
     cursor: pointer;
 }
