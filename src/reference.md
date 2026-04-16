@@ -119,8 +119,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - ensure that even converting it into a function is wrapped in a try/catch
   - ensure that this feature is behind a feature flag for devs only
 - Add way to quickly enable/disable specific cars
-- Animation bug***
-  - phase not properly accounted for (use Mona car as example)
 
 ## Track 
 - Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent.
