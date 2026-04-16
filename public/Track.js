@@ -207,10 +207,12 @@ export default class Track {
 
     for (const i of remove.reverse()) {
       this.activeBackgrounds.splice(i, 1)
-      const newCount = Math.floor((Math.random() - 1 / 3) * 3)
-      for (let k = 0; k < newCount; k++) {
-        this._addBackgroundItem(false, cameraLoc, canvasWidth)
-      }
+    }
+
+    // add back more backgrounds once complete
+    const newCount = Math.floor((Math.random() - 1 / 3) * 3 * remove.length)
+    for (let k = 0; k < newCount; k++) {
+      this._addBackgroundItem(false, cameraLoc, canvasWidth)
     }
 
     const fgRemove = this.activeForegrounds
