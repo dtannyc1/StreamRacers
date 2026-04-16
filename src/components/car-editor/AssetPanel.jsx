@@ -20,7 +20,7 @@ const AssetPanel = ({
 }) => {
 
   return (
-    <div className={`flex flex-col gap-2 relative h-full custom-scrollbar rounded-lg 
+    <div className={`flex flex-col gap-2 relative h-full custom-scrollbar rounded-lg pr-1
                     max-h-[calc(100dvh-1rem-42px-1.5rem)]
                     sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
                     xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]

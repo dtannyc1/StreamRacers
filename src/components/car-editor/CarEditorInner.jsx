@@ -135,6 +135,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
 
         <div className="grid grid-cols-[1fr_280px] gap-6">
           <div
+            className="h-fit"
             onClick={(e) => e.stopPropagation()}
           >
             <CarCanvas
@@ -153,7 +154,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             />
           </div>
           <div 
-            className="flex flex-col gap-6 pr-1"
+            className="flex flex-col gap-6 -mr-2"
             onClick={(e) => e.stopPropagation()}
           >
             <AssetPanel

@@ -21,7 +21,8 @@ const AssetDrawer = ({ isOpen, onClose, title, children }) => {
 
   return (
     <div 
-      className={`absolute top-0 right-0 h-full w-full overflow-hidden z-[101] ${isRendered ? '' : 'hidden'}`}
+      className={`absolute right-0 h-full w-full overflow-hidden z-[101] pr-2
+                ${isRendered ? '' : 'hidden'}`}
     >
       <div
         className={`h-full w-full rounded-lg border-purple-600 
