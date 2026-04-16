@@ -154,7 +154,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             />
           </div>
           <div 
-            className="flex flex-col gap-6 -mr-2"
+            className="flex flex-col gap-6 -mr-2 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <AssetPanel
