@@ -115,9 +115,9 @@ export default class Track {
   _createInstance(asset, drawAnywhere, cameraLoc, canvasWidth) {
     const w = asset.dim[0] * asset.scale
     let h = asset.dim[1] * asset.scale
-    const depthRange = asset.depthRange || [0,10] 
+    const depthRange = asset.depthRange ?? [0,10] 
     const depth = this._randomVal(depthRange[0], depthRange[1])
-    const parallaxFactor = depth * 0.6/10
+    const parallaxFactor = depth * 0.6/10 // value should be 0-0.6
 
     // y anchors to road top, slightly offset for depth
     const y = this.roadTop - h - (depth * 2)
@@ -201,7 +201,7 @@ export default class Track {
 
   updateScatteredArt(dX, cameraLoc, canvasWidth, finishX) {
     for (const item of this.activeBackgrounds) {
-      item.x -= dX * (item.parallaxFactor || 1)
+      item.x -= dX * (item.parallaxFactor ?? 0)
     }
 
     // remove off-screen, maybe add new ones
