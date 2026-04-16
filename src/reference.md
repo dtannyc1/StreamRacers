@@ -118,7 +118,8 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - make sure Game wraps this function in a try/catch
   - ensure that even converting it into a function is wrapped in a try/catch
   - ensure that this feature is behind a feature flag for devs only
-- Animation bug
+- Add way to quickly enable/disable specific cars
+- Animation bug***
   - phase not properly accounted for (use Mona car as example)
 
 ## Track 
