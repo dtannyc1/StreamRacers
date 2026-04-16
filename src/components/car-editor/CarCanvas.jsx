@@ -161,6 +161,7 @@ const CarCanvas = ({
   selectedAsset,
   avatarUrl,
   onSelectAsset,
+  onDeselectAsset,
   onMouseDown,
   onMouseMove,
   onMouseUp,
@@ -326,13 +327,16 @@ const CarCanvas = ({
       const onRadius = hitTestRadius(mx, my, selectedAsset)
 
       if (!onCorner && !onCR && !onRadius) {
+        const hit = [...assets].reverse().find(asset => {
+          const [ax, ay] = asset.tl
+          const [aw, ah] = asset.dim
+          return mx >= ax && mx <= ax + aw && my >= ay && my <= ay + ah
+        })
+        
         if (!selectedId) {
-          const hit = [...assets].reverse().find(asset => {
-            const [ax, ay] = asset.tl
-            const [aw, ah] = asset.dim
-            return mx >= ax && mx <= ax + aw && my >= ay && my <= ay + ah
-          })
           onSelectAsset(hit?.id ?? null)
+        } else if (!hit) {
+          onDeselectAsset()
         }
       }
     }
