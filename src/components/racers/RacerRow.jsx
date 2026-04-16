@@ -68,9 +68,11 @@ const RacerRow = ({ username, cars = [] }) => {
     <div className="rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
 
       {/* Header row */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3 cursor-pointer"
+          onClick={() => setExpanded(prev => !prev)}
+      >
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          {editing && !twitchUser ? (
+          {(editing && !twitchUser) ? (
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <input
                 type="text"
@@ -102,7 +104,6 @@ const RacerRow = ({ username, cars = [] }) => {
           ) : (
             <>
               <button
-                onClick={() => setExpanded(prev => !prev)}
                 className="flex items-center gap-3 flex-1 min-w-0 text-left"
               >
                 <span className="text-sm font-medium text-white truncate">{username}</span>
@@ -113,7 +114,7 @@ const RacerRow = ({ username, cars = [] }) => {
               {!twitchUser && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-xs text-gray-400 hover:text-white transition-colors flex-shrink-0 ml-2"
+                  className="text-sm text-gray-400 hover:text-white transition-colors flex-shrink-0 mr-2"
                 >
                   ✎
                 </button>
@@ -124,7 +125,7 @@ const RacerRow = ({ username, cars = [] }) => {
         {!editing && !twitchUser && (
           <span
             onClick={() => setExpanded(prev => !prev)}
-            className="text-gray-400 text-xs cursor-pointer ml-2"
+            className="text-gray-400 text-xs cursor-pointer ml-2 hover:text-white transition-colors"
           >
             {expanded ? '▲' : '▼'}
           </span>
