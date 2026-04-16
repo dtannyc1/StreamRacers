@@ -100,6 +100,12 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
+## Editor
+- When managing a large list of assets, editor becomes unweildy
+  - move actual editing window to a sidebar
+  - shrink assets to minimum possible height, remove extra data
+  - make lists scrollable so that the canvas is locked in place
+
 ## Racer
 - Add more options for color changer
   - use a slider to adjust tolerance. Swap to the complimentary color to show the effect well. 
@@ -109,22 +115,31 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
     - Add limiting options for global vehicles (ie one user per race has this vehicle)
     - Add percentage chance of change
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
+- Add support for custom code animations
+  - text box, user given access to ctx, asset, sample schema for asset
+  - converts code into function for drawing a particular asset
+  - make sure Game wraps this function in a try/catch
+  - ensure that even converting it into a function is wrapped in a try/catch
+  - ensure that this feature is behind a feature flag for devs only
+- Animation bug
+  - phase not properly accounted for (use Mona car as example)
 
 ## Track 
 - Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent.
+  - put this into settings page for universal usage on all tracks
 - Add toggle to enable/disable track scrolling
   - need to change how bg/fg assets are rendered...
   - need to fix scrolling asset rendering
-- Organize background assets into layers? 
-  - Change logic to accept a depth range, min max slider, value from 0-10, use that for parallaxFactor instead
-
-- Add road assets
+- Change background asset logic to accept a depth range
+  - min max slider, value from 0-10, use that for parallaxFactor instead
+- After saving, if changes, save button should be available***
+- Add randomized road assets
   - drawn under cars but scrolls like the scrolling layer
   - Note: can't add these to background assets with negative heights because of parallax speed
   
 ## Settings
 - Add more default settings
-  - Enable/disable boost functionality
+  - Enable/disable boost functionality (behind feature flag for now)
 
 ## Home Page
 - Add animation to home page with sample cars. demo should swap between maps/cars randomly
