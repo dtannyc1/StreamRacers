@@ -326,12 +326,14 @@ const CarCanvas = ({
       const onRadius = hitTestRadius(mx, my, selectedAsset)
 
       if (!onCorner && !onCR && !onRadius) {
-        const hit = [...assets].reverse().find(asset => {
-          const [ax, ay] = asset.tl
-          const [aw, ah] = asset.dim
-          return mx >= ax && mx <= ax + aw && my >= ay && my <= ay + ah
-        })
-        onSelectAsset(hit?.id ?? null)
+        if (!selectedId) {
+          const hit = [...assets].reverse().find(asset => {
+            const [ax, ay] = asset.tl
+            const [aw, ah] = asset.dim
+            return mx >= ax && mx <= ax + aw && my >= ay && my <= ay + ah
+          })
+          onSelectAsset(hit?.id ?? null)
+        }
       }
     }
 
