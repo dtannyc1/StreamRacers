@@ -37,6 +37,31 @@ export default class Car {
     if (!carData?.assets?.length) return []
     return await Promise.all(carData.assets.map(async asset => {
       const { img, frames } = await loadAssetImage(asset, this.avatar)
+
+      // account for phase if oscillator
+      let correctedTheta, correctedThetaDot;
+      if (asset.type === 'oscillating') {
+        const radius = asset.radius ?? 1
+        const speed = 200
+        const dt = 0
+        const slope = (speed / radius) 
+        const min = asset.minTheta ?? 0
+        const max = asset.maxTheta ?? 0
+        const amplitude = (max - min) / 2
+        const period = (4 * amplitude) / slope
+        const center = (max + min) / 2
+        const xshift = (asset.phase ?? 0) * period / (2 * Math.PI)
+
+        const timeWithPhase = (dt + xshift) % period
+        const triangle = Math.abs((timeWithPhase / period) * 4 - 2) - 1
+        
+        const thetad = Math.cos(2 * Math.PI * (dt + xshift) / period)
+        const theta_dot = thetad > 0 ? 1 : -1
+
+        correctedTheta = center + amplitude * triangle
+        correctedThetaDot = theta_dot
+      }
+
       return {
         ...asset,
         img,
@@ -45,7 +70,8 @@ export default class Car {
         lastFrameTime: performance.now(),
         remappedImg: null,
         theta_0: asset.theta ?? 0,
-        theta_dot: asset.theta_dot ?? 1,
+        theta_dot: correctedThetaDot ?? asset.theta_dot ?? 1,
+        theta: correctedTheta ?? asset.theta,
       }
     }))
   }
