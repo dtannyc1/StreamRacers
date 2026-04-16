@@ -20,12 +20,16 @@ const AssetPanel = ({
 }) => {
 
   return (
-    <div className="flex flex-col gap-2 relative h-full">
+    <div className={`flex flex-col gap-2 relative h-full custom-scrollbar rounded-lg 
+                    max-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                    ${drawerOpen ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Assets</h3>
         <button
           onClick={onAdd}
-          className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+          className="text-xs text-purple-400 hover:text-purple-300 transition-colors pr-2"
         >
           + Add
         </button>
@@ -33,7 +37,7 @@ const AssetPanel = ({
 
       <p className="text-xs text-gray-500">The order of assets determines their drawing priority.</p>
 
-      <div className="flex flex-col gap-1 custom-scrollbar overflow-y-auto pr-1">
+      <div className="flex flex-col gap-1 pr-1">
         {[...assets].reverse().map((asset, reversedIndex) => {
           const index = assets.length - 1 - reversedIndex
           return (
