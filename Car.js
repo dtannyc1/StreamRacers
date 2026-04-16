@@ -109,20 +109,6 @@ export default class Car {
     drawAllAssets(ctx, this.assets, now)
   }
 
-  applyColorRemaps(displayColor) {
-    this.assets.forEach(asset => {
-      if (!asset.colorRemap?.enabled || !asset.img || asset.type === 'avatar') return
-      const apply = () => {
-        asset.remappedImg = remapImageColor(asset.img, asset.colorRemap.sourceColor, displayColor)
-      }
-      if (asset.img.complete && asset.img.naturalWidth) {
-        apply()
-      } else {
-        asset.img.onload = apply
-      }
-    })
-  }
-
   // ── Boost ──────────────────────────────────────────────────────────────────
 
   applyBoost(boostCooldown = 10) {
