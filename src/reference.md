@@ -101,10 +101,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 # Notes for next changes:
 
 ## Editor
-- When managing a large list of assets, editor becomes unweildy
-  - move actual editing window to a sidebar
-  - shrink assets to minimum possible height, remove extra data
-  - make lists scrollable so that the canvas is locked in place
 - Add drag and drop to change layer position
 
 ## Racer
@@ -129,11 +125,8 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent.
   - put this into settings page for universal usage on all tracks
 - Add toggle to enable/disable track scrolling
-  - need to change how bg/fg assets are rendered...
-  - need to fix scrolling asset rendering
-- Change background asset logic to accept a depth range
-  - min max slider, value from 0-10, use that for parallaxFactor instead
-- After saving, if changes, save button should be available***
+  - need to change how bg/fg assets are rendered on track editor
+  - need to change scrolling asset rendering on track editor
 - Add randomized road assets
   - drawn under cars but scrolls like the scrolling layer
   - Note: can't add these to background assets with negative heights because of parallax speed
