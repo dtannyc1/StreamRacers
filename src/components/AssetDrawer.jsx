@@ -51,7 +51,7 @@ const AssetDrawer = ({ isOpen, onClose, title, children }) => {
           </div>
 
           {/* Scrollable Content (Asset Editor Forms) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
             {children}
           </div>
         </div>
