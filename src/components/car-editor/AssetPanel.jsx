@@ -24,6 +24,9 @@ const AssetPanel = ({
                     max-h-[calc(100dvh-1rem-42px-1.5rem)]
                     sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
                     xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                    min-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:min-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:min-h-[calc(100dvh-4rem-42px-1.5rem)]
                     ${drawerOpen ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Assets</h3>
