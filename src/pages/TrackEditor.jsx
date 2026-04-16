@@ -84,6 +84,11 @@ const TrackEditor = ({ mode }) => {
     setSelection({ type: 'asset', id, listKey })
   }
 
+  const handleChange = (fn, ...args) => {
+    setSaved(false) 
+    return fn(...args)
+  }
+
   const handleRemoveAsset = (listKey, id) => {
     removeAsset(listKey, id)
     if (selection?.type === 'asset' && selection.id === id) setSelection(null)
@@ -257,8 +262,8 @@ const TrackEditor = ({ mode }) => {
             <TrackCanvas
               track={track}
               selection={selection}
-              onUpdateRacingLine={updateRacingLine}
-              onUpdateModifier={updateModifier}
+              onUpdateRacingLine={(...args) => handleChange(updateRacingLine, ...args)}
+              onUpdateModifier={(...args) => handleChange(updateModifier, ...args)}
               onSelectAsset={handleSelectAsset}
               activeRacers={activeRacers}
               racerAvatars={racerAvatars}
@@ -281,9 +286,9 @@ const TrackEditor = ({ mode }) => {
             >
               <RoadDetailsPanel
                 track={track}
-                setRoad={setRoad}
-                setSlot={setSlot}
-                clearSlot={clearSlot}
+                setRoad={(...args) => handleChange(setRoad, ...args)}
+                setSlot={(...args) => handleChange(setSlot, ...args)}
+                clearSlot={(...args) => handleChange(clearSlot, ...args)}
               />
 
               {/* Racing line */}
@@ -291,10 +296,10 @@ const TrackEditor = ({ mode }) => {
                 racingLine={track.racingLine}
                 selection={selection}
                 onSelect={setSelection}
-                onUpdateRacingLine={updateRacingLine}
-                onAddModifier={handleAddModifier}
-                onRemoveModifier={handleRemoveModifier}
-                onUpdateModifier={updateModifier}
+                onUpdateRacingLine={(...args) => handleChange(updateRacingLine, ...args)}
+                onAddModifier={(...args) => handleChange(handleAddModifier, ...args)}
+                onRemoveModifier={(...args) => handleChange(handleRemoveModifier, ...args)}
+                onUpdateModifier={(...args) => handleChange(updateModifier, ...args)}
                 onVisibleModifierKeyChange={setVisibleModifierKey}
               />
 
@@ -304,9 +309,9 @@ const TrackEditor = ({ mode }) => {
                 selectedAssetId={selection?.type === 'asset' ? selection.id : null}
                 selectedListKey={selection?.type === 'asset' ? selection.listKey : null}
                 onSelect={handleSelectAsset}
-                onAdd={handleAddAsset}
-                onRemove={handleRemoveAsset}
-                onUpdate={updateAsset}
+                onAdd={(...args) => handleChange(handleAddAsset, ...args)}
+                onRemove={(...args) => handleChange(handleRemoveAsset, ...args)}
+                onUpdate={(...args) => handleChange(updateAsset, ...args)}
               />
             </div>
           </div>

@@ -108,6 +108,46 @@ const TrackAssetForm = ({ asset, listKey, onUpdate }) => {
           className="w-full accent-purple-500"
         />
       </label>
+
+      <div className="flex gap-3 justify-between">
+        <label className="flex flex-col gap-1 grow-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400">Min Depth</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={0.05}
+            value={asset.depthRange?.[0] ?? 0}
+            onChange={(e) => {
+              let curVal = asset.depthRange ?? [0, 10]
+              if (parseFloat(e.target.value) > curVal[1]) curVal[1] = parseFloat(e.target.value)
+              u({ depthRange: [parseFloat(e.target.value), curVal[1]] })
+            }}
+            className="accent-purple-500"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1 grow-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400">Max Depth</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={0.05}
+            value={asset.depthRange?.[1] ?? 10}
+            onChange={(e) => {
+              let curVal = asset.depthRange ?? [0, 10]
+              if (parseFloat(e.target.value) < curVal[0]) curVal[0] = parseFloat(e.target.value)
+              u({ depthRange: [curVal[0], parseFloat(e.target.value)] })
+            }}
+            className="accent-purple-500"
+          />
+        </label>
+      </div>
     </div>
   )
 }

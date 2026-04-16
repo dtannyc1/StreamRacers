@@ -72,6 +72,7 @@ export const useTrackEditor = (initialTrack = null) => {
       url: '',
       dim: [500, 500],
       scale: 0.25,
+      depthRange: [0, 10],
     }
     setTrack(prev => ({
       ...prev,
