@@ -84,6 +84,11 @@ const TrackEditor = ({ mode }) => {
     setSelection({ type: 'asset', id, listKey })
   }
 
+  const handleChange = (fn, ...args) => {
+    setSaved(false) 
+    return fn(...args)
+  }
+
   const handleRemoveAsset = (listKey, id) => {
     removeAsset(listKey, id)
     if (selection?.type === 'asset' && selection.id === id) setSelection(null)
@@ -257,8 +262,8 @@ const TrackEditor = ({ mode }) => {
             <TrackCanvas
               track={track}
               selection={selection}
-              onUpdateRacingLine={updateRacingLine}
-              onUpdateModifier={updateModifier}
+              onUpdateRacingLine={(...args) => handleChange(updateRacingLine, ...args)}
+              onUpdateModifier={(...args) => handleChange(updateModifier, ...args)}
               onSelectAsset={handleSelectAsset}
               activeRacers={activeRacers}
               racerAvatars={racerAvatars}
@@ -267,37 +272,48 @@ const TrackEditor = ({ mode }) => {
           </div>
 
           {/* Right panel */}
-          <div className="flex flex-col gap-3 pr-1">
+          <div className="flex flex-col gap-3 -mr-2 h-full 
+                    custom-scrollbar rounded-lg overflow-y-auto
+                    max-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                    min-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:min-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:min-h-[calc(100dvh-4rem-42px-1.5rem)]"
+          >
+            <div
+              className="flex flex-col gap-3 mr-2"
+            >
+              <RoadDetailsPanel
+                track={track}
+                setRoad={(...args) => handleChange(setRoad, ...args)}
+                setSlot={(...args) => handleChange(setSlot, ...args)}
+                clearSlot={(...args) => handleChange(clearSlot, ...args)}
+              />
 
-            <RoadDetailsPanel
-              track={track}
-              setRoad={setRoad}
-              setSlot={setSlot}
-              clearSlot={clearSlot}
-            />
+              {/* Racing line */}
+              <RacingLinePanel
+                racingLine={track.racingLine}
+                selection={selection}
+                onSelect={setSelection}
+                onUpdateRacingLine={(...args) => handleChange(updateRacingLine, ...args)}
+                onAddModifier={(...args) => handleChange(handleAddModifier, ...args)}
+                onRemoveModifier={(...args) => handleChange(handleRemoveModifier, ...args)}
+                onUpdateModifier={(...args) => handleChange(updateModifier, ...args)}
+                onVisibleModifierKeyChange={setVisibleModifierKey}
+              />
 
-            {/* Racing line */}
-            <RacingLinePanel
-              racingLine={track.racingLine}
-              selection={selection}
-              onSelect={setSelection}
-              onUpdateRacingLine={updateRacingLine}
-              onAddModifier={handleAddModifier}
-              onRemoveModifier={handleRemoveModifier}
-              onUpdateModifier={updateModifier}
-              onVisibleModifierKeyChange={setVisibleModifierKey}
-            />
-
-            {/* Asset lists */}
-            <TrackAssetList
-              track={track}
-              selectedAssetId={selection?.type === 'asset' ? selection.id : null}
-              selectedListKey={selection?.type === 'asset' ? selection.listKey : null}
-              onSelect={handleSelectAsset}
-              onAdd={handleAddAsset}
-              onRemove={handleRemoveAsset}
-              onUpdate={updateAsset}
-            />
+              {/* Asset lists */}
+              <TrackAssetList
+                track={track}
+                selectedAssetId={selection?.type === 'asset' ? selection.id : null}
+                selectedListKey={selection?.type === 'asset' ? selection.listKey : null}
+                onSelect={handleSelectAsset}
+                onAdd={(...args) => handleChange(handleAddAsset, ...args)}
+                onRemove={(...args) => handleChange(handleRemoveAsset, ...args)}
+                onUpdate={(...args) => handleChange(updateAsset, ...args)}
+              />
+            </div>
           </div>
         </div>
       </div>

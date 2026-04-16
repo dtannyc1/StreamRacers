@@ -100,6 +100,8 @@ export const DEFAULT_RACE_SETTINGS = {
   testing: true,
   joinCommands: ['!join', '!start'],
   goCommands: ['!go', '!potato'],
+  resetCommands: ['!reset'],
+  enableBoostWords: false,
   testRacers: [
     'apocalypse_squirrel', 'KnuthingIsReal', 'NowImABeliever',
     'albinounounou', 'Neiluj04', 'Pyobum', 'TheComplements',
@@ -169,4 +171,5 @@ export const DEFAULT_RACE_SETTINGS = {
     ],
     name: 'Default Car',
   },
+  raceDuration: 30,
 }

@@ -1,9 +1,12 @@
+import AssetDrawer from "../AssetDrawer"
 import AssetForm from "./AssetForm"
 
 const AssetPanel = ({ 
   assets, 
   selectedId, 
+  drawerOpen,
   onSelect, 
+  onDeselect,
   onAdd, 
   onRemove, 
   onMoveUp, 
@@ -16,21 +19,20 @@ const AssetPanel = ({
   onEyedropperActivate
 }) => {
 
-  const toggleAssetId = (id) => {
-    if (selectedId === id) {
-      onSelect(null)
-    } else {
-      onSelect(id)
-    }
-  }
-
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex flex-col gap-2 h-full custom-scrollbar rounded-lg pr-1
+                    max-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                    min-h-[calc(100dvh-1rem-42px-1.5rem)]
+                    sm:min-h-[calc(100dvh-2rem-42px-1.5rem)] 
+                    xl:min-h-[calc(100dvh-4rem-42px-1.5rem)]
+                    ${drawerOpen ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Assets</h3>
         <button
           onClick={onAdd}
-          className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+          className="text-xs text-purple-400 hover:text-purple-300 transition-colors pr-2"
         >
           + Add
         </button>
@@ -38,7 +40,7 @@ const AssetPanel = ({
 
       <p className="text-xs text-gray-500">The order of assets determines their drawing priority.</p>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 pr-1">
         {[...assets].reverse().map((asset, reversedIndex) => {
           const index = assets.length - 1 - reversedIndex
           return (
@@ -46,7 +48,7 @@ const AssetPanel = ({
                 key={asset.id}
             >
               <div
-                onClick={() => toggleAssetId(asset.id)}
+                onClick={() => onSelect(asset.id)}
                 className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer transition-colors ${
                   asset.id === selectedId
                     ? 'bg-purple-900/40 border border-purple-600 rounded-b-none'
@@ -80,24 +82,25 @@ const AssetPanel = ({
                   </button>
                 </div>
               </div>
-              
-              {
-                asset.id === selectedId && 
-                <div className="rounded-b-lg border-purple-600 px-3 py-2 bg-purple-950/30 border border-t-0">
-                  <AssetForm 
-                    asset={asset} 
-                    onUpdate={onUpdate} 
-                    onSpriteUrlChange={onSpriteUrlChange}
-                    toggleAspectLock={toggleAspectLock}
-                    isDefaultCar={isDefaultCar}
-                    onEyedropperActivate={onEyedropperActivate}
-                  />
-                </div>
-              }
             </div>
           )
         })}
       </div>
+
+      <AssetDrawer
+        isOpen={drawerOpen}
+        onClose={onDeselect}
+        title={asset?.name ? ('Edit ' + asset.name) : 'Edit Asset'}
+      >
+        <AssetForm 
+          asset={asset} 
+          onUpdate={onUpdate} 
+          onSpriteUrlChange={onSpriteUrlChange}
+          toggleAspectLock={toggleAspectLock}
+          isDefaultCar={isDefaultCar}
+          onEyedropperActivate={onEyedropperActivate}
+        />
+      </AssetDrawer>
     </div>
   )
 }

@@ -83,12 +83,14 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
                     >
                       <div>
                         <p className="text-sm text-white">{asset.name || `Asset ${index + 1}`}</p>
+                        {/*
                         <p className="text-xs text-gray-400 truncate max-w-[160px]">
                           {asset.url
                             ? (() => { try { return new URL(asset.url).hostname } catch { return asset.url } })()
                             : 'No URL'
                           }
                         </p>
+                        */}
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); onRemove(listKey, asset.id) }}

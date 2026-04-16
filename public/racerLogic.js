@@ -1,3 +1,5 @@
+import { pauseGIFs } from './gifLoader.js'
+
 export const updateRacerPos = (racer, curTime, clampToStart = false, speedMultiplier = 1) => {
   const dt = (curTime - racer.time) / 1000
   if (dt <= 0) return [racer.XY, racer.vel]
@@ -15,6 +17,8 @@ export const updateRacerPos = (racer, curTime, clampToStart = false, speedMultip
   }
 
   racer.time = curTime
+  racer.distanceTravelled ||= 0
+  racer.distanceTravelled = racer.distanceTravelled + racer.vel[0] * dt
   return [racer.XY, racer.vel]
 }
 

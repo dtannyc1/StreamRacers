@@ -100,6 +100,9 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
+## Editor
+- Add drag and drop to change layer position
+
 ## Racer
 - Add more options for color changer
   - use a slider to adjust tolerance. Swap to the complimentary color to show the effect well. 
@@ -109,21 +112,28 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
     - Add limiting options for global vehicles (ie one user per race has this vehicle)
     - Add percentage chance of change
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
+- Add support for custom code animations
+  - text box, user given access to ctx, asset, sample schema for asset
+  - converts code into function for drawing a particular asset
+  - make sure Game wraps this function in a try/catch
+  - ensure that even converting it into a function is wrapped in a try/catch
+  - ensure that this feature is behind a feature flag for devs only
+- Animation bug
+  - phase not properly accounted for (use Mona car as example)
 
 ## Track 
 - Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent.
+  - put this into settings page for universal usage on all tracks
 - Add toggle to enable/disable track scrolling
-  - need to change how bg/fg assets are rendered...
-  - need to fix scrolling asset rendering
+  - need to change how bg/fg assets are rendered on track editor
+  - need to change scrolling asset rendering on track editor
+- Add randomized road assets
+  - drawn under cars but scrolls like the scrolling layer
+  - Note: can't add these to background assets with negative heights because of parallax speed
   
 ## Settings
 - Add more default settings
-  - Race reset words
-  - Enable/disable boost functionality
-
-## Instructions
-- Add easy instructions for what to copy into SE
+  - Enable/disable boost functionality (behind feature flag for now)
 
 ## Home Page
-- What is this page and how do you use it?
-  - Add animation to home page with sample cars. demo should swap between maps/cars randomly
+- Add animation to home page with sample cars. demo should swap between maps/cars randomly

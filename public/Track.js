@@ -9,8 +9,7 @@ export default class Track {
     this.backgroundAssets = trackData.backgroundAssets ?? []
     this.foregroundAssets = trackData.foregroundAssets ?? []
 
-    // 3 parallax layers + foreground
-    this.activeBackgrounds = [[], [], []]
+    this.activeBackgrounds = []
     this.activeForegrounds = []
 
     this.images = {}
@@ -107,23 +106,28 @@ export default class Track {
 
   // ── Scattered asset management ─────────────────────────────────────────────
 
-  // parallax multipliers per layer — layer 0 furthest back, layer 2 closest
-  _parallaxFactor(layer) {
-    return 0.6 - 0.3 * layer  // 0.6, 0.3, 0.0 — matches original
+  _randomVal(a, b) {
+    const min = Math.min(a, b)
+    const max = Math.max(a, b)
+    return Math.random() * (max - min) + min;
   }
 
-  _createInstance(asset, layer, drawAnywhere, cameraLoc, canvasWidth) {
+  _createInstance(asset, drawAnywhere, cameraLoc, canvasWidth) {
     const w = asset.dim[0] * asset.scale
-    const h = asset.dim[1] * asset.scale
+    let h = asset.dim[1] * asset.scale
+    const depthRange = asset.depthRange ?? [0,10] 
+    const depth = this._randomVal(depthRange[0], depthRange[1])
+    const parallaxFactor = depth * 0.6/10 // value should be 0-0.6
 
-    // y anchors to road top, slightly offset per layer for depth
-    const y = this.roadTop - h - 10 * (2 - layer)
+    // y anchors to road top, slightly offset for depth
+    const y = this.roadTop - h - (depth * 2)
+    h = h + (depth * 2)
 
     const x = drawAnywhere
       ? -canvasWidth * 0.75 + Math.random() * canvasWidth * 2 - w
       : canvasWidth - cameraLoc[0] + Math.random() * canvasWidth / 4
 
-    return { asset, x, y, w, h }
+    return { asset, x, y, w, h, parallaxFactor }
   }
 
   _avoidsOverlap(instance, list) {
@@ -136,19 +140,21 @@ export default class Track {
     return true
   }
 
-  _addBackgroundItem(layer, drawAnywhere, cameraLoc, canvasWidth) {
+  _addBackgroundItem(drawAnywhere, cameraLoc, canvasWidth) {
     if (!this.backgroundAssets.length) return
-    // any asset can go in any layer
+    
     const asset = this.backgroundAssets[Math.floor(Math.random() * this.backgroundAssets.length)]
-    let instance = this._createInstance(asset, layer, drawAnywhere, cameraLoc, canvasWidth)
+    let instance = this._createInstance(asset, drawAnywhere, cameraLoc, canvasWidth)
 
     let attempts = 0
-    while (!this._avoidsOverlap(instance, this.activeBackgrounds[layer]) && attempts < 20) {
+    while (!this._avoidsOverlap(instance, this.activeBackgrounds) && attempts < 20) {
       instance.x += instance.w
       attempts++
     }
 
-    this.activeBackgrounds[layer].push(instance)
+    this.activeBackgrounds.push(instance)
+
+    this.activeBackgrounds.sort((a, b) => b.parallaxFactor - a.parallaxFactor)
   }
 
   _addForegroundItem(drawAnywhere, cameraLoc, canvasWidth, finishX) {
@@ -179,14 +185,12 @@ export default class Track {
   }
 
   resetScatteredArt(cameraLoc, canvasWidth) {
-    this.activeBackgrounds = [[], [], []]
+    this.activeBackgrounds = []
     this.activeForegrounds = []
 
-    for (let layer = 0; layer < 3; layer++) {
-      const count = Math.floor(2 - layer + Math.random() * 2)
-      for (let i = 0; i < count; i++) {
-        this._addBackgroundItem(layer, true, cameraLoc, canvasWidth)
-      }
+    let count = this._randomVal(6, 20)
+    for (let i = 0; i < count; i++) {
+      this._addBackgroundItem(true, cameraLoc, canvasWidth)
     }
 
     const fgCount = Math.floor(2 + Math.random() * 2)
@@ -196,30 +200,29 @@ export default class Track {
   }
 
   updateScatteredArt(dX, cameraLoc, canvasWidth, finishX) {
-    // parallax scroll each background layer
-    for (let layer = 0; layer < 3; layer++) {
-      const factor = this._parallaxFactor(layer)
-      for (const item of this.activeBackgrounds[layer]) {
-        item.x -= dX * factor
-      }
+    for (const item of this.activeBackgrounds) {
+      item.x -= dX * (item.parallaxFactor ?? 0)
+    }
 
-      // remove off-screen, maybe add new ones
-      const remove = this.activeBackgrounds[layer]
-        .map((item, i) => item.x + cameraLoc[0] < -500 ? i : -1)
-        .filter(i => i >= 0)
+    // remove off-screen, maybe add new ones
+    const remove = this.activeBackgrounds
+      .map((item, i) => item.x + cameraLoc[0] < (-Math.abs(item.w ?? 400) - 100) ? i : -1)
+      .filter(i => i >= 0)
 
-      for (const i of remove.reverse()) {
-        this.activeBackgrounds[layer].splice(i, 1)
-        const newCount = Math.floor((Math.random() - 1 / 3) * 3)
-        for (let k = 0; k < newCount; k++) {
-          this._addBackgroundItem(layer, false, cameraLoc, canvasWidth)
-        }
+    for (const i of remove.reverse()) {
+      this.activeBackgrounds.splice(i, 1)
+    }
+
+    // add back more backgrounds once complete
+    for (let i = 0; i < remove.length; i++) {
+      const newCount = Math.floor((Math.random() - 1 / 3) * 3)
+      for (let k = 0; k < newCount; k++) {
+        this._addBackgroundItem(false, cameraLoc, canvasWidth)
       }
     }
 
-    // foreground — no parallax, just remove and replace
     const fgRemove = this.activeForegrounds
-      .map((item, i) => item.x + cameraLoc[0] < -500 ? i : -1)
+      .map((item, i) => item.x + cameraLoc[0] < (-Math.abs(item.w ?? 400) - 100) ? i : -1)
       .filter(i => i >= 0)
 
     for (const i of fgRemove.reverse()) {
@@ -239,16 +242,12 @@ export default class Track {
       this._drawScrolling(ctx, this.scrollingImage, cameraLoc, canvasWidth)
     }
 
-    // background layers — further back drawn first
     ctx.save()
     ctx.translate(...cameraLoc)
-    for (let layer = 0; layer < 3; layer++) {
-      for (const item of this.activeBackgrounds[layer]) {
-        const img = this.images[item.asset.url]
-        if (img?.naturalWidth) {
-          ctx.drawImage(img, item.x, item.y,
-            item.w, item.h + 10 * (2 - layer))  // slightly taller for far layers, matches original
-        }
+    for (const item of this.activeBackgrounds) {
+      const img = this.images[item.asset.url]
+      if (img?.naturalWidth) {
+        ctx.drawImage(img, item.x, item.y, item.w, item.h)  
       }
     }
     ctx.restore()
