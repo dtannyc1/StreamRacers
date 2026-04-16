@@ -19,10 +19,7 @@ const RacerList = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-3 overflow-y-auto -mr-4 pr-2 rounded-lg
-        max-h-[calc(100dvh-1rem-66px-39px-3rem)]
-        sm:max-h-[calc(100dvh-2rem-66px-39px-3rem)] 
-        xl:max-h-[calc(100dvh-4rem-66px-39px-3rem)]"
+      <div className="flex flex-col gap-3"
       >
         
         {/* Default car */}
