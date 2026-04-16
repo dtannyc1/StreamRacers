@@ -106,11 +106,17 @@ export default class Track {
 
   // ── Scattered asset management ─────────────────────────────────────────────
 
+  randomVal(a, b) {
+    const min = Math.min(a, b)
+    const max = Math.max(a, b)
+    return Math.random() * (max - min) + min;
+  }
+
   _createInstance(asset, drawAnywhere, cameraLoc, canvasWidth) {
     const w = asset.dim[0] * asset.scale
     let h = asset.dim[1] * asset.scale
     const depthRange = asset.depthRange || [0,10] 
-    const depth = Math.random(depthRange[0], depthRange[1])
+    const depth = randomVal(depthRange[0], depthRange[1])
     const parallaxFactor = depth * 0.6/10
 
     // y anchors to road top, slightly offset for depth
@@ -182,11 +188,9 @@ export default class Track {
     this.activeBackgrounds = []
     this.activeForegrounds = []
 
-    for (let ii = 0; ii < 3; ii++) {
-      const count = Math.floor(2 - ii + Math.random() * 2)
-      for (let i = 0; i < count; i++) {
-        this._addBackgroundItem(true, cameraLoc, canvasWidth)
-      }
+    let count = randomVal(6, 20)
+    for (let i = 0; i < count; i++) {
+      this._addBackgroundItem(true, cameraLoc, canvasWidth)
     }
 
     const fgCount = Math.floor(2 + Math.random() * 2)
