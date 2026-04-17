@@ -32,7 +32,7 @@ const Login = () => {
           </h2>
           <div className="flex flex-col gap-4">
             <Step number={1}>
-              Go to <span className="text-purple-400 font-medium">streamelements.com</span> and log in to your account.
+              Go to <span className="text-purple-400 font-medium cursor-pointer" onClick={() => window.open('https://streamelements.com/dashboard/account/channels', '_blank')}>streamelements.com</span> and log in to your account.
             </Step>
             <Step number={2}>
               Click your avatar in the top right corner, click on your username, and open <span className="text-purple-400 font-medium">Channel Settings</span>.
