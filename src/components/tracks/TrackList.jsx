@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { useKVStore } from '../../context/KVStoreContext'
+import ErrorNewUser from '../ErrorNewUser'
 
 const TrackList = () => {
   const { tracks, updateTracks, loading, error } = useKVStore()
   const navigate = useNavigate()
 
   if (loading) return <p className="text-sm text-gray-400">Loading tracks...</p>
+  if (error === 'Failed to list kvstore keys (404)' ) return <ErrorNewUser error={error}/>
   if (error) return <p className="text-sm text-red-400">{error}</p>
 
   const trackNames = tracks 

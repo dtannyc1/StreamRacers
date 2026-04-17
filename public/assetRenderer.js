@@ -43,7 +43,7 @@ export const drawAsset = (ctx, asset, drawable) => {
     ctx.drawImage(drawable, x, y, w, h)
 
   } else if (asset.type === 'rotating' || asset.type === 'oscillating') {
-    angle = asset.cur_theta ? asset.cur_theta + angle : angle
+    angle = (asset.cur_theta ?? 0) + angle
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
     ctx.translate(cx, cy)
     ctx.rotate(angle)

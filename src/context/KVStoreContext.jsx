@@ -79,11 +79,37 @@ export const KVStoreProvider = ({ children }) => {
     }
   }
 
+  const hardResetKVStore = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { racers, tracks } = await getRacersAndTracks(token, channelId, true) // hard reset
+      let settings
+      try {
+        settings = await getRaceSettings(token, channelId)
+        if (Object.keys(settings).length === 0) throw new Error('Empty settings')
+      } catch {
+        settings = DEFAULT_RACE_SETTINGS
+        await setRaceSettings(token, channelId, DEFAULT_RACE_SETTINGS)
+      }
+      if (racers && tracks && token && channelId) {
+        setJWTToken(token, channelId, token) // ensure the token is saved in KV for tester.js to access
+      } 
+      setRacersState(racers)
+      setTracksState(tracks)
+      setRaceSettingsState(settings ?? DEFAULT_RACE_SETTINGS)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <KVStoreContext.Provider value={{ 
                                       racers, tracks, raceSettings, 
                                       loading, error, 
-                                      updateRacers, updateTracks, updateRaceSettings 
+                                      updateRacers, updateTracks, updateRaceSettings, hardResetKVStore
     }}>
       {children}
     </KVStoreContext.Provider>

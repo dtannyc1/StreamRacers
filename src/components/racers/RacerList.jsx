@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useKVStore } from '../../context/KVStoreContext'
 import RacerRow from './RacerRow'
 import AddRacerModal from './AddRacerModal'
+import ErrorNewUser from '../ErrorNewUser'
 
 const RacerList = () => {
   const { racers, loading, error, raceSettings } = useKVStore()
@@ -10,6 +11,7 @@ const RacerList = () => {
   const [showModal, setShowModal] = useState(false)
 
   if (loading) return <p className="text-sm text-gray-400">Loading racers...</p>
+  if (error === 'Failed to list kvstore keys (404)' ) return <ErrorNewUser error={error}/>
   if (error) return <p className="text-sm text-red-400">{error}</p>
 
   const usernames = racers
