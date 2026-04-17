@@ -145,7 +145,7 @@ const Instructions = () => {
           {/* image placeholder */}
         </Step>
 
-        <Step number={9} title="Save and get your browser source link">
+        <Step number={9} title="Get your browser source link">
           <span className="text-white font-medium">Copy</span> the overlay URL by clicking the <span className="text-white font-medium">🔗</span> icon at top of the overlay screen.  
           {/* image placeholder */}
         </Step>
