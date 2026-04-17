@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getRacersAndTracks, setJWTToken, setRacers, setTracks, getRaceSettings, setRaceSettings } from '../lib/streamelements'
+import { getRacersAndTracks, setJWTToken, setRacers, setTracks, 
+  getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay } from '../lib/streamelements'
 import { useAuth } from './AuthContext'
 
 const KVStoreContext = createContext(null)
@@ -11,6 +12,7 @@ export const KVStoreProvider = ({ children }) => {
   const [racers, setRacersState] = useState(null)
   const [tracks, setTracksState] = useState(null)
   const [raceSettings, setRaceSettingsState] = useState(null)
+  const [validOverlayId, setValidOverlayId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -33,6 +35,9 @@ export const KVStoreProvider = ({ children }) => {
         if (racers && tracks && token && channelId) {
           setJWTToken(token, channelId, token) // ensure the token is saved in KV for tester.js to access
         } 
+        if (settings.lastOverlayId) {
+          setValidOverlayId(await checkSEOVerlay(token, channelId, settings.lastOverlayId))
+        }
         setRacersState(racers)
         setTracksState(tracks)
         setRaceSettingsState(settings ?? DEFAULT_RACE_SETTINGS)
@@ -79,6 +84,18 @@ export const KVStoreProvider = ({ children }) => {
     }
   }
 
+  const createOverlay = async () => {
+    try { 
+      let output = await createSEOverlay(token, channelId)
+      setRaceSettings(token, channelId, {...raceSettings, 'lastOverlayId': output?._id})
+      setRaceSettingsState({...raceSettings, 'lastOverlayId': output?._id})
+      setValidOverlayId(output?._id)
+      return output?._id
+    } catch (err) {
+      throw err
+    }
+  }
+
   const hardResetKVStore = async () => {
     setLoading(true)
     setError(null)
@@ -108,8 +125,9 @@ export const KVStoreProvider = ({ children }) => {
   return (
     <KVStoreContext.Provider value={{ 
                                       racers, tracks, raceSettings, 
-                                      loading, error, 
-                                      updateRacers, updateTracks, updateRaceSettings, hardResetKVStore
+                                      loading, error, validOverlayId, 
+                                      updateRacers, updateTracks, updateRaceSettings, 
+                                      hardResetKVStore, createOverlay
     }}>
       {children}
     </KVStoreContext.Provider>

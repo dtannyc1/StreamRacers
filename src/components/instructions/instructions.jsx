@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
+import { useKVStore } from '../../context/KVStoreContext'
 
 const Step = ({ number, title, children, image }) => (
   <div className="flex gap-2">
@@ -21,6 +22,7 @@ const Step = ({ number, title, children, image }) => (
 
 const Instructions = () => {
   const [copied, setCopied] = useState(false)
+  const { validOverlayId, createOverlay } = useKVStore()
 
   const currentOrigin = window.location.origin;
   const scriptTag = `<script type="module" src="${currentOrigin}/Game.js"></script>`
@@ -45,6 +47,40 @@ const Instructions = () => {
         Follow these steps to add StreamRacers as an overlay on your Twitch stream.
         The whole process takes about 5 minutes.
         </p>
+        { !validOverlayId ? 
+          <div
+            className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
+          >
+            <p className="text-white-400">
+            Either walk through these steps or press this button to skip to Step 9.
+            </p>
+            <button
+              className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+              onClick={() => createOverlay()}
+            >
+              🪄 Create overlay
+            </button>
+          </div> : 
+          <div
+            className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
+          >
+            <p className="text-white-400">
+            You have an overlay for the game 🥳
+            </p>
+            <p className="text-white-400 mb-2">
+            Click the button below to go to your editor and continue with Step 9.
+            </p>
+            <button
+              className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+              onClick={() => {
+                let url = `https://streamelements.com/overlay/${validOverlayId}/editor?er=1`
+                window.open(url, '_blank')
+              }}
+            >
+              Go to Overlay Editor
+            </button>
+          </div>
+        }
       </div>
 
       <div className="flex flex-col gap-8">
@@ -82,8 +118,8 @@ const Instructions = () => {
 
         <Step number={6} title="Copy and paste the script tag">
           In the <span className="text-white font-medium">HTML</span> tab, <span className="text-white font-medium">delete any existing content</span> and <span className="text-white font-medium">paste</span> in the following:
-          <div className="mt-2" onClick={handleCopy}>
-            <code className={`relative block bg-gray-950 border cursor-pointer ${copied ? 'border-green-500' : 'border-gray-700'} rounded-lg px-4 py-3 text-sm text-purple-300 font-mono break-all`}>
+          <span onClick={handleCopy}>
+            <code className={`relative mt-2 block bg-gray-950 border cursor-pointer ${copied ? 'border-green-500' : 'border-gray-700'} rounded-lg px-4 py-3 text-sm text-purple-300 font-mono break-all`}>
               {scriptTag}
               {copied && (
                 <span className="-top-6 right-0 absolute text-green-600 text-sm">
@@ -92,7 +128,7 @@ const Instructions = () => {
               )}
             </code>
             
-          </div>
+          </span>
         </Step>
 
         <Step number={7} title="Clear the other tabs">
@@ -103,14 +139,14 @@ const Instructions = () => {
           {/* image placeholder */}
         </Step>
 
-        <Step number={8} title="Resize the widget">
+        <Step number={8} title="Resize the widget and Save">
           Go to <span className="text-white font-medium">Position, size and style</span> for the widget and make the overlay <span className="text-white font-medium">1920 x 1080px</span>.
+          Press <span className="text-white font-medium"> Save</span> on the top right. 
           {/* image placeholder */}
         </Step>
 
         <Step number={9} title="Save and get your browser source link">
-          <span className="text-white font-medium">Save</span> the overlay using the button on the top right. 
-          <span className="text-white font-medium"> Copy</span> the overlay URL by clicking the <span className="text-white font-medium">🔗</span> icon at top of the overlay screen.  
+          <span className="text-white font-medium">Copy</span> the overlay URL by clicking the <span className="text-white font-medium">🔗</span> icon at top of the overlay screen.  
           {/* image placeholder */}
         </Step>
 
