@@ -79,11 +79,37 @@ export const KVStoreProvider = ({ children }) => {
     }
   }
 
+  const hardResetKVStore = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { racers, tracks } = await getRacersAndTracks(token, channelId, true) // hard reset
+      let settings
+      try {
+        settings = await getRaceSettings(token, channelId)
+        if (Object.keys(settings).length === 0) throw new Error('Empty settings')
+      } catch {
+        settings = DEFAULT_RACE_SETTINGS
+        await setRaceSettings(token, channelId, DEFAULT_RACE_SETTINGS)
+      }
+      if (racers && tracks && token && channelId) {
+        setJWTToken(token, channelId, token) // ensure the token is saved in KV for tester.js to access
+      } 
+      setRacersState(racers)
+      setTracksState(tracks)
+      setRaceSettingsState(settings ?? DEFAULT_RACE_SETTINGS)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <KVStoreContext.Provider value={{ 
                                       racers, tracks, raceSettings, 
                                       loading, error, 
-                                      updateRacers, updateTracks, updateRaceSettings 
+                                      updateRacers, updateTracks, updateRaceSettings, hardResetKVStore
     }}>
       {children}
     </KVStoreContext.Provider>
@@ -103,15 +129,13 @@ export const DEFAULT_RACE_SETTINGS = {
   resetCommands: ['!reset'],
   enableBoostWords: false,
   testRacers: [
-    'apocalypse_squirrel', 'KnuthingIsReal', 'NowImABeliever',
-    'albinounounou', 'Neiluj04', 'Pyobum', 'TheComplements',
-    'AndyTheFrenchy', 'TheSolid7', 'pencils45'
+    'pencils45', 'MamzelleRylo', 'TheComplements', 'AndyTheFrenchy', 'JoPlaysViolin', 'andrewcore', 
   ],
   messages: {
     raceStarted: 'Race started!',
-    boostFound: 'OUI! {username} FOUND IT!',
+    boostFound: 'YES! {username} FOUND IT!',
     wordClue: "Guess the word I'm thinking of for a boost! The category is: {category}",
-    winner: '!addqwoin {username} 5',
+    winner: 'And the winner was {username}! You get nothing for that...',
   },
   wordBank: {
     food: ['pizza', 'chocolate', 'sushi', 'ice cream', 'burger', 'pasta', 'salad', 'potato', 'taco', 'steak'],

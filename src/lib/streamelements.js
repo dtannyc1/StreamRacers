@@ -65,8 +65,14 @@ export const setKVKey = async (token, channelId, key, value) => {
 
 // ── Convenience helpers ───────────────────────────────────────────────────────
 
-export const getRacersAndTracks = async (token, channelId) => {
-  const existing = await listKVKeys(token, channelId)
+export const getRacersAndTracks = async (token, channelId, hardReset = false) => {
+  let existing = {}
+  try {
+    existing = await listKVKeys(token, channelId)
+  } catch (err) {
+    if (!hardReset) throw err
+  }
+ 
   const existingKeys = Object.keys(existing)
 
   const initIfMissing = async (key) => {

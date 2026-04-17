@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 import { DEFAULT_RACE_SETTINGS } from '../../context/KVStoreContext'
 import { getTwitchUser } from '../../lib/twitch'
+import ErrorNewUser from '../ErrorNewUser'
 
 const resolveUsername = async (input) => {
   try {
@@ -264,7 +265,7 @@ const WordBankEditor = ({ wordBank, onChange }) => {
 }
 
 const SettingsPanel = () => {
-  const { raceSettings, updateRaceSettings, tracks } = useKVStore()
+  const { raceSettings, updateRaceSettings, tracks, error: kvStoreError } = useKVStore()
   const [local, setLocal] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -294,6 +295,10 @@ const SettingsPanel = () => {
       setSaving(false)
     }
   }
+
+
+  if (kvStoreError === 'Failed to list kvstore keys (404)' ) return <ErrorNewUser error={error}/>
+  if (kvStoreError) return <p className="text-sm text-red-400">{error}</p>
 
   if (!raceSettings) return (
     <p className="text-sm text-gray-400">Loading settings...</p>
