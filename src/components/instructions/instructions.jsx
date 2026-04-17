@@ -47,22 +47,6 @@ const Instructions = () => {
         </p>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Prerequisites</h3>
-        <div className="flex flex-col gap-2 rounded-lg bg-gray-800 border border-gray-700 p-4">
-        {[
-          'A Twitch account',
-          'A StreamElements account linked to your Twitch',
-          'OBS or a similar streaming application',
-        ].map((item, i) => (
-          <div key={i} className="flex items-center gap-2">
-          <span className="text-purple-400 text-sm">✓</span>
-          <span className="text-sm text-gray-300">{item}</span>
-          </div>
-        ))}
-        </div>
-      </div>
-
       <div className="flex flex-col gap-8">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 -mb-4">Steps</h3>
 
@@ -80,7 +64,7 @@ const Instructions = () => {
         </Step>
 
         <Step number={3} title="Create a new overlay">
-          Click <span className="text-white font-medium">New Overlay</span>. When prompted for a size, choose <span className="text-white font-medium">1920 × 1080</span>.
+          Click <span className="text-white font-medium">New Overlay</span>. When prompted for a resolution, choose <span className="text-white font-medium">1080p</span>, then press <span className="text-white font-medium">Start</span>.
           {/* image placeholder */}
         </Step>
 
@@ -92,12 +76,12 @@ const Instructions = () => {
         </Step>
 
         <Step number={5} title="Open the widget editor">
-          Click <span className="text-white font-medium">Open Editor</span> on the widget that appears.
+          Click <span className="text-white font-medium">Open Editor</span> on the menu on the left.
           {/* image placeholder */}
         </Step>
 
-        <Step number={6} title="Paste the script tag">
-          In the <span className="text-white font-medium">HTML</span> tab, delete any existing content and paste in the following:
+        <Step number={6} title="Copy and paste the script tag">
+          In the <span className="text-white font-medium">HTML</span> tab, <span className="text-white font-medium">delete any existing content</span> and <span className="text-white font-medium">paste</span> in the following:
           <div className="mt-2" onClick={handleCopy}>
             <code className={`relative block bg-gray-950 border cursor-pointer ${copied ? 'border-green-500' : 'border-gray-700'} rounded-lg px-4 py-3 text-sm text-purple-300 font-mono break-all`}>
               {scriptTag}
@@ -112,12 +96,27 @@ const Instructions = () => {
         </Step>
 
         <Step number={7} title="Clear the other tabs">
-          Click the <span className="text-white font-medium">JS</span> tab and delete everything. Do the same for the <span className="text-white font-medium">Fields</span> and <span className="text-white font-medium">Data</span> tabs.
+          Click the <span className="text-white font-medium">CSS</span> tab and <span className="text-white font-medium">delete everything</span>. 
+          Do the same for the <span className="text-white font-medium">JS</span> and <span className="text-white font-medium">Fields</span> tabs.
+          Leave the Data tab as it is.
+          Press <span className="text-white font-medium">Done</span>.
           {/* image placeholder */}
         </Step>
 
-        <Step number={8} title="Save and get your browser source link">
-          Click <span className="text-white font-medium">Done</span>, then <span className="text-white font-medium">Save</span> the overlay. The browser source URL will be shown at the top of the overlay screen — copy it and add it as a Browser Source in OBS.
+        <Step number={8} title="Resize the widget">
+          Go to <span className="text-white font-medium">Position, size and style</span> for the widget and make the overlay <span className="text-white font-medium">1920 x 1080px</span>.
+          {/* image placeholder */}
+        </Step>
+
+        <Step number={9} title="Save and get your browser source link">
+          <span className="text-white font-medium">Save</span> the overlay using the button on the top right. 
+          <span className="text-white font-medium"> Copy</span> the overlay URL by clicking the <span className="text-white font-medium">🔗</span> icon at top of the overlay screen.  
+          {/* image placeholder */}
+        </Step>
+
+        <Step number={10} title="Add the browser source link to OBS">
+          Add the link as a <span className="text-white font-medium">Browser Source</span> in OBS.
+          Ensure that the browser source is also <span className="text-white font-medium">1920 x 1080px</span>.
           {/* image placeholder */}
         </Step>
       </div>
@@ -125,19 +124,23 @@ const Instructions = () => {
       <div className="rounded-lg bg-purple-900/30 border border-purple-700 p-5 flex flex-col gap-3 mt-4">
         <p className="text-md font-semibold text-grey-200">You're all set!</p>
         <p className="text-sm text-gray-400">
-          Once the browser source is added in OBS, use the dashboard to set up and update your racers and tracks. 
+          Once the browser source is added in OBS, use the dashboard on this website to set up and update your racers and tracks. 
           Remember to refresh the browser source after making changes in the dashboard to see them reflected on stream.
         </p>
 
         <p className="text-sm text-gray-400">
-          Pro tip 1: Set your browser source to <span className="text-gray-200 font-medium">Refresh browser when scene becomes active</span> in OBS. 
+          <span className="text-gray-200 font-medium">Note:</span> All streamers start off with Test mode enabled! Go into your Settings to turn off the test racers when you're ready.
+        </p>
+
+        <p className="text-sm text-gray-400">
+          <span className="text-gray-200 font-medium">Pro tip 1:</span> Set your browser source to <span className="text-gray-200 font-medium">Refresh browser when scene becomes active</span> in OBS. 
           This way, you won't have to manually refresh every time you make a change in the dashboard.
           Just hiding the source and unhiding it will trigger a refresh!
           Map this to a streamdeck button for even easier access.
         </p>
 
         <p className="text-sm text-gray-400">
-          Pro tip 2: If you want to test changes without going live, you can open the browser source URL in a regular web browser. 
+          <span className="text-gray-200 font-medium">Pro tip 2:</span> If you want to test changes without going live, you can open the browser source URL in a regular web browser. 
           You'll still need to join and start your race from your own stream chat. 
           Test mode is available within the Settings tab if you want to see users racing without needing them to actually join in your chat.
         </p>
