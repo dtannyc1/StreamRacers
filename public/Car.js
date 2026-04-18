@@ -70,8 +70,8 @@ export default class Car {
         lastFrameTime: performance.now(),
         remappedImg: null,
         theta_0: asset.theta ?? 0,
-        theta_dot: correctedThetaDot ?? asset.theta_dot ?? 1,
-        theta: correctedTheta ?? asset.theta,
+        theta_dot: correctedThetaDot ?? 1,
+        theta: correctedTheta ?? (asset.theta ?? 0),
       }
     }))
   }
@@ -96,10 +96,10 @@ export default class Car {
       if (!asset.colorRemap?.enabled || !asset.img || asset.type === 'avatar') return
       const img = asset.img
       if (img.complete && img.naturalWidth) {
-        asset.remappedImg = this._remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
+        asset.remappedImg = remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
       } else {
         img.onload = () => {
-          asset.remappedImg = this._remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
+          asset.remappedImg = remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
         }
       }
     })
