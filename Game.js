@@ -494,6 +494,8 @@ class Game {
   }
 
   _updateStandings() {
+    if (!this.standings.length) return 
+    
     for (let i = 0; i < this.leaderboardRowElements.length; i++) {
       const row = this.leaderboardRowElements[i];
       
