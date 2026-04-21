@@ -51,4 +51,16 @@ export const createDefaultTrack = (name = 'New Track') => ({
   },
   backgroundAssets: [],
   foregroundAssets: [],
+  styleSheet: {
+    top: 320,
+    left: 1425,
+    paddingY: 20,
+    paddingX: 25,
+    font: 'Oswald',
+    fontSize: 32,
+    backgroundColor: "rgb(0,0,0)",
+    backgroundOpacity: 1,
+    color: 'white',
+    winColor: 'cyan',
+  }
 })

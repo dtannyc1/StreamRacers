@@ -26,7 +26,7 @@ export const useTrackEditor = (initialTrack = null) => {
   const updateStyleSheet = useCallback((patch) => 
     setTrack(prev => ({
       ...prev,
-      styleSheet: { ...prev.styleSheet, ...patch },
+      styleSheet: { ...(prev.styleSheet ?? {}), ...patch },
     })), [])
 
   const addModifier = (modifierKey) => {

@@ -12,6 +12,7 @@ import { getTwitchUser } from '../lib/twitch'
 import RoadDetailsPanel from '../components/track-editor/RoadDetailsPanel'
 import Tooltip from '../components/ToolTip'
 import { updateRacerPos } from '../shared/racerLogic'
+import LeaderboardSettings from '../components/track-editor/LeaderboardSettings'
 
 const TrackEditor = ({ mode }) => {
   const { trackName } = useParams()
@@ -315,6 +316,13 @@ const TrackEditor = ({ mode }) => {
                 onAdd={(...args) => handleChange(handleAddAsset, ...args)}
                 onRemove={(...args) => handleChange(handleRemoveAsset, ...args)}
                 onUpdate={(...args) => handleChange(updateAsset, ...args)}
+              />
+
+              <LeaderboardSettings
+                track={track}
+                selection={selection}
+                onSelect={setSelection}
+                onUpdate={(...args) => handleChange(updateStyleSheet, ...args)}
               />
             </div>
           </div>
