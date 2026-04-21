@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 import { DEFAULT_RACE_SETTINGS } from '../../context/KVStoreContext'
 import { getTwitchUser } from '../../lib/twitch'
 import ErrorNewUser from '../ErrorNewUser'
+import UploadButton from '../UploadButton'
 
 const resolveUsername = async (input) => {
   try {
@@ -264,6 +265,25 @@ const WordBankEditor = ({ wordBank, onChange }) => {
   )
 }
 
+const DebouncedUrlInput = ({ value, onChange }) => {
+  const [local, setLocal] = useState(value)
+  useEffect(() => { setLocal(value) }, [value])
+  useEffect(() => {
+    if (local === value) return
+    const timer = setTimeout(() => onChange(local), 600)
+    return () => clearTimeout(timer)
+  }, [local])
+  return (
+    <input
+      type="text"
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      placeholder="https://..."
+      className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 grow-1"
+    />
+  )
+}
+
 const SettingsPanel = () => {
   const { raceSettings, updateRaceSettings, tracks, error: kvStoreError } = useKVStore()
   const [local, setLocal] = useState(null)
@@ -405,6 +425,19 @@ const SettingsPanel = () => {
           onChange={(v) => update({ resetCommands: v })}
           placeholder="!reset"
         />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Track Alignment Image">
+        <p className="text-xs text-gray-500">Screenshot of your stream to help with sizing of art assets.</p>
+        <label className="flex gap-2">
+          <DebouncedUrlInput 
+            value={settings?.alignmentImage || ""} 
+            onChange={(v) => update({ alignmentImage: v })} 
+          />
+          <UploadButton
+            onUploaded={(v) => update({ alignmentImage: v })}
+          />
+        </label>
       </CollapsibleSection>
 
       <CollapsibleSection title="Bot Messages during Race">

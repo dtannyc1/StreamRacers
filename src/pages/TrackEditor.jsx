@@ -27,6 +27,7 @@ const TrackEditor = ({ mode }) => {
   const activeRacersRef = useRef(activeRacers)
   const animRef = useRef(null)
   const racerAssetsRef = useRef({})
+  const alignmentImageURL = raceSettings?.alignmentImage || null
 
   const initialTrack = mode === 'edit'
     ? tracks?.[decodeURIComponent(trackName)]
@@ -45,6 +46,7 @@ const TrackEditor = ({ mode }) => {
     addAsset,
     updateAsset,
     removeAsset,
+    updateStyleSheet,
   } = useTrackEditor(initialTrack)
 
   useEffect(() => { activeRacersRef.current = activeRacers }, [activeRacers])
@@ -268,6 +270,7 @@ const TrackEditor = ({ mode }) => {
               activeRacers={activeRacers}
               racerAvatars={racerAvatars}
               visibleModifierKey={visibleModifierKey}
+              alignmentImageURL={alignmentImageURL}
             />
           </div>
 

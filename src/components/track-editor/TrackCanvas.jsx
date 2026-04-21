@@ -129,6 +129,17 @@ const drawLineEditor = (ctx, racingLine) => {
   ctx.restore()
 }
 
+const drawAlignmentImage = (ctx, url, imageCache) => {
+  if (!imageCache.current[resolveImageUrl(url)]) return
+  const img = imageCache.current[resolveImageUrl(url)]
+
+  ctx.save()
+  ctx.globalAlpha = 0.5;
+  if (img?.naturalWidth) ctx.drawImage(img, 0, 0, 1920, 1080)
+  ctx.globalAlpha = 1;
+  ctx.restore()
+}
+
 const hitTestHandle = (mx, my, racingLine) => {
   for (const key of ['p1', 'p2']) {
     const p = racingLine[key]
@@ -157,6 +168,7 @@ const TrackCanvas = ({
   activeRacers,
   racerAvatars,
   visibleModifierKey,
+  alignmentImageURL,
 }) => {
   const canvasRef = useRef(null)
   const imageCache = useRef({})
@@ -188,6 +200,7 @@ const TrackCanvas = ({
       ...track.racingLine.finishModifiers.map(m => m.url),
       ...track.backgroundAssets.map(a => a.url),
       ...track.foregroundAssets.map(a => a.url),
+      alignmentImageURL,
     ].filter(Boolean).map(resolveImageUrl)
 
     urls.forEach(url => {
@@ -221,6 +234,8 @@ const TrackCanvas = ({
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
+
+      drawAlignmentImage(ctx, alignmentImageURL, imageCache)
 
       drawRoad(ctx, t.road, t.racingLine, imageCache)
 

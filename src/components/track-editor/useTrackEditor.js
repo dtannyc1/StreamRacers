@@ -23,6 +23,12 @@ export const useTrackEditor = (initialTrack = null) => {
       racingLine: { ...prev.racingLine, ...patch },
     })), [])
 
+  const updateStyleSheet = useCallback((patch) => 
+    setTrack(prev => ({
+      ...prev,
+      styleSheet: { ...prev.styleSheet, ...patch },
+    })), [])
+
   const addModifier = (modifierKey) => {
     const newMod = {
       id: crypto.randomUUID(),
@@ -106,5 +112,6 @@ export const useTrackEditor = (initialTrack = null) => {
     addAsset,
     updateAsset,
     removeAsset,
+    updateStyleSheet,
   }
 }
