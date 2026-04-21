@@ -205,6 +205,7 @@ class Game {
       this.leaderboardRowElements.push(row)
     }
 
+    document.body.appendChild(leaderboardContainer)
     this.leaderboardContainer = leaderboardContainer
   }
 
@@ -329,6 +330,7 @@ class Game {
     this.foundWord = false
     this.chosenWord = null
     this.carManager.reset()
+    this.leaderboardContainer.style.opacity = 0
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
     if (!this.isUpdatingRacers) {
       this.isUpdatingRacers = true
