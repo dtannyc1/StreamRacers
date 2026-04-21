@@ -3,12 +3,14 @@ import Track from './Track.js'
 
 class Game {
   constructor() {
-    let canvas = document.createElement("canvas");
-    canvas.width = 1920;
-    canvas.height = 1080;
-    document.body.appendChild(canvas);
-    this.canvas = canvas;
+    let canvas = document.createElement("canvas")
+    canvas.width = 1920
+    canvas.height = 1080
+    document.body.appendChild(canvas)
+    this.canvas = canvas
     this.ctx = this.canvas.getContext('2d')
+
+    this._addLeaderboardHTML()
 
     this.track = null
     this.carManager = null
@@ -125,6 +127,13 @@ class Game {
 
     this.track.resetScatteredArt(this.cameraLoc, this.canvas.width)
 
+    if (this.track.styleSheet) { 
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(this.track.styleSheet)
+
+      document.adoptedStyleSheets = [sheet]
+    }
+
     const settings = await SE_API.store.get('raceSettings').catch(() => null)
     if (settings) {
       if (settings.joinCommands && Array.isArray(settings.joinCommands) && settings.joinCommands.length > 0) this.joinCommands = settings.joinCommands
@@ -147,6 +156,56 @@ class Game {
     this.readying = true
     this.isUpdatingRacers = true
     requestAnimationFrame(this._loop.bind(this))
+  }
+
+  _addLeaderboardHTML() {
+
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(`
+        .leaderboard {
+          opacity: 0;
+          position: absolute;
+          top: 360px;
+          left: 1450px;
+          width: 35ch;
+          padding: 45px 25px;
+          font: 32px Oswald;
+          display: flex;
+          flex-direction: column;
+          border-radius: 30px;
+          background-color: rgba(0,0,0,1.0);
+          letter-spacing: 1.5px;
+        }
+        .leaderboard-item { 
+          color: white; 
+          font: inherit;
+          letter-spacing: inherit;
+        }
+        .finished { color: cyan; }
+    `)
+
+    document.adoptedStyleSheets = [sheet]
+
+    let leaderboardContainer = document.createElement("div")
+    leaderboardContainer.className = "leaderboard"
+
+    const row = document.createElement('div')
+    row.className = 'leaderboard-item'
+    row.textContent = "Leaderboard";
+    row.style.font = "inherit"
+    leaderboardContainer.appendChild(row)
+
+    this.leaderboardRowElements = []
+    for (let i = 0; i < 10; i++) {
+      const row = document.createElement('div')
+      row.className = 'leaderboard-item'
+      row.textContent = " ";
+      row.style.font = "inherit"
+      leaderboardContainer.appendChild(row)
+      this.leaderboardRowElements.push(row)
+    }
+
+    this.leaderboardContainer = leaderboardContainer
   }
 
   // ── Event binding ──────────────────────────────────────────────────────────
@@ -318,6 +377,8 @@ class Game {
 
       if (elapsed >= this.setupDuration * 1000) {
         if (!this.sentClue) {
+          // also show leaderboard once everything has started up
+          this.leaderboardContainer.style.opacity = 1
           this.sendMessage(this.messages?.wordClue?.replace('{category}', this.chosenWord?.category))
           this.sentClue = true
         }
@@ -397,31 +458,52 @@ class Game {
   }
 
   _drawStandings() {
-    if (!this.standings.length) return
+    // if (!this.standings.length) return
 
-    const topLeft = [1450, 360]
-    this.ctx.font = '32px Oswald'
-    this.ctx.letterSpacing = '1.5px'
+    // const topLeft = [1450, 360]
+    // this.ctx.font = '32px Oswald'
+    // this.ctx.letterSpacing = '1.5px'
 
-    // background box
-    this.ctx.fillStyle = 'rgba(0,0,0,1.0)'
-    this.ctx.beginPath()
-    this.ctx.roundRect(topLeft[0] - 25, topLeft[1] - 42, 480, 400, 30)
-    this.ctx.fill()
-    this.ctx.closePath()
+    // // background box
+    // this.ctx.fillStyle = 'rgba(0,0,0,1.0)'
+    // this.ctx.beginPath()
+    // this.ctx.roundRect(topLeft[0] - 25, topLeft[1] - 42, 480, 400, 30)
+    // this.ctx.fill()
+    // this.ctx.closePath()
 
-    this.ctx.fillStyle = 'white'
-    this.ctx.textAlign = 'left'
-    this.ctx.fillText('Leaderboard', ...topLeft)
+    // this.ctx.fillStyle = 'white'
+    // this.ctx.textAlign = 'left'
+    // this.ctx.fillText('Leaderboard', ...topLeft)
 
-    for (let i = 0; i < Math.min(this.standings.length, 10); i++) {
-      const finished = i < this.leaderboard.length
-      this.ctx.fillStyle = finished ? 'cyan' : 'white'
-      const label = finished ? this.leaderboard[i] : this.standings[i]
-      this.ctx.fillText(`${i + 1}. ${label}`, topLeft[0], topLeft[1] + 34 * (i + 1))
+    // for (let i = 0; i < Math.min(this.standings.length, 10); i++) {
+    //   const finished = i < this.leaderboard.length
+    //   this.ctx.fillStyle = finished ? 'cyan' : 'white'
+    //   const label = finished ? this.leaderboard[i] : this.standings[i]
+    //   this.ctx.fillText(`${i + 1}. ${label}`, topLeft[0], topLeft[1] + 34 * (i + 1))
+    // }
+
+    // this.ctx.resetTransform()
+    this._updateStandings()
+  }
+
+  _updateStandings() {
+    for (let i = 0; i < this.leaderboardRowElements.length; i++) {
+      const row = this.leaderboardRowElements[i];
+      
+      // Hide row if no data, or update it
+      if (i >= this.standings.length) {
+        continue;
+      }
+      
+      const finished = i < this.leaderboard.length;
+      row.classList.toggle('finished', finished)
+
+      const label = finished ? this.leaderboard[i] : this.standings[i];
+      const newText = `${i + 1}. ${label}`;
+      if (row.textContent !== newText) {
+        row.textContent = newText;
+      }
     }
-
-    this.ctx.resetTransform()
   }
 
   // ── Race end ───────────────────────────────────────────────────────────────
