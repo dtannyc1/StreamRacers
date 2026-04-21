@@ -184,7 +184,6 @@ class Game {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          min-height: 1.2em;
         }
         .finished { color: cyan; }
         .hidden { display: none; }
@@ -500,7 +499,7 @@ class Game {
       
       // Hide row if no data, or update it
       if (i >= this.standings.length) {
-        row.classList.toggle('finished', true)
+        row.classList.toggle('hidden', true)
         continue;
       }
       
