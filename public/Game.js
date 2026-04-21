@@ -165,14 +165,14 @@ class Game {
         .leaderboard {
           opacity: 0;
           position: absolute;
-          top: 360px;
-          left: 1450px;
-          width: 35ch;
-          padding: 45px 25px;
+          top: 320px;
+          left: 1425px;
+          width: 25ch;
+          padding: 20px 25px;
           font: 32px Oswald;
           display: flex;
           flex-direction: column;
-          border-radius: 30px;
+          border-radius: 25px;
           background-color: rgba(0,0,0,1.0);
           letter-spacing: 1.5px;
         }
@@ -180,6 +180,10 @@ class Game {
           color: white; 
           font: inherit;
           letter-spacing: inherit;
+          margin-top: -5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .finished { color: cyan; }
     `)
