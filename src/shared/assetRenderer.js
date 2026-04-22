@@ -96,3 +96,35 @@ export const remapImageColor = (img, sourceHex, targetHex) => {
   remapped.src = offscreen.toDataURL()
   return remapped
 }
+
+export const convertToStyleSheet = (styleSheet) => {
+  return `
+        .leaderboard {
+          opacity: 0;
+          position: absolute;
+          top: ${styleSheet?.top ?? 320}px;
+          left: ${styleSheet?.left ?? 1425}px;
+          width: ${styleSheet?.widthChars ?? 28}ch;
+          padding: ${styleSheet?.paddingY ?? 20}px ${styleSheet?.paddingX ?? 25}px;
+          font: ${styleSheet?.fontSize ?? 32}px ${styleSheet?.font ?? "Oswald"};
+          display: ${(styleSheet?.enabled ?? true) === false ? 'none' : 'flex'};
+          flex-direction: column;
+          border-radius: 25px;
+          background-color: ${(styleSheet?.backgroundColor ?? "#000000") + 
+            Math.round((styleSheet?.backgroundOpacity ?? 1) * 255).toString(16)
+          };
+          letter-spacing: ${styleSheet?.letterSpacing ?? 1.5}px;
+        }
+        .leaderboard-item { 
+          color: ${styleSheet?.color ?? "white"}; 
+          font: inherit;
+          letter-spacing: inherit;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-top: ${styleSheet?.ySpacing ?? -5}px;
+        }
+        .finished { color: ${styleSheet?.winColor ?? "cyan"}; }
+        .hidden { display: none; }
+    `
+}

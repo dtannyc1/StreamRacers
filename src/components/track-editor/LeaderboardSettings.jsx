@@ -70,6 +70,28 @@ const DebouncedColorInput = ({ value, onChange}) => {
   )
 }
 
+const CheckboxInput = ({ value, onChange}) => {
+  const [local, setLocal] = useState(value)
+
+  useEffect(() => {
+    setLocal(value)
+  }, [value])
+
+  useEffect(() => {
+    if (local === value) return
+    const timer = setTimeout(() => onChange(local), 100)
+    return () => clearTimeout(timer)
+  }, [local])
+
+  return (
+    <input
+      type="checkbox"
+      checked={local}
+      onChange={(e) => setLocal(e.target.checked)}
+    />
+  )
+}
+
 const LeaderboardSettings = ({track, selection, onSelect, onUpdate}) => {
 
   useEffect(() => {
@@ -84,7 +106,7 @@ const LeaderboardSettings = ({track, selection, onSelect, onUpdate}) => {
 
   const fontOptions = ["Arial", "Verdana", "Tahoma", "Trebuchet MS", "Georgia", 
                         "Times New Roman", "Garamond", "Courier New", "Oswald", 
-                        "Open Sans", "Roboto"
+                        "Open Sans", "Roboto", "Comic Sans MS"
                       ]
 
   const u = (patch) => onUpdate(patch)
@@ -159,9 +181,6 @@ const LeaderboardSettings = ({track, selection, onSelect, onUpdate}) => {
                         <option key={`${val}-${id}`} value={`${val}`} style={{fontFamily: `${val}`, color: 'black'}}>{`${val}`}</option>
                       ))
                   }
-                  <option value="Roboto" style={{fontFamily: 'Roboto', color: 'black'}}>Roboto</option>
-                  <option value="Open Sans" style={{fontFamily: 'Open Sans', color: 'black'}}>Open Sans</option>
-                  <option value="Oswald" style={{fontFamily: 'Oswald', color: 'black'}}>Oswald</option>
                 </select>
               </label>
               <NumInput
@@ -169,6 +188,43 @@ const LeaderboardSettings = ({track, selection, onSelect, onUpdate}) => {
                 value={track.styleSheet?.fontSize ?? 32}
                 onChange={(v) => u({ fontSize: v })}
               />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <DebouncedSliderInput 
+                label="Letter Spacing X"
+                value={track.styleSheet?.letterSpacing ?? 1.5}
+                onChange={(v) => u({ letterSpacing: v })}
+                min={-5}
+                max={5}
+                step={0.5}
+              />
+              <DebouncedSliderInput 
+                label="Line Spacing Y"
+                value={track.styleSheet?.ySpacing ?? -5}
+                onChange={(v) => u({ ySpacing: v })}
+                min={-10}
+                max={10}
+                step={0.5}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <DebouncedSliderInput 
+                label="Width"
+                value={track.styleSheet?.widthChars ?? 28}
+                onChange={(v) => u({ widthChars: v })}
+                min={10}
+                max={40}
+                step={1}
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">Visible during Race</span>
+                <CheckboxInput
+                  value={track.styleSheet?.enabled ?? true}
+                  onChange={(v) => u({ enabled: v })}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -180,7 +236,7 @@ const LeaderboardSettings = ({track, selection, onSelect, onUpdate}) => {
                 />
               </div>
               <DebouncedSliderInput 
-                label="Opacity"
+                label="Background Opacity"
                 value={track.styleSheet?.backgroundOpacity ?? 1}
                 onChange={(v) => u({ backgroundOpacity: v })}
               />
@@ -223,4 +279,7 @@ const DEFAULT_LEADERBOARD_SETTINGS = {
   backgroundOpacity: 1,
   color: '#FFFFFF',
   winColor: '#00FFFF',
+  widthChars: 28,
+  letterSpacing: 1.5,
+  ySpacing: -5,
 }

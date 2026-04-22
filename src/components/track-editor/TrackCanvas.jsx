@@ -1,7 +1,9 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
 import { drawRacer } from '../../lib/racerRenderer'
 import { incrementCarAssetAngles } from '../../shared/racerLogic'
+import "./TrackCanvas.css"
+import { convertToStyleSheet } from '../../shared/assetRenderer'
 
 const CANVAS_W = 1920
 const CANVAS_H = 1080
@@ -134,7 +136,7 @@ const drawAlignmentImage = (ctx, url, imageCache) => {
   const img = imageCache.current[resolveImageUrl(url)]
 
   ctx.save()
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.25;
   if (img?.naturalWidth) ctx.drawImage(img, 0, 0, 1920, 1080)
   ctx.globalAlpha = 1;
   ctx.restore()
@@ -170,6 +172,8 @@ const TrackCanvas = ({
   visibleModifierKey,
   alignmentImageURL,
 }) => {
+  const [scale, setScale] = useState([1, 1])
+
   const canvasRef = useRef(null)
   const imageCache = useRef({})
   const animRef = useRef(null)
@@ -221,10 +225,28 @@ const TrackCanvas = ({
     track.foregroundAssets.map(a => a.url).join(','),
   ])
 
+  useEffect(() => {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(convertToStyleSheet(track.styleSheet))
+
+    document.adoptedStyleSheets = [sheet]
+  }, [track.styleSheet])
+
   // draw loop
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const rect = entry.contentRect
+        
+        let scaleX = rect.width / 1920.0
+        let scaleY = rect.height / 1080.0
+
+        setScale([scaleX, scaleY])
+      }
+    })
 
     const draw = (timestamp) => {
       const dt = (timestamp / 1000) - tRef.current
@@ -321,8 +343,13 @@ const TrackCanvas = ({
       animRef.current = requestAnimationFrame(draw)
     }
 
+    resizeObserver.observe(canvas)
+
     animRef.current = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(animRef.current)
+    return () => {
+      cancelAnimationFrame(animRef.current)
+      resizeObserver.disconnect()
+    }
   }, [])
 
   const drawScattered = (ctx, assets, imageCache, seed, selectedAssetId, layer, racingLine) => {
@@ -447,8 +474,21 @@ const TrackCanvas = ({
 
   const isLineEditing = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
 
+  const leaderboardList = [
+    'pencils45',
+    'heyIcameInFirstplace',
+    'waitbutIcameInFirstplace',
+    'ThisGameIsRiggedForSure',
+    'StreamElements',
+    'Nightbot',
+    'SonglistBot',
+    'StreamLabs',
+    'Twitch',
+    'WWWWWWWWWWWWWWWWWWWWWWWWW',
+  ]
+
   return (
-    <div className="overflow-auto rounded-lg border border-gray-700 bg-gray-950">
+    <div className="overflow-auto rounded-lg border border-gray-700 bg-gray-950 relative overflow-hidden">
       <canvas
         ref={canvasRef}
         width={CANVAS_W}
@@ -460,6 +500,32 @@ const TrackCanvas = ({
         onMouseLeave={handleMouseUp}
         className={`block ${isLineEditing ? 'cursor-crosshair' : ''}`}
       />
+
+      {
+        selection?.type === "leaderboard" &&
+        <div 
+          className={`leaderboard absolute !opacity-100 origin-top-left`}
+          style={{
+            'transform': `scale(${scale[0]}, ${scale[1]})`,
+            top: `${track.styleSheet.top * scale[0]}px`,
+            left: `${track.styleSheet.left * scale[1]}px`,
+            marginTop: 0,
+          }}
+        >
+          <div className="leaderboard-item">
+            Leaderboard
+          </div>
+          {
+            leaderboardList.map((name, ind) => (
+              <div 
+                key={`${name}-${ind}`} 
+                className={`leaderboard-item ${(ind < 4) ? 'finished' : ''}`}>
+                {ind + 1}. {name}
+              </div>
+            ))
+          }
+        </div>
+      }
     </div>
   )
 }

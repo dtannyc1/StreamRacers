@@ -1,3 +1,4 @@
+import { convertToStyleSheet } from './assetRenderer.js'
 import CarManager from './CarManager.js'
 import Track from './Track.js'
 
@@ -129,7 +130,7 @@ class Game {
 
     if (this.track.styleSheet) { 
       const sheet = new CSSStyleSheet();
-      sheet.replaceSync(this.track.styleSheet)
+      sheet.replaceSync(convertToStyleSheet(this.track.styleSheet))
 
       document.adoptedStyleSheets = [sheet]
     }
@@ -495,7 +496,7 @@ class Game {
 
   _updateStandings() {
     if (!this.standings.length) return 
-    
+
     for (let i = 0; i < this.leaderboardRowElements.length; i++) {
       const row = this.leaderboardRowElements[i];
       
