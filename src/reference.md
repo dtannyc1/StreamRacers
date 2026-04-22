@@ -103,9 +103,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 ## Leaderboard
 - Leaderboard during race should be configurable
   - Make sure to import fonts when necessary!
-  - Render location during race (per track), font, font size, visibility
-  - Add renderer in track editor
-  - Update interpreter in Game init to new object structure
 
 - Leaderboard should be visible and filterable in Dashboard
 
