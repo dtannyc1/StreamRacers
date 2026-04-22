@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getRacersAndTracks, setJWTToken, setRacers, setTracks, 
+import { getRacersAndTracks, setJWTToken, setRacers, setTracks, getRaceHistory,
   getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay } from '../lib/streamelements'
 import { useAuth } from './AuthContext'
 
@@ -122,12 +122,16 @@ export const KVStoreProvider = ({ children }) => {
     }
   }
 
+  const fetchRaceHistory = async () => {
+    return await getRaceHistory(token, channelId)
+  }
+
   return (
     <KVStoreContext.Provider value={{ 
                                       racers, tracks, raceSettings, 
                                       loading, error, validOverlayId, 
                                       updateRacers, updateTracks, updateRaceSettings, 
-                                      hardResetKVStore, createOverlay
+                                      hardResetKVStore, createOverlay, fetchRaceHistory
     }}>
       {children}
     </KVStoreContext.Provider>
