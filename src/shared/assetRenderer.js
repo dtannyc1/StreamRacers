@@ -114,6 +114,7 @@ export const convertToStyleSheet = (styleSheet) => {
             Math.round((styleSheet?.backgroundOpacity ?? 1) * 255).toString(16)
           };
           letter-spacing: ${styleSheet?.letterSpacing ?? 1.5}px;
+          box-sizing: border-box;
         }
         .leaderboard-item { 
           color: ${styleSheet?.color ?? "white"}; 
