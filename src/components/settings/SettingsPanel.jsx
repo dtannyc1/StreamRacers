@@ -464,10 +464,15 @@ const SettingsPanel = () => {
           </>
         }
         <MessageInput
-          label="Winner reward command"
+          label="Winner reward message (skipped during testing mode)"
           value={settings.messages.winner}
           onChange={(v) => updateMessages({ winner: v })}
           hint="{username}"
+        />
+        <MessageInput
+          label="Race saved message (skipped during testing mode)"
+          value={settings.messages.raceSaved ?? "Race results saved!"}
+          onChange={(v) => updateMessages({ raceSaved: v })}
         />
       </CollapsibleSection>
 
