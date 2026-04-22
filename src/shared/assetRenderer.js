@@ -104,7 +104,7 @@ export const convertToStyleSheet = (styleSheet) => {
           position: absolute;
           top: ${styleSheet?.top ?? 320}px;
           left: ${styleSheet?.left ?? 1425}px;
-          width: ${styleSheet?.widthChars ?? 28}ch;
+          width: ${styleSheet?.width ?? 28}px;
           padding: ${styleSheet?.paddingY ?? 20}px ${styleSheet?.paddingX ?? 25}px;
           font: ${styleSheet?.fontSize ?? 32}px ${styleSheet?.font ?? "Oswald"};
           display: ${(styleSheet?.enabled ?? true) === false ? 'none' : 'flex'};

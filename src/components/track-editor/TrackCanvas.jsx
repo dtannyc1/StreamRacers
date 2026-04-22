@@ -503,27 +503,30 @@ const TrackCanvas = ({
 
       {
         selection?.type === "leaderboard" &&
-        <div 
-          className={`leaderboard absolute !opacity-100 origin-top-left`}
+        <div className='absolute origin-top-left top-0 left-0 w-[1920px] h-[1080px]'
           style={{
-            'transform': `scale(${scale[0]}, ${scale[1]})`,
-            top: `${track.styleSheet.top * scale[0]}px`,
-            left: `${track.styleSheet.left * scale[1]}px`,
-            marginTop: 0,
+              'transform': `scale(${scale[0]}, ${scale[1]})`,
           }}
         >
-          <div className="leaderboard-item">
-            Leaderboard
+          <div 
+            className={`leaderboard !opacity-100 `}
+            style={{
+              marginTop: 0,
+            }}
+          >
+            <div className="leaderboard-item">
+              Leaderboard
+            </div>
+            {
+              leaderboardList.map((name, ind) => (
+                <div 
+                  key={`${name}-${ind}`} 
+                  className={`leaderboard-item ${(ind < 4) ? 'finished' : ''}`}>
+                  {ind + 1}. {name}
+                </div>
+              ))
+            }
           </div>
-          {
-            leaderboardList.map((name, ind) => (
-              <div 
-                key={`${name}-${ind}`} 
-                className={`leaderboard-item ${(ind < 4) ? 'finished' : ''}`}>
-                {ind + 1}. {name}
-              </div>
-            ))
-          }
         </div>
       }
     </div>

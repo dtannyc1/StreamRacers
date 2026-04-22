@@ -212,10 +212,10 @@ const LeaderboardSettings = ({track, selection, onSelect, onUpdate}) => {
             <div className="grid grid-cols-2 gap-2">
               <DebouncedSliderInput 
                 label="Width"
-                value={track.styleSheet?.widthChars ?? 28}
-                onChange={(v) => u({ widthChars: v })}
-                min={10}
-                max={40}
+                value={track.styleSheet?.width ?? 480}
+                onChange={(v) => u({ width: v })}
+                min={50}
+                max={1080}
                 step={1}
               />
               <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ const DEFAULT_LEADERBOARD_SETTINGS = {
   backgroundOpacity: 1,
   color: '#FFFFFF',
   winColor: '#00FFFF',
-  widthChars: 28,
+  width: 480,
   letterSpacing: 1.5,
   ySpacing: -5,
 }
