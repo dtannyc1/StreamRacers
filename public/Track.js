@@ -8,6 +8,7 @@ export default class Track {
     this.scrollingImage = trackData.scrollingImage ?? null
     this.backgroundAssets = trackData.backgroundAssets ?? []
     this.foregroundAssets = trackData.foregroundAssets ?? []
+    this.styleSheet = trackData.styleSheet ?? null
 
     this.activeBackgrounds = []
     this.activeForegrounds = []
