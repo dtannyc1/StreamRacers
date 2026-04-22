@@ -25,6 +25,7 @@ Please change the parent <Route path="${e}"> to <Route path="${e===`/`?`*`:`${e}
           border-radius: 25px;
           background-color: ${(e?.backgroundColor??`#000000`)+Math.round((e?.backgroundOpacity??1)*255).toString(16)};
           letter-spacing: ${e?.letterSpacing??1.5}px;
+          box-sizing: border-box;
         }
         .leaderboard-item { 
           color: ${e?.color??`white`}; 
