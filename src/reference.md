@@ -100,9 +100,11 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
-## Testing
-- **New user testing**
-  - Just logging in with fresh account, then immediately adding the game without any assets. What happens?
+## Leaderboard
+- Leaderboard during race should be configurable
+  - Make sure to import fonts when necessary!
+
+- Leaderboard should be visible and filterable in Dashboard
 
 ## Racer Editor
 - Add drag and drop to change layer position
