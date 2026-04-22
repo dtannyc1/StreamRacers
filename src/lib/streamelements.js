@@ -117,10 +117,10 @@ export const getRacersAndTracks = async (token, channelId, hardReset = false) =>
  
   const existingKeys = Object.keys(existing)
 
-  const initIfMissing = async (key) => {
+  const initIfMissing = async (key, defaultVal={}) => {
     if (!existingKeys.includes(key)) {
-      await setKVKey(token, channelId, key, {})
-      return {}
+      await setKVKey(token, channelId, key, defaultVal)
+      return defaultVal
     }
     const res = await getKVKey(token, channelId, key)
     return res
@@ -130,7 +130,8 @@ export const getRacersAndTracks = async (token, channelId, hardReset = false) =>
     initIfMissing('customRacers'),
     initIfMissing('customTracks'),
     initIfMissing('raceSettings'),
-    initIfMissing('jwtToken'),
+    initIfMissing('raceHistory', []),
+    initIfMissing('jwtToken', ''),
   ])
 
   return { racers, tracks }
@@ -150,6 +151,9 @@ export const getRaceSettings = async (token, channelId) =>
 
 export const setRaceSettings = async (token, channelId, value) =>
   setKVKey(token, channelId, 'raceSettings', value)
+
+export const getRaceHistory = async (token, channelId) =>
+  getKVKey(token, channelId, 'raceHistory')
 
 export const uploadImage = async (token, channelId, file) => {
   const formData = new FormData()
