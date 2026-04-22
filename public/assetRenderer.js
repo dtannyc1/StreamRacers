@@ -104,27 +104,28 @@ export const convertToStyleSheet = (styleSheet) => {
           position: absolute;
           top: ${styleSheet?.top ?? 320}px;
           left: ${styleSheet?.left ?? 1425}px;
-          width: 25ch;
+          width: ${styleSheet?.width ?? 28}px;
           padding: ${styleSheet?.paddingY ?? 20}px ${styleSheet?.paddingX ?? 25}px;
-          font: ${styleSheet?.fontSize ?? 32}px ${styleSheet?.font ?? Oswald};
-          display: flex;
+          font: ${styleSheet?.fontSize ?? 32}px ${styleSheet?.font ?? "Oswald"};
+          display: ${(styleSheet?.enabled ?? true) === false ? 'none' : 'flex'};
           flex-direction: column;
           border-radius: 25px;
           background-color: ${(styleSheet?.backgroundColor ?? "#000000") + 
-            ((styleSheet?.backgroundOpacity ?? 1) * 255).toString(16)
+            Math.round((styleSheet?.backgroundOpacity ?? 1) * 255).toString(16)
           };
-          letter-spacing: 1.5px;
+          letter-spacing: ${styleSheet?.letterSpacing ?? 1.5}px;
+          box-sizing: border-box;
         }
         .leaderboard-item { 
           color: ${styleSheet?.color ?? "white"}; 
           font: inherit;
           letter-spacing: inherit;
-          margin-top: -5px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          margin-top: ${styleSheet?.ySpacing ?? -5}px;
         }
-        .finished { color: ${styleSheet?.winColor ?? cyan}; }
+        .finished { color: ${styleSheet?.winColor ?? "cyan"}; }
         .hidden { display: none; }
     `
 }

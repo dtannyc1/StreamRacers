@@ -58,9 +58,12 @@ export const createDefaultTrack = (name = 'New Track') => ({
     paddingX: 25,
     font: 'Oswald',
     fontSize: 32,
-    backgroundColor: "rgb(0,0,0)",
+    backgroundColor: "#000000",
     backgroundOpacity: 1,
-    color: 'white',
-    winColor: 'cyan',
+    color: '#FFFFFF',
+    winColor: '#00FFFF',
+    width: 480,
+    letterSpacing: 1.5,
+    ySpacing: -5,
   }
 })
