@@ -469,6 +469,11 @@ const SettingsPanel = () => {
           onChange={(v) => updateMessages({ winner: v })}
           hint="{username}"
         />
+        <MessageInput
+          label="Race Saved Message"
+          value={settings.messages.raceSaved}
+          onChange={(v) => updateMessages({ raceSaved: v })}
+        />
       </CollapsibleSection>
 
       { settings.enableBoostWords &&
