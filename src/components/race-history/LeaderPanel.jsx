@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { buildStats, sortedLeaders } from "../../lib/leaderboardFilters"
 import { RacerRow } from "./RacerRow"
 
-export default function LeaderPanel({ raceSet, label, sub }) {
+export default function LeaderPanel({ raceSet, label, sub, onNameClick, mode }) {
   const stats   = useMemo(() => buildStats(raceSet), [raceSet])
   const leaders = useMemo(() => sortedLeaders(stats),  [stats])
 
@@ -22,7 +22,7 @@ export default function LeaderPanel({ raceSet, label, sub }) {
       ) : (
         <div>
           {leaders.map(([name, s], i) => (
-            <RacerRow key={name} rank={i + 1} name={name} stats={s} />
+            <RacerRow key={name} rank={i + 1} name={name} stats={s} onNameClick={(name) => onNameClick(name, mode)} />
           ))}
         </div>
       )}

@@ -33,19 +33,31 @@ export function PosBadge({ pos }) {
   }
 }
 
-export function RacerRow({ rank, name, stats }) {
+export function RacerRow({ rank, name, stats, onNameClick }) {
   return (
     <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b 
                     border-gray-100 dark:border-gray-800 last:border-b-0 
                     hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors 
                     duration-100">
       <PosBadge pos={rank} />
-      <span className="flex-1 text-sm text-gray-800 dark:text-gray-200 truncate">
-        {name}
-      </span>
+      {onNameClick ? (
+        <button
+          onClick={() => onNameClick(name)}
+          className="flex-1 text-sm text-left text-gray-800 dark:text-gray-200 truncate
+                     hover:text-red-600 dark:hover:text-red-400 hover:underline
+                     underline-offset-2 transition-colors duration-100 cursor-pointer"
+        >
+          {name}
+        </button>
+      ) : (
+        <span className="flex-1 text-sm text-gray-800 dark:text-gray-200 truncate">
+          {name}
+        </span>
+      )}
       <span className="text-xs text-gray-500 dark:text-gray-400 text-right tabular-nums shrink-0">
         <span className="font-medium text-gray-800 dark:text-gray-200">{stats.points}pts</span>
-        &nbsp; {stats.wins} Win{stats.wins !== 1 ? 's' : ''} &nbsp;{stats.races} Race{stats.races !== 1 ? 's' : ''}
+        &nbsp; {stats.wins} Win{stats.wins !== 1 ? 's' : ''} 
+        &nbsp;{stats.races} Race{stats.races !== 1 ? 's' : ''}
       </span>
     </div>
   );

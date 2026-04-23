@@ -19,25 +19,25 @@ const VIEW_TABS = [
   { id: "lookup",  label: "Player lookup" },
 ]
 
-function usePanelProps(mode, races, refDate) {
+function usePanelProps(mode, races, refDate, onNameClick) {
   return useMemo(() => {
     const raceSet = filterRaces(races, mode, refDate)
     if (mode === "day") {
-      return { raceSet, label: `${formatDateLabel(refDate)}`, sub: `${raceSet.length} races` }
+      return { raceSet, label: `${formatDateLabel(refDate)}`, sub: `${raceSet.length} races`, onNameClick, mode }
     }
     if (mode === "month") {
-      return { raceSet, label: formatMonthLabel(refDate), sub: `${raceSet.length} races this month` }
+      return { raceSet, label: formatMonthLabel(refDate), sub: `${raceSet.length} races this month`, onNameClick, mode }
     }
     if (mode === "year") {
-      return { raceSet, label: `${refDate.getFullYear()} Season`, sub: `${raceSet.length} total races` }
+      return { raceSet, label: `${refDate.getFullYear()} Season`, sub: `${raceSet.length} total races`, onNameClick, mode }
     }
-    return { raceSet: races, label: "All Time", sub: `${races.length} total races` }
+    return { raceSet: races, label: "All Time", sub: `${races.length} total races`, onNameClick, mode }
   }, [mode, races, refDate])
 }
 
-function SplitView({ splitLeft, splitRight, races, refDate }) {
-  const left  = usePanelProps(splitLeft,  races, refDate)
-  const right = usePanelProps(splitRight, races, refDate)
+function SplitView({ splitLeft, splitRight, races, refDate, onNameClick }) {
+  const left  = usePanelProps(splitLeft,  races, refDate, onNameClick)
+  const right = usePanelProps(splitRight, races, refDate, onNameClick)
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -47,8 +47,8 @@ function SplitView({ splitLeft, splitRight, races, refDate }) {
   )
 }
 
-function SingleView({ mode, races, refDate }) {
-  const props = usePanelProps(mode, races, refDate)
+function SingleView({ mode, races, refDate, onNameClick }) {
+  const props = usePanelProps(mode, races, refDate, onNameClick)
   return (
     <div className="grid grid-cols-1 gap-3">
       <LeaderPanel {...props} />
@@ -61,16 +61,28 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
   const [splitLeft,   setSplitLeft]   = useState("day")
   const [splitRight,  setSplitRight]  = useState("month")
   const [refDate,     setRefDate]     = useState(() => getMostRecentDay(raceHistory))
+  const [lookupQuery, setLookupQuery] = useState("")
+  const [lookupPeriod,setLookupPeriod]= useState("month")
 
   useEffect(() => {
     setRefDate(getMostRecentDay(raceHistory))
   }, [raceHistory])
 
+  function openPlayerLookup(name, period) {
+    setLookupQuery(name);
+    setLookupPeriod(period ?? "month");
+    setViewMode("lookup");
+  }
+
   return (
     <div className="font-sans">
 
       <div className="flex flex-wrap justify-center items-center gap-3 mb-4">
-        <TabBar tabs={VIEW_TABS} active={viewMode} onChange={setViewMode} />
+        <TabBar 
+          tabs={VIEW_TABS} 
+          active={viewMode} 
+          onChange={setViewMode} 
+        />
       </div>
 
       {viewMode !== "alltime" && viewMode !== "lookup" && (
@@ -94,15 +106,26 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
           splitRight={splitRight}
           races={raceHistory}
           refDate={refDate}
+          onNameClick={openPlayerLookup}
         />
       )}
 
       {(viewMode === "day" || viewMode === "month" || viewMode === "year" || viewMode === "alltime") && (
-        <SingleView mode={viewMode} races={raceHistory} refDate={refDate} />
+        <SingleView 
+          mode={viewMode} 
+          races={raceHistory} 
+          refDate={refDate} 
+          onNameClick={openPlayerLookup}
+        />
       )}
 
       {viewMode === "lookup" && (
-        <PlayerLookup races={raceHistory} refDate={refDate} />
+        <PlayerLookup 
+          races={raceHistory} 
+          refDate={refDate} 
+          initialQuery={lookupQuery}
+          initialPeriod={lookupPeriod}
+        />
       )}
     </div>
   )

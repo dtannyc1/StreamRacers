@@ -11,9 +11,9 @@ const PERIOD_TABS = [
   { id: "alltime", label: "All time" },
 ]
 
-export default function PlayerLookup({ races, refDate }) {
-  const [query,  setQuery]  = useState("")
-  const [period, setPeriod] = useState("month")
+export default function PlayerLookup({ races, refDate, initialQuery = "", initialPeriod = "month" }) {
+  const [query,  setQuery]  = useState(initialQuery)
+  const [period, setPeriod] = useState(initialPeriod)
 
   const raceSet = useMemo(
     () => filterRaces(races, period, refDate),
