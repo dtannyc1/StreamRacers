@@ -158,7 +158,7 @@ export const DEFAULT_RACE_SETTINGS = {
     boostFound: 'YES! {username} FOUND IT!',
     wordClue: "Guess the word I'm thinking of for a boost! The category is: {category}",
     winner: 'And the winner was {username}! You get nothing for that...',
-    raceSaved: 'Race results saved!',
+    raceSaved: "Race results saved!",
   },
   wordBank: {
     food: ['pizza', 'chocolate', 'sushi', 'ice cream', 'burger', 'pasta', 'salad', 'potato', 'taco', 'steak'],
