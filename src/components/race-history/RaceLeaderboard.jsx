@@ -122,7 +122,7 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
       {viewMode === "lookup" && (
         <PlayerLookup 
           races={raceHistory} 
-          refDate={refDate} 
+          refDate={new Date()} 
           initialQuery={lookupQuery}
           initialPeriod={lookupPeriod}
         />

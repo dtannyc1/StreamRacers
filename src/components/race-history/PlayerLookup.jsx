@@ -86,7 +86,7 @@ export default function PlayerLookup({ races, refDate, initialQuery = "", initia
 
       {query.trim() && !foundName && (
         <p className="px-3.5 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
-          No races found for &ldquo{query}&rdquo in this period.
+          No races found for {query} in this period.
         </p>
       )}
 

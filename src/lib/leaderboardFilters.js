@@ -80,6 +80,5 @@ export function getAvailableYears(races) {
 
 export function getMostRecentDay(races) {
   const days = getAvailableDays(races)
-  console.log(races, days)
   return days.length > 0 ? days[days.length - 1] : new Date()
 }
