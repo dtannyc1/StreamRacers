@@ -8,7 +8,7 @@ import { getTwitchAccessToken } from '../lib/twitch'
 import Instructions from '../components/instructions/instructions'
 import RaceHistory from './RaceHistory'
 
-const tabs = ['Vehicles', 'Tracks', 'Settings', 'Setup Guide', 'Leaderboard']
+const tabs = ['Vehicles', 'Tracks', 'Leaderboard', 'Settings', 'Setup Guide']
 
 const Dashboard = () => {
   const { channel, settling, clearToken } = useAuth()
