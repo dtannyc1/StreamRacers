@@ -5,9 +5,9 @@ import RaceLogRow from "./RaceLogRow"
 import TabBar from "./TabBar"
 
 const PERIOD_TABS = [
-  { id: "day",     label: "Today" },
-  { id: "month",   label: "This month" },
-  { id: "year",    label: "This year" },
+  { id: "day",     label: "Day" },
+  { id: "month",   label: "Month" },
+  { id: "year",    label: "Year" },
   { id: "alltime", label: "All time" },
 ]
 

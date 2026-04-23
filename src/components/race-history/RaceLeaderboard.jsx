@@ -77,11 +77,14 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
   return (
     <div className="font-sans">
 
-      <div className="flex flex-wrap justify-center items-center gap-3 mb-4">
+      <div className="flex relative flex-wrap justify-center items-center gap-3 mb-4">
         <TabBar 
           tabs={VIEW_TABS} 
           active={viewMode} 
           onChange={setViewMode} 
+          races={raceHistory}
+          refDate={refDate}
+          setRefDate={setRefDate}
         />
       </div>
 
@@ -122,7 +125,7 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
       {viewMode === "lookup" && (
         <PlayerLookup 
           races={raceHistory} 
-          refDate={new Date()} 
+          refDate={refDate} 
           initialQuery={lookupQuery}
           initialPeriod={lookupPeriod}
         />
