@@ -145,7 +145,7 @@ class Game {
       if (settings.testing !== undefined) this.testing = settings.testing
       if (settings.wordBank) this.wordBank = settings.wordBank
       if (settings.raceDuration) this.raceDuration = settings.raceDuration
-      this.enableBoostWords = settings.enableBoostWords ?? this.enableBoostWords
+      this.enableBoostWords = ((settings.enableBoostWords ?? false) === true) 
     }
 
     if (this.testing) {
@@ -387,7 +387,9 @@ class Game {
         if (!this.sentClue) {
           // also show leaderboard once everything has started up
           this.leaderboardContainer.style.opacity = 1
-          this.sendMessage(this.messages?.wordClue?.replace('{category}', this.chosenWord?.category))
+          if (this.enableBoostWords === true && this.chosenWord?.category) {
+            this.sendMessage(this.messages?.wordClue?.replace('{category}', this.chosenWord?.category))
+          }
           this.sentClue = true
         }
 
