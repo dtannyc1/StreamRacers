@@ -104,7 +104,7 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - Leaderboard during race should be configurable
   - Make sure to import fonts when necessary!
 
-- Leaderboard should be visible and filterable in Dashboard
+- Race History overlay
 
 ## Racer Editor
 - Add drag and drop to change layer position

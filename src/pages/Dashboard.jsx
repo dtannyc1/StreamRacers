@@ -6,8 +6,9 @@ import ChannelProfile from '../components/ChannelProfile'
 import { useAuth } from '../context/AuthContext'
 import { getTwitchAccessToken } from '../lib/twitch'
 import Instructions from '../components/instructions/instructions'
+import RaceHistory from './RaceHistory'
 
-const tabs = ['Vehicles', 'Tracks', 'Settings', 'Setup Guide']
+const tabs = ['Vehicles', 'Tracks', 'Race History', 'Settings', 'Setup Guide']
 
 const Dashboard = () => {
   const { channel, settling, clearToken } = useAuth()
@@ -70,6 +71,7 @@ const Dashboard = () => {
           {activeTab === 'Tracks' && <TrackList />} 
           {activeTab === 'Settings' && <SettingsPanel />}
           {activeTab === 'Setup Guide' && <Instructions />}
+          {activeTab === 'Race History' && <RaceHistory />}
         </div>
 
 
