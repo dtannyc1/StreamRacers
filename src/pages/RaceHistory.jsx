@@ -1,25 +1,27 @@
 import { useState, useEffect } from "react"
 import { useKVStore } from "../context/KVStoreContext"
+import RaceLeaderboard from "../components/race-history/RaceLeaderboard"
 
 const RaceHistory = ({}) => {
   const { fetchRaceHistory } = useKVStore()
-  const [raceHistory, setRaceHistory] = useState({})
+  const [raceHistory, setRaceHistory] = useState([])
 
   useEffect(() => {
+    updateRaceHistory()
+  }, [])
+
+  const updateRaceHistory = () => {
     fetchRaceHistory()
       .then((history) => {
-        console.log('history: ', history)
         setRaceHistory(history)
       })
       .catch((err) => {
         setRaceHistory([])
       })
-  }, [])
+  }
 
   return (
-    <div>
-      hi
-    </div>
+    <RaceLeaderboard raceHistory={raceHistory} />
   )
 }
 
