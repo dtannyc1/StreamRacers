@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { getRacersAndTracks, setJWTToken, setRacers, setTracks, getRaceHistory,
-  getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay } from '../lib/streamelements'
+  getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay, 
+  setRaceHistoryOverlaySettings } from '../lib/streamelements'
 import { useAuth } from './AuthContext'
 
 const KVStoreContext = createContext(null)
@@ -84,6 +85,16 @@ export const KVStoreProvider = ({ children }) => {
     }
   }
 
+  const updateRaceHistoryOverlaySettings = async (value) => {
+    setError(null)
+    try {
+      await setRaceHistoryOverlaySettings(token, channelId, value)
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
+  }
+
   const createOverlay = async () => {
     try { 
       let output = await createSEOverlay(token, channelId)
@@ -131,7 +142,8 @@ export const KVStoreProvider = ({ children }) => {
                                       racers, tracks, raceSettings, 
                                       loading, error, validOverlayId, 
                                       updateRacers, updateTracks, updateRaceSettings, 
-                                      hardResetKVStore, createOverlay, fetchRaceHistory
+                                      hardResetKVStore, createOverlay, fetchRaceHistory,
+                                      updateRaceHistoryOverlaySettings
     }}>
       {children}
     </KVStoreContext.Provider>

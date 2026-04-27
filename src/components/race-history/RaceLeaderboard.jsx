@@ -1,14 +1,16 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import {
   filterRaces,
   formatDateLabel,
   formatMonthLabel,
   getMostRecentDay,
+  getDayKey,
 } from "../../shared/leaderboardFilters"
 import TabBar from "./TabBar"
 import PeriodControls from "./PeriodControls"
 import LeaderPanel from "./LeaderPanel"
 import PlayerLookup from "./PlayerLookup"
+import { useKVStore } from "../../context/KVStoreContext"
 
 const VIEW_TABS = [
   { id: "split",   label: "Split view" },
@@ -64,9 +66,29 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
   const [lookupQuery, setLookupQuery] = useState("")
   const [lookupPeriod,setLookupPeriod]= useState("month")
 
+  const { updateRaceHistoryOverlaySettings } = useKVStore();
+
   useEffect(() => {
     setRefDate(getMostRecentDay(raceHistory))
   }, [raceHistory])
+
+  const pushOverlaySettings = useCallback(() => {
+    if (viewMode === "lookup") return;         // player lookup has no overlay equivalent
+
+    const payload = {
+      viewMode,
+      splitLeft,
+      splitRight,
+      // Store refDate as YYYY-MM-DD so the overlay can reconstruct it without timezone issues
+      refDate: getDayKey(refDate),
+    };
+
+    updateRaceHistoryOverlaySettings(payload)
+  }, [viewMode, splitLeft, splitRight, refDate]);
+
+  useEffect(() => {
+    pushOverlaySettings();
+  }, [pushOverlaySettings]);
 
   function openPlayerLookup(name, period) {
     setLookupQuery(name);

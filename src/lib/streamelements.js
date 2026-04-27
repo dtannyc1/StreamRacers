@@ -152,6 +152,9 @@ export const getRaceSettings = async (token, channelId) =>
 export const setRaceSettings = async (token, channelId, value) =>
   setKVKey(token, channelId, 'raceSettings', value)
 
+export const setRaceHistoryOverlaySettings = async (token, channelId, value) =>
+  setKVKey(token, channelId, 'raceHistoryOverlaySettings', value)
+
 export const getRaceHistory = async (token, channelId) =>
   getKVKey(token, channelId, 'raceHistory')
 
