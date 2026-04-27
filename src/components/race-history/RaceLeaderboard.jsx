@@ -74,6 +74,7 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
 
   const pushOverlaySettings = useCallback(() => {
     if (viewMode === "lookup") return;         // player lookup has no overlay equivalent
+    if (!raceHistory.length) return;
     let diff = (refDate - getMostRecentDay(raceHistory)) / (1000 * 60 * 60 * 24)
 
     const payload = {

@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { getRacersAndTracks, setJWTToken, setRacers, setTracks, getRaceHistory,
   getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay, 
-  setRaceHistoryOverlaySettings } from '../lib/streamelements'
+  setRaceHistoryOverlaySettings, 
+  getRaceHistoryOverlaySettings} from '../lib/streamelements'
 import { useAuth } from './AuthContext'
 
 const KVStoreContext = createContext(null)
@@ -13,6 +14,7 @@ export const KVStoreProvider = ({ children }) => {
   const [racers, setRacersState] = useState(null)
   const [tracks, setTracksState] = useState(null)
   const [raceSettings, setRaceSettingsState] = useState(null)
+  const [raceHistorySettings, setRaceHistorySettingsState] = useState(null)
   const [validOverlayId, setValidOverlayId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -25,10 +27,12 @@ export const KVStoreProvider = ({ children }) => {
       setError(null)
       try {
         const { racers, tracks } = await getRacersAndTracks(token, channelId)
-        let settings
+        let settings, raceHistorySettings
         try {
           settings = await getRaceSettings(token, channelId)
           if (Object.keys(settings).length === 0) throw new Error('Empty settings')
+
+          raceHistorySettings = await getRaceHistoryOverlaySettings(token, channelId)
         } catch {
           settings = DEFAULT_RACE_SETTINGS
           await setRaceSettings(token, channelId, DEFAULT_RACE_SETTINGS)
@@ -42,6 +46,7 @@ export const KVStoreProvider = ({ children }) => {
         setRacersState(racers)
         setTracksState(tracks)
         setRaceSettingsState(settings ?? DEFAULT_RACE_SETTINGS)
+        setRaceHistorySettingsState(raceHistorySettings ?? {})
       } catch (err) {
         setError(err.message)
       } finally {
@@ -88,7 +93,17 @@ export const KVStoreProvider = ({ children }) => {
   const updateRaceHistoryOverlaySettings = async (value) => {
     setError(null)
     try {
-      await setRaceHistoryOverlaySettings(token, channelId, value)
+      let diff = false
+      for (let [key, val] of Object.entries(value)) {
+        if (val !== raceHistorySettings[key]) {
+          diff = true
+        }
+      }
+
+      if (diff){
+        await setRaceHistoryOverlaySettings(token, channelId, value)
+        setRaceHistorySettingsState(value)
+      }
     } catch (err) {
       setError(err.message)
       throw err
