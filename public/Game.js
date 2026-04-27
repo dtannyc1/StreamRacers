@@ -537,7 +537,7 @@ class Game {
         };
         raceHistory.push(result);
         SE_API.store.set('raceHistory', raceHistory).then(() => {
-            sendMessageInChat(this.messages?.raceSaved);
+            this.sendMessage(this.messages?.raceSaved);
         });
     });
   }
