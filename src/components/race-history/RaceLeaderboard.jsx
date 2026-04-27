@@ -4,7 +4,7 @@ import {
   formatDateLabel,
   formatMonthLabel,
   getMostRecentDay,
-} from "../../lib/leaderboardFilters"
+} from "../../shared/leaderboardFilters"
 import TabBar from "./TabBar"
 import PeriodControls from "./PeriodControls"
 import LeaderPanel from "./LeaderPanel"

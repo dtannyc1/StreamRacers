@@ -1,4 +1,4 @@
-import { formatDateLabel, getAvailableDays, getDayKey } from "../../lib/leaderboardFilters";
+import { formatDateLabel, getAvailableDays, getDayKey } from "../../shared/leaderboardFilters";
 
 function Label({ children }) {
   return (
