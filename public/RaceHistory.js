@@ -31,6 +31,7 @@ window.addEventListener('onWidgetLoad', async function (obj) {
 window.addEventListener('onEventReceived', async function (obj) {
   const listener = obj?.detail?.listener;
   const key      = obj?.detail?.event?.data?.key;
+  let changed = false;
 
   if (key === 'customWidget.raceHistoryOverlaySettings') {
     await getLatestOverlaySettings();
@@ -180,6 +181,14 @@ function renderPanel(mode, races, refDate, maxRows = 10) {
   }
 
   return panel;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /** Determine which panels to show based on current settings. */
