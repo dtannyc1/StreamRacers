@@ -49,6 +49,12 @@ window.addEventListener('onEventReceived', async function (obj) {
   }
 })
 
+function flashRefresh() {
+  const el = document.getElementById('refresh-flash');
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 200);
+}
+
 function applyCSSSettings(s) {
   const root = document.documentElement.style;
   const set  = (prop, val) => { if (val != null) root.setProperty(prop, val); };
