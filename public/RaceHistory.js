@@ -32,19 +32,14 @@ window.addEventListener('onWidgetLoad', async function (obj) {
 window.addEventListener('onEventReceived', async function (obj) {
   const listener = obj?.detail?.listener;
   const key      = obj?.detail?.event?.data?.key;
-  let changed = false;
 
   if (key === 'customWidget.raceHistoryOverlaySettings') {
     await getLatestOverlaySettings();
-    changed = true;
+    render();
   }
 
   if (key === 'customWidget.raceHistory') {
     await getLatestRaceHistory();
-    changed = true;
-  }
-
-  if (changed) {
     flashRefresh();
     render();
   }
@@ -180,7 +175,7 @@ function renderPanel(mode, races, refDate, maxRows = 10) {
         <span class="racer-name">${escHtml(name)}</span>
         <div class="racer-stats">
           <span class="racer-pts">${s.points}pts</span>
-          <span class="racer-meta">${s.wins}W ${s.races}R</span>
+          <span class="racer-meta">${s.wins} Wins ${s.races} Races</span>
         </div>
       `;
       panel.appendChild(row);
