@@ -74,13 +74,14 @@ export default function RaceLeaderboard({ raceHistory = [] }) {
 
   const pushOverlaySettings = useCallback(() => {
     if (viewMode === "lookup") return;         // player lookup has no overlay equivalent
+    let diff = (refDate - getMostRecentDay(raceHistory)) / (1000 * 60 * 60 * 24)
 
     const payload = {
       viewMode,
       splitLeft,
       splitRight,
       // Store refDate as YYYY-MM-DD so the overlay can reconstruct it without timezone issues
-      refDate: getDayKey(refDate),
+      refDate: (!diff) ? null : getDayKey(refDate),
     };
 
     updateRaceHistoryOverlaySettings(payload)

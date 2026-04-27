@@ -7,6 +7,7 @@ import {
   formatMonthLabel,
   getDayKey,
   getMonthKey,
+  getMostRecentDay,
 } from './leaderboardFilters.js'
 
 let raceHistory = []
@@ -99,7 +100,7 @@ function getRefDate(s) {
     const [y, m, d] = s.refDate.split('-').map(Number);
     return new Date(y, m - 1, d);
   }
-  return new Date();
+  return getMostRecentDay(raceHistory)
 }
 
 /** Returns { raceSet, label, sub } for a given period mode. */
@@ -109,8 +110,8 @@ function getPanelData(mode, races, refDate) {
   if (mode === 'day') {
     return {
       raceSet,
-      label: 'Today',
-      sub: `${formatDateLabel(refDate)} · ${raceSet.length} races`,
+      label: `${formatDateLabel(refDate)}`,
+      sub: `${raceSet.length} races`,
     };
   }
   if (mode === 'month') {
