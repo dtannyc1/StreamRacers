@@ -106,11 +106,10 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
 
   return (
     <div 
-      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2"
+      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2 touch-action-none"
       onClick={() => handleDrawerClose()}
       onTouchEnd={(e) => {
         e.stopPropagation()
-        e.preventDefault()
         handleDrawerClose()
       }}
     >
@@ -147,9 +146,9 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 touch-action-none">
           <div
-            className="h-fit"
+            className="h-fit touch-action-none"
             onClick={(e) => e.stopPropagation()}
           >
             <CarCanvas
@@ -168,7 +167,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             />
           </div>
           <div 
-            className="flex flex-col gap-6 -mr-2 relative"
+            className="flex flex-col gap-6 -mr-2 relative touch-action-none"
             onClick={(e) => e.stopPropagation()}
           >
             <AssetPanel
