@@ -59,14 +59,14 @@ export const useCarEditor = (initialCar = null) => {
   // 'asset' | 'cr'
   const dragState = useRef(null)
 
-  const onCanvasMouseDown = useCallback((e, canvasRect, scale, draggingCR, resizeCorner, draggingRadius) => {
+  const onCanvasMouseDown = useCallback((clientX, clientY, canvasRect, scale, draggingCR, resizeCorner, draggingRadius) => {
     if (!selectedAsset) return
     if (resizeCorner) {
       dragState.current = {
         mode: 'resize',
         corner: resizeCorner,
-        startMouseX: e.clientX,
-        startMouseY: e.clientY,
+        startMouseX: clientX,
+        startMouseY: clientY,
         startTL: [...selectedAsset.tl],
         startDIM: [...selectedAsset.dim],
         startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
@@ -77,24 +77,24 @@ export const useCarEditor = (initialCar = null) => {
     } else if (draggingRadius) {
       dragState.current = {
         mode: 'radius',
-        startMouseX: e.clientX,
-        startMouseY: e.clientY,
+        startMouseX: clientX,
+        startMouseY: clientY,
         startCR: [...(selectedAsset.cr ?? [0, 0])],
         scale,
       }
     } else if (draggingCR) {
       dragState.current = {
         mode: 'cr',
-        startMouseX: e.clientX,
-        startMouseY: e.clientY,
+        startMouseX: clientX,
+        startMouseY: clientY,
         startCR: [...(selectedAsset.cr ?? [0, 0])],
         scale,
       }
     } else {
       dragState.current = {
         mode: 'asset',
-        startMouseX: e.clientX,
-        startMouseY: e.clientY,
+        startMouseX: clientX,
+        startMouseY: clientY,
         startTL: [...selectedAsset.tl],
         startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
         scale,
@@ -102,11 +102,11 @@ export const useCarEditor = (initialCar = null) => {
     }
   }, [selectedAsset])
 
-  const onCanvasMouseMove = useCallback((e, canvasX, canvasY) => {
+  const onCanvasMouseMove = useCallback((clientX, clientY, canvasX, canvasY) => {
     if (!dragState.current || !selectedId) return
     const { mode, startMouseX, startMouseY, scale } = dragState.current
-    const dx = (e.clientX - startMouseX) * scale
-    const dy = (e.clientY - startMouseY) * scale
+    const dx = (clientX - startMouseX) * scale
+    const dy = (clientY - startMouseY) * scale
 
     if (mode === 'cr') {
       const { startCR } = dragState.current

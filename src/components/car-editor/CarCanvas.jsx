@@ -259,7 +259,7 @@ const CarCanvas = ({
     return () => cancelAnimationFrame(animRef.current)
   }, [assets, selectedId, selectedAsset, eyedropperAssetId])
 
-  const getCoords = (e) => {
+  const getClientCoords = (e) => {
     if (e.touches && e.touches.length > 0) {
       return { x: e.touches[0].clientX, y: e.touches[0].clientY }
     }
@@ -269,20 +269,20 @@ const CarCanvas = ({
     return { x: e.clientX, y: e.clientY }
   }
 
-  const getCanvasPos = useCallback((e) => {
+  const getCanvasPos = useCallback((clientX, clientY) => {
     const rect = canvasRef.current.getBoundingClientRect()
     const scale = CANVAS_W / rect.width
-    let data = getCoords(e)
     return {
-      x: (data.x - rect.left) * scale,
-      y: (data.y - rect.top) * scale,
+      x: (clientX - rect.left) * scale,
+      y: (clientY - rect.top) * scale,
       scale,
     }
-  }, [])
+  }, [CANVAS_W])
 
   const handleMouseDown = useCallback((e) => {
     if (!eyedropperAssetId) {
-      const { x, y, scale } = getCanvasPos(e)
+      const { x: clientX, y: clientY } = getClientCoords(e);
+      const { x, y, scale } = getCanvasPos(clientX, clientY);
       const mx = x - ORIGIN[0]
       const my = y - ORIGIN[1]
 
@@ -296,13 +296,14 @@ const CarCanvas = ({
       draggingCR.current = isCR
       draggingRadius.current = isRadius
 
-      onMouseDown(e, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius)
+      onMouseDown(clientX, clientY, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius)
     }
   }, [onMouseDown, getCanvasPos, selectedAsset, eyedropperAssetId])
 
   const handleMouseMove = useCallback((e) => {
     if (!eyedropperAssetId) {
-      const { x, y } = getCanvasPos(e)
+      const { x: clientX, y: clientY } = getClientCoords(e);
+      const { x, y, scale } = getCanvasPos(clientX, clientY);
       if (dragStartPos.current) {
         const dx = x - dragStartPos.current.x
         const dy = y - dragStartPos.current.y
@@ -311,13 +312,14 @@ const CarCanvas = ({
         }
       }
     // pass canvas-space position relative to origin
-      onMouseMove(e, x - ORIGIN[0], y - ORIGIN[1])
+      onMouseMove(clientX, clientY, x - ORIGIN[0], y - ORIGIN[1])
     }
   }, [onMouseMove, getCanvasPos, eyedropperAssetId])
 
   const handleMouseUp = useCallback((e) => {
     if (eyedropperAssetId) {
-      const { x, y } = getCanvasPos(e)
+      const { x: clientX, y: clientY } = getClientCoords(e);
+      const { x, y, scale } = getCanvasPos(clientX, clientY);
       const ctx = canvasRef.current.getContext('2d')
       const pixel = ctx.getImageData(Math.round(x), Math.round(y), 1, 1).data
       const hex = '#' + [pixel[0], pixel[1], pixel[2]]
@@ -332,7 +334,8 @@ const CarCanvas = ({
       return
     }
     if (!didDrag.current) {
-      const { x, y } = getCanvasPos(e)
+      const { x: clientX, y: clientY } = getClientCoords(e);
+      const { x, y, scale } = getCanvasPos(clientX, clientY);
       const mx = x - ORIGIN[0]
       const my = y - ORIGIN[1]
 
@@ -359,7 +362,7 @@ const CarCanvas = ({
     didDrag.current = false
     draggingCR.current = false
     draggingRadius.current = false
-    onMouseUp(e)
+    onMouseUp()
   }, [eyedropperAssetId, onEyedropperPick, assets, selectedAsset, onSelectAsset, onMouseUp, getCanvasPos])
 
   return (
@@ -374,7 +377,7 @@ const CarCanvas = ({
       onTouchMove={handleMouseMove}
       onTouchEnd={handleMouseUp}
       className={`w-full h-auto rounded-lg border border-gray-700
-                  max-w-full object-contain
+                  max-w-full object-contain touch-action-none
                   max-h-[calc(100dvh-1rem-42px-1.5rem)]
                   sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
                   xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
