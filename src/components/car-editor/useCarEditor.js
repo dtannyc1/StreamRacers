@@ -110,7 +110,7 @@ export const useCarEditor = (initialCar = null) => {
 
     if (mode === 'cr') {
       const { startCR } = dragState.current
-      updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy] })
+      updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy], cur_theta: 0 })
     } else if (mode === 'asset') {
       const { startTL, startCR } = dragState.current
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }

@@ -219,7 +219,7 @@ const CarCanvas = ({
         resetAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
         const curAsset = assetsRef.current[asset.id]
         const drawable = resolveDrawable(curAsset, timestamp)
-        drawAsset(ctx, {...asset, cur_theta: isSelected ? 0 : (asset.cur_theta ?? 0)}, drawable)
+        drawAsset(ctx, {...asset, cur_theta: (isSelected && !asset.animationEnabled) ? 0 : (asset.cur_theta ?? 0)}, drawable)
 
         if (isSelected) {
           // draw selection outline

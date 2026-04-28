@@ -248,7 +248,25 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
       {(asset.type === 'rotating' || asset.type === 'oscillating') && (
         <>
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Center of Rotation</p>
+            
+            <div className='flex justify-between align-center'>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Center of Rotation
+              </p>
+              {
+                asset.type === 'rotating' &&
+                <div className='flex gap-2'>
+                  <label className="text-xs font-semibold text-gray-400">
+                    Animation?
+                  </label>
+                  <input 
+                    type="checkbox"
+                    checked={asset.animationEnabled ?? false}
+                    onChange={(e) => u({animationEnabled: e.target.checked}) }
+                  />
+                </div>
+              }
+            </div>
             <Row>
               <NumInput
                 label="CX"
@@ -268,7 +286,21 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
 
       {asset.type === 'oscillating' && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Oscillation Range (°)</p>
+          <div className='flex justify-between align-center'>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Oscillation Range (°)
+            </p>
+            <div className='flex gap-2'>
+              <label className="text-xs font-semibold text-gray-400">
+                Animation?
+              </label>
+              <input 
+                type="checkbox"
+                checked={asset.animationEnabled ?? false}
+                onChange={(e) => u({animationEnabled: e.target.checked})}
+              />
+            </div>
+          </div>
           <Row>
             <NumInput
               label="Min θ (°)"
