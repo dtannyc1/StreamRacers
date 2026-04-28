@@ -105,6 +105,47 @@ export const createSEOverlay = async (token, channelId) => {
   return res.json()
 }
 
+export const checkSELeaderboardOVerlay = async (token, channelId, overlayId) => {
+  const res = await fetch(`${OVERLAY_BASE_URL}/${channelId}/${overlayId}`, {
+    method: 'GET',
+    headers: {
+      ...authHeaders(token),
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!res.ok) {
+    return null
+  }
+
+  return overlayId
+}
+
+export const createSELeaderboardOverlay = async (token, channelId) => {
+  const overlay = structuredClone(CLEAN_LEADERBOARD_OVERLAY)
+  const currentOrigin = window.location.origin;
+  let scriptTag = `<script type=\"module\" src=\"${currentOrigin}/StreamRacers/RaceHistory.js\"></script>`
+  if (currentOrigin.includes('onrender.com')) {
+    scriptTag = `<script type=\"module\" src=\"${currentOrigin}/RaceHistory.js\"></script>`
+  }
+  overlay.channel = channelId
+  overlay.widgets[0].variables.html = scriptTag + " \n\n<div id=\"refresh-flash\"></div>\n<div id=\"overlay\">\n  <div id=\"panels\"></div>\n</div>"
+  const res = await fetch(`${OVERLAY_BASE_URL}/${channelId}`, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(token),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(overlay),
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to create a new overlay (${res.status})`)
+  }
+
+  return res.json()
+}
+
 // ── Convenience helpers ───────────────────────────────────────────────────────
 
 export const getRacersAndTracks = async (token, channelId, hardReset = false) => {

@@ -3,13 +3,21 @@ import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 
-const Step = ({ number, title, children, image }) => (
+const Step = ({ number, title, children, image, link }) => (
   <div className="flex gap-2">
     <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-bold flex items-center justify-center">
       {number}
     </div>
     <div className="ml-4 flex flex-col gap-3">
-      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <h3 className="text-base font-semibold text-white">
+        {title}
+        {link && (
+          <>
+            {" from "}
+            <a href={link} target="_blank" className="text-purple-400 hover:text-purple-300">StreamElements</a>
+          </>
+        )}
+      </h3>
       <p className="text-sm text-gray-400 leading-relaxed">{children}</p>
       {image && (
         <div className="rounded-lg border border-gray-700 overflow-hidden bg-gray-800">
@@ -22,7 +30,11 @@ const Step = ({ number, title, children, image }) => (
 
 const Instructions = () => {
   const [copied, setCopied] = useState(false)
-  const { validOverlayId, createOverlay } = useKVStore()
+  const { validOverlayId, 
+          createOverlay, 
+          validLeaderboardOverlayId, 
+          createLeaderboardOverlay 
+        } = useKVStore()
 
   const currentOrigin = window.location.origin;
   const scriptTag = `<script type="module" src="${currentOrigin}/StreamRacers/Game.js"></script>`
@@ -47,40 +59,77 @@ const Instructions = () => {
         Follow these steps to add StreamRacers as an overlay on your Twitch stream.
         The whole process takes about 5 minutes.
         </p>
-        { !validOverlayId ? 
-          <div
-            className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
-          >
-            <p className="text-white-400">
-            Either walk through these steps or press this button to skip to Step 9.
-            </p>
-            <button
-              className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
-              onClick={() => createOverlay()}
+        <div className="flex gap-2">
+          { !validOverlayId ? 
+            <div
+              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
             >
-              🪄 Create overlay
-            </button>
-          </div> : 
-          <div
-            className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
-          >
-            <p className="text-white-400">
-            You have an overlay for the game 🥳
-            </p>
-            <p className="text-white-400 mb-2">
-            Click the button below to go to your editor and continue with Step 9.
-            </p>
-            <button
-              className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
-              onClick={() => {
-                let url = `https://streamelements.com/overlay/${validOverlayId}/editor?er=1`
-                window.open(url, '_blank')
-              }}
+              <p className="text-white-400">
+              Either walk through these steps or press this button to skip to Step 9.
+              </p>
+              <button
+                className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+                onClick={() => createOverlay()}
+              >
+                🪄 Create overlay
+              </button>
+            </div> : 
+            <div
+              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
             >
-              Go to Overlay Editor
-            </button>
-          </div>
-        }
+              <p className="text-white-400">
+              You have an overlay for the game 🥳
+              </p>
+              <p className="text-white-400 mb-2 text-center">
+              Click the button below to go to your editor and continue with Step 9.
+              </p>
+              <button
+                className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+                onClick={() => {
+                  let url = `https://streamelements.com/overlay/${validOverlayId}/editor?er=1`
+                  window.open(url, '_blank')
+                }}
+              >
+                Go to Overlay Editor
+              </button>
+            </div>
+          }
+
+          { !validLeaderboardOverlayId ? 
+            <div
+              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
+            >
+              <p className="text-white-400">
+                Press this button to skip to Step 9.
+              </p>
+              <button
+                className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+                onClick={() => createLeaderboardOverlay()}
+              >
+                🪄 Create Leaderboard Overlay
+              </button>
+            </div> : 
+            <div
+              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
+            >
+              <p className="text-white-400">
+              You have an overlay for the Leaderboard 🥳
+              </p>
+              <p className="text-white-400 mb-2 text-center">
+              Click the button below to go to your editor and continue with Step 9.
+              </p>
+              <button
+                className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+                onClick={() => {
+                  let url = `https://streamelements.com/overlay/${validLeaderboardOverlayId}/editor?er=1`
+                  window.open(url, '_blank')
+                }}
+              >
+                Go to Leaderboard Overlay Editor
+              </button>
+            </div>
+          }
+        </div>
       </div>
 
       <div className="flex flex-col gap-8">
@@ -145,7 +194,10 @@ const Instructions = () => {
           {/* image placeholder */}
         </Step>
 
-        <Step number={9} title="Get your browser source link">
+        <Step number={9} 
+          title={`Get your browser source link`}
+          link={validOverlayId ? `https://streamelements.com/overlay/${validOverlayId}/editor?er=1` : ''}
+        >
           <span className="text-white font-medium">Copy</span> the overlay URL by clicking the <span className="text-white font-medium">🔗</span> icon at top of the overlay screen.  
           {/* image placeholder */}
         </Step>
