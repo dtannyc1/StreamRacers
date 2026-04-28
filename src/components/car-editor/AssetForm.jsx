@@ -335,7 +335,19 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
             <input
               type="checkbox"
               checked={asset.colorRemap?.enabled ?? false}
-              onChange={(e) => u({ colorRemap: { ...asset.colorRemap, enabled: e.target.checked }, remapEnabled: e.target.checked })}
+              onChange={(e) => {
+                u({ 
+                  colorRemap: { ...asset.colorRemap, enabled: e.target.checked }, 
+                  remapEnabled: e.target.checked,
+                })
+                loadAssetImage(asset, null)
+                .then(({img: loadedImg, frames}) => {
+                  const hex = asset.colorRemap.sourceColor
+                  u({ 
+                    remappedImg: remapImageColor(loadedImg, hex, getComplementaryColor(hex), asset.colorRemap.remapTolerance ?? 10)
+                  })
+                })
+              }}
               className="w-4 h-4 accent-purple-500"
             />
             <span className="text-sm text-white">Enable color remapping</span>
@@ -350,11 +362,13 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
                   type="checkbox"
                   checked={asset.remapEnabled ?? false}
                   onChange={(e) => {
+                    u({
+                      remapEnabled: e.target.checked,
+                    })
                     loadAssetImage(asset, null)
                     .then(({img: loadedImg, frames}) => {
                       const hex = asset.colorRemap.sourceColor
                       u({
-                        remapEnabled: !e.target.checked,
                         remappedImg: remapImageColor(loadedImg, hex, getComplementaryColor(hex), asset.colorRemap.remapTolerance ?? 10)
                       })
                     })

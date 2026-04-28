@@ -101,21 +101,12 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 # Notes for next changes:
 
 ## Leaderboard
-- Leaderboard during race should be configurable
-  - Make sure to import fonts when necessary!
-
-- Race History overlay
-  - Any kvstore update actually creates an event that's readable by SE
-  - Just have a kvstore update listener which will change the display instantly
+- Import fonts when necessary!
 
 ## Racer Editor
 - Add drag and drop to change layer position
 
 - Add drag and drop for image assets
-
-- Add more options for color changer
-  - use a slider to adjust tolerance. Swap to the complimentary color to show the effect. 
-  - Make sure to undo the color swap when color picker is enabled
 
 - Add global vehicles
   - Allows for some vehicles to be used for all users
