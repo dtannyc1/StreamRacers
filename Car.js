@@ -96,10 +96,10 @@ export default class Car {
       if (!asset.colorRemap?.enabled || !asset.img || asset.type === 'avatar') return
       const img = asset.img
       if (img.complete && img.naturalWidth) {
-        asset.remappedImg = remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
+        asset.remappedImg = remapImageColor(img, asset.colorRemap.sourceColor, displayColor, asset.colorRemap.remapTolerance ?? 10)
       } else {
         img.onload = () => {
-          asset.remappedImg = remapImageColor(img, asset.colorRemap.sourceColor, displayColor)
+          asset.remappedImg = remapImageColor(img, asset.colorRemap.sourceColor, displayColor, asset.colorRemap.remapTolerance ?? 10)
         }
       }
     })
