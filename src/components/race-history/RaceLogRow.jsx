@@ -1,4 +1,4 @@
-import { parseDate, calcPoints, formatShortDate } from "../../lib/leaderboardFilters"
+import { parseDate, calcPoints, formatShortDate } from "../../shared/leaderboardFilters"
 
 export default function RaceLogRow({ race, username }) {
   const pos = race.racers.findIndex((n) => n.toLowerCase() === username.toLowerCase()) + 1

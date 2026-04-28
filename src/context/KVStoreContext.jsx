@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { getRacersAndTracks, setJWTToken, setRacers, setTracks, getRaceHistory,
-  getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay } from '../lib/streamelements'
+  getRaceSettings, setRaceSettings, checkSEOVerlay, createSEOverlay, 
+  checkSELeaderboardOVerlay, createSELeaderboardOverlay,
+  setRaceHistoryOverlaySettings, 
+  getRaceHistoryOverlaySettings} from '../lib/streamelements'
 import { useAuth } from './AuthContext'
 
 const KVStoreContext = createContext(null)
@@ -12,7 +15,9 @@ export const KVStoreProvider = ({ children }) => {
   const [racers, setRacersState] = useState(null)
   const [tracks, setTracksState] = useState(null)
   const [raceSettings, setRaceSettingsState] = useState(null)
+  const [raceHistorySettings, setRaceHistorySettingsState] = useState(null)
   const [validOverlayId, setValidOverlayId] = useState(null)
+  const [validLeaderboardOverlayId, setValidLeaderboardOverlayId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -24,10 +29,12 @@ export const KVStoreProvider = ({ children }) => {
       setError(null)
       try {
         const { racers, tracks } = await getRacersAndTracks(token, channelId)
-        let settings
+        let settings, raceHistorySettings
         try {
           settings = await getRaceSettings(token, channelId)
           if (Object.keys(settings).length === 0) throw new Error('Empty settings')
+
+          raceHistorySettings = await getRaceHistoryOverlaySettings(token, channelId)
         } catch {
           settings = DEFAULT_RACE_SETTINGS
           await setRaceSettings(token, channelId, DEFAULT_RACE_SETTINGS)
@@ -38,9 +45,13 @@ export const KVStoreProvider = ({ children }) => {
         if (settings.lastOverlayId) {
           setValidOverlayId(await checkSEOVerlay(token, channelId, settings.lastOverlayId))
         }
+        if (settings.lastLeaderboardOverlayId) {
+          setValidLeaderboardOverlayId(await checkSEOVerlay(token, channelId, settings.lastLeaderboardOverlayId))
+        }
         setRacersState(racers)
         setTracksState(tracks)
         setRaceSettingsState(settings ?? DEFAULT_RACE_SETTINGS)
+        setRaceHistorySettingsState(raceHistorySettings ?? {})
       } catch (err) {
         setError(err.message)
       } finally {
@@ -84,12 +95,44 @@ export const KVStoreProvider = ({ children }) => {
     }
   }
 
+  const updateRaceHistoryOverlaySettings = async (value) => {
+    setError(null)
+    try {
+      let diff = false
+      for (let [key, val] of Object.entries(value)) {
+        if (val !== raceHistorySettings[key]) {
+          diff = true
+        }
+      }
+
+      if (diff){
+        await setRaceHistoryOverlaySettings(token, channelId, value)
+        setRaceHistorySettingsState(value)
+      }
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
+  }
+
   const createOverlay = async () => {
     try { 
       let output = await createSEOverlay(token, channelId)
       setRaceSettings(token, channelId, {...raceSettings, 'lastOverlayId': output?._id})
       setRaceSettingsState({...raceSettings, 'lastOverlayId': output?._id})
       setValidOverlayId(output?._id)
+      return output?._id
+    } catch (err) {
+      throw err
+    }
+  }
+
+  const createLeaderboardOverlay = async () => {
+    try { 
+      let output = await createSELeaderboardOverlay(token, channelId)
+      setRaceSettings(token, channelId, {...raceSettings, 'lastLeaderboardOverlayId': output?._id})
+      setRaceSettingsState({...raceSettings, 'lastLeaderboardOverlayId': output?._id})
+      setValidLeaderboardOverlayId(output?._id)
       return output?._id
     } catch (err) {
       throw err
@@ -129,9 +172,10 @@ export const KVStoreProvider = ({ children }) => {
   return (
     <KVStoreContext.Provider value={{ 
                                       racers, tracks, raceSettings, 
-                                      loading, error, validOverlayId, 
+                                      loading, error, validOverlayId, validLeaderboardOverlayId,
                                       updateRacers, updateTracks, updateRaceSettings, 
-                                      hardResetKVStore, createOverlay, fetchRaceHistory
+                                      hardResetKVStore, createOverlay, createLeaderboardOverlay, 
+                                      fetchRaceHistory, updateRaceHistoryOverlaySettings
     }}>
       {children}
     </KVStoreContext.Provider>

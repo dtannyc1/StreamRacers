@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react"
-import { filterRaces, calcPoints, parseDate } from "../../lib/leaderboardFilters"
+import { filterRaces, calcPoints, parseDate } from "../../shared/leaderboardFilters"
 import StatCard from "./StatCard"
 import RaceLogRow from "./RaceLogRow"
 import TabBar from "./TabBar"

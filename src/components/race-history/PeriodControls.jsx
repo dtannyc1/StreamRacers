@@ -6,7 +6,7 @@ import {
   getAvailableDays,
   getAvailableMonths,
   getAvailableYears,
-} from "../../lib/leaderboardFilters"
+} from "../../shared/leaderboardFilters"
 
 const SPLIT_OPTS = ["day", "month", "year", "alltime"]
 const optLabel   = (o) => o === "alltime" ? "All time" : o.charAt(0).toUpperCase() + o.slice(1)

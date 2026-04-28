@@ -105,6 +105,8 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - Make sure to import fonts when necessary!
 
 - Race History overlay
+  - Any kvstore update actually creates an event that's readable by SE
+  - Just have a kvstore update listener which will change the display instantly
 
 ## Racer Editor
 - Add drag and drop to change layer position

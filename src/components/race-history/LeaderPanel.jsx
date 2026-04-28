@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { buildStats, sortedLeaders } from "../../lib/leaderboardFilters"
+import { buildStats, sortedLeaders } from "../../shared/leaderboardFilters"
 import { RacerRow } from "./RacerRow"
 
 export default function LeaderPanel({ raceSet, label, sub, onNameClick, mode }) {
