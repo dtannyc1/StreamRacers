@@ -108,6 +108,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     <div 
       className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2"
       onClick={() => handleDrawerClose()}
+      onTouchEnd={() => handleDrawerClose()}
     >
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
 

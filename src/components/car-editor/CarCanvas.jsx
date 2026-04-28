@@ -280,6 +280,7 @@ const CarCanvas = ({
   }, [CANVAS_W])
 
   const handleMouseDown = useCallback((e) => {
+    e.stopPropagation()
     if (!eyedropperAssetId) {
       const { x: clientX, y: clientY } = getClientCoords(e);
       const { x, y, scale } = getCanvasPos(clientX, clientY);
@@ -301,6 +302,7 @@ const CarCanvas = ({
   }, [onMouseDown, getCanvasPos, selectedAsset, eyedropperAssetId])
 
   const handleMouseMove = useCallback((e) => {
+    e.stopPropagation()
     if (!eyedropperAssetId) {
       const { x: clientX, y: clientY } = getClientCoords(e);
       const { x, y, scale } = getCanvasPos(clientX, clientY);
@@ -317,6 +319,7 @@ const CarCanvas = ({
   }, [onMouseMove, getCanvasPos, eyedropperAssetId])
 
   const handleMouseUp = useCallback((e) => {
+    e.stopPropagation()
     if (eyedropperAssetId) {
       const { x: clientX, y: clientY } = getClientCoords(e);
       const { x, y, scale } = getCanvasPos(clientX, clientY);
