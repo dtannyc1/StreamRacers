@@ -5,6 +5,8 @@ import { useCarEditor } from './useCarEditor'
 import CarCanvas from './CarCanvas'
 import AssetPanel from './AssetPanel'
 import { sanitizeCarData, sanitizeDeep, validateCar } from '../../lib/sanitize'
+import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
+import { loadAssetImage } from '../../shared/gifLoader'
 
 const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDefaultCar, onSaveDefault }) => {
   const { racers, updateRacers } = useKVStore()
@@ -75,13 +77,20 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     setEyedropperAssetId(assetId)
   }
 
-  const handleEyedropperPick = (assetId, hex) => {
-    updateAsset(assetId, {
-      colorRemap: {
-        ...car.assets.find(a => a.id === assetId)?.colorRemap,
-        sourceColor: hex,
-      }
-    })
+  const handleEyedropperPick = async (assetId, hex) => {
+    const asset = car.assets.find(a => a.id === assetId);
+    const {img: loadedImg, frames} = await loadAssetImage(asset, null)
+
+    if (asset) {
+      updateAsset(assetId, {
+        colorRemap: {
+          ...asset.colorRemap,
+          sourceColor: hex,
+        },
+        img: loadedImg,
+        remappedImg: remapImageColor(loadedImg, hex, getComplementaryColor(hex), asset.colorRemap.remapTolerance ?? 10)
+      })
+    }
     setEyedropperAssetId(null)
   }
 

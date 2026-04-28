@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import UploadButton from '../UploadButton'
+import { loadAssetImage } from '../../shared/gifLoader'
+import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
 
 const DebouncedUrlInput = ({ value, onChange, disabled }) => {
   const [local, setLocal] = useState(value)
@@ -333,14 +335,34 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
             <input
               type="checkbox"
               checked={asset.colorRemap?.enabled ?? false}
-              onChange={(e) => u({ colorRemap: { ...asset.colorRemap, enabled: e.target.checked } })}
+              onChange={(e) => u({ colorRemap: { ...asset.colorRemap, enabled: e.target.checked }, remapEnabled: e.target.checked })}
               className="w-4 h-4 accent-purple-500"
             />
             <span className="text-sm text-white">Enable color remapping</span>
           </label>
           {asset.colorRemap?.enabled && (
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-gray-400">Source color to replace</span>
+              <div className="flex justify-between align-center">
+                <span className="text-xs text-gray-400">Source color to replace</span>
+                <div className="flex gap-2">
+                <label className="text-xs text-gray-400">Preview?</label>
+                <input 
+                  type="checkbox"
+                  checked={asset.remapEnabled ?? false}
+                  onChange={(e) => {
+                    loadAssetImage(asset, null)
+                    .then(({img: loadedImg, frames}) => {
+                      const hex = asset.colorRemap.sourceColor
+                      u({
+                        remapEnabled: !e.target.checked,
+                        remappedImg: remapImageColor(loadedImg, hex, getComplementaryColor(hex), asset.colorRemap.remapTolerance ?? 10)
+                      })
+                    })
+                    
+                  }}
+                />
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <div
                   className="w-8 h-8 rounded border border-gray-600 flex-shrink-0"
@@ -355,6 +377,22 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
                 <span className="text-xs text-gray-500 font-mono">
                   {asset.colorRemap?.sourceColor ?? '#FF001A'}
                 </span>
+              </div>
+              <div>
+                <SliderInput
+                  label="Tolerance"
+                  value={asset.colorRemap?.remapTolerance ?? 10}
+                  min={0}
+                  max={50}
+                  onChange={async (v) => {
+                    const {img: loadedImg, frames} = await loadAssetImage(asset, null)
+                    const hex = asset.colorRemap.sourceColor
+                    u({ 
+                      colorRemap: {...asset.colorRemap, remapTolerance: v},
+                      remappedImg: remapImageColor(loadedImg, hex, getComplementaryColor(hex), v)
+                    })
+                  }}
+                />
               </div>
             </div>
           )}

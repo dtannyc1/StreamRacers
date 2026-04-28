@@ -218,7 +218,10 @@ const CarCanvas = ({
         const isSelected = asset.id === selectedId
         resetAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
         const curAsset = assetsRef.current[asset.id]
-        const drawable = resolveDrawable(curAsset, timestamp)
+        const drawable = resolveDrawable(
+          {...curAsset, 
+            remappedImg: (asset.remapEnabled && !eyedropperAssetId) ? asset.remappedImg : null
+          }, timestamp)
         drawAsset(ctx, {...asset, cur_theta: (isSelected && !asset.animationEnabled) ? 0 : (asset.cur_theta ?? 0)}, drawable)
 
         if (isSelected) {
@@ -254,7 +257,7 @@ const CarCanvas = ({
 
     animRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(animRef.current)
-  }, [assets, selectedId, selectedAsset])
+  }, [assets, selectedId, selectedAsset, eyedropperAssetId])
 
   const getCanvasPos = useCallback((e) => {
     const rect = canvasRef.current.getBoundingClientRect()
