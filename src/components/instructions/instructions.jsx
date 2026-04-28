@@ -62,9 +62,9 @@ const Instructions = () => {
         <div className="flex gap-2">
           { !validOverlayId ? 
             <div
-              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
+              className="grow w-full rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
             >
-              <p className="text-white-400">
+              <p className="text-white-400 text-center">
               Either walk through these steps or press this button to skip to Step 9.
               </p>
               <button
@@ -75,7 +75,7 @@ const Instructions = () => {
               </button>
             </div> : 
             <div
-              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
+              className="grow w-full rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
             >
               <p className="text-white-400">
               You have an overlay for the game 🥳
@@ -97,10 +97,10 @@ const Instructions = () => {
 
           { !validLeaderboardOverlayId ? 
             <div
-              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
+              className="grow w-full rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center gap-2"
             >
-              <p className="text-white-400">
-                Press this button to skip to Step 9.
+              <p className="text-white-400 text-center">
+                I haven't written instructions for the Leaderboard overlay but here's a button.
               </p>
               <button
                 className="w-fit rounded-lg bg-purple-600 px-4 py-2 mb-1 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
@@ -110,7 +110,7 @@ const Instructions = () => {
               </button>
             </div> : 
             <div
-              className="rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
+              className="grow w-full rounded-lg bg-purple-900/30 border border-purple-700 px-5 py-3 flex flex-col items-center "
             >
               <p className="text-white-400">
               You have an overlay for the Leaderboard 🥳
