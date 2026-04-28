@@ -259,12 +259,23 @@ const CarCanvas = ({
     return () => cancelAnimationFrame(animRef.current)
   }, [assets, selectedId, selectedAsset, eyedropperAssetId])
 
+  const getCoords = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+    }
+    return { x: e.clientX, y: e.clientY }
+  }
+
   const getCanvasPos = useCallback((e) => {
     const rect = canvasRef.current.getBoundingClientRect()
     const scale = CANVAS_W / rect.width
+    let data = getCoords(e)
     return {
-      x: (e.clientX - rect.left) * scale,
-      y: (e.clientY - rect.top) * scale,
+      x: (data.x - rect.left) * scale,
+      y: (data.y - rect.top) * scale,
       scale,
     }
   }, [])
@@ -359,6 +370,9 @@ const CarCanvas = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onTouchStart={handleMouseDown}
+      onTouchMove={handleMouseMove}
+      onTouchEnd={handleMouseUp}
       className={`w-full h-auto rounded-lg border border-gray-700
                   max-w-full object-contain
                   max-h-[calc(100dvh-1rem-42px-1.5rem)]

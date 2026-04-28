@@ -137,8 +137,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 ## Settings
 - Add more default settings
   - Enable/disable boost functionality (behind feature flag for now)
-  
-- Add alignment image (aka screenshot of stream). Should always be rendered first and semi-transparent in track editor
 
 ## Home Page
 - Add animation to home page with sample cars. demo should swap between maps/cars randomly

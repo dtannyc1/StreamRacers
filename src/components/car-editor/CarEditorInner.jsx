@@ -142,7 +142,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_280px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
           <div
             className="h-fit"
             onClick={(e) => e.stopPropagation()}
