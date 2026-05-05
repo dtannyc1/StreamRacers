@@ -66,7 +66,7 @@ const Dashboard = () => {
                       max-h-[calc(100dvh-1rem-66px-39px-3rem)]
                       sm:max-h-[calc(100dvh-2rem-66px-39px-3rem)] 
                       xl:max-h-[calc(100dvh-4rem-66px-39px-3rem)]
-                      w-[calc(100dvw-var(--spacing)*2)]
+                      w-[min(calc(100dvw-var(--spacing)*2),var(--container-4xl+var(--spacing)*2))]
                     "
         >
           {activeTab === 'Vehicles' && <RacerList />}
