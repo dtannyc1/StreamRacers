@@ -228,8 +228,12 @@ const TrackCanvas = ({
   useEffect(() => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(convertToStyleSheet(track.styleSheet))
+    const sheet2 = new CSSStyleSheet();
+    sheet2.replaceSync(`
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap');
+      `)
 
-    document.adoptedStyleSheets = [sheet]
+    document.adoptedStyleSheets = [sheet2, sheet]
   }, [track.styleSheet])
 
   // draw loop
