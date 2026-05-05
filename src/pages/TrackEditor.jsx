@@ -258,7 +258,7 @@ const TrackEditor = ({ mode }) => {
         </div>
 
         {/* Main layout */}
-        <div className="grid grid-cols-[1fr_320px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6">
 
           {/* Left — canvas + road */}
           <div className="flex flex-col gap-4">

@@ -61,7 +61,7 @@ export const drawAllAssets = (ctx, assets, now) => {
   })
 }
 
-export const remapImageColor = (img, sourceHex, targetHex) => {
+export const remapImageColor = (img, sourceHex, targetHex, tolerance = 10) => {
   const offscreen = document.createElement('canvas')
   offscreen.width = img.naturalWidth || img.width
   offscreen.height = img.naturalHeight || img.height
@@ -78,16 +78,15 @@ export const remapImageColor = (img, sourceHex, targetHex) => {
   const tg = parseInt(targetHex.slice(3, 5), 16)
   const tb = parseInt(targetHex.slice(5, 7), 16)
 
-  const tolerance = 10
   for (let i = 0; i < data.length; i += 4) {
     if (
       Math.abs(data[i] - sr) <= tolerance &&
       Math.abs(data[i + 1] - sg) <= tolerance &&
       Math.abs(data[i + 2] - sb) <= tolerance
     ) {
-      data[i] = tr
-      data[i + 1] = tg
-      data[i + 2] = tb
+      data[i] = tr + data[i] - sr
+      data[i + 1] = tg + data[i + 1] - sg
+      data[i + 2] = tb + data[i + 2] - sb
     }
   }
 
@@ -95,6 +94,25 @@ export const remapImageColor = (img, sourceHex, targetHex) => {
   const remapped = new Image()
   remapped.src = offscreen.toDataURL()
   return remapped
+}
+
+export const getComplementaryColor = (hex) => {
+    // 1. Remove the hash symbol if present
+    const cleanHex = hex.replace('#', '');
+
+    // 2. Parse the r, g, b values
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+
+    // 3. Invert the values by subtracting from 255
+    // 4. Convert back to hex and pad with '0' to ensure 2 digits
+    const rComp = (255 - r).toString(16).padStart(2, '0');
+    const gComp = (255 - g).toString(16).padStart(2, '0');
+    const bComp = (255 - b).toString(16).padStart(2, '0');
+
+    // 5. Combine and return
+    return `#${rComp}${gComp}${bComp}`;
 }
 
 export const convertToStyleSheet = (styleSheet) => {

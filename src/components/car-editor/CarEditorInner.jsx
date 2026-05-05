@@ -5,6 +5,8 @@ import { useCarEditor } from './useCarEditor'
 import CarCanvas from './CarCanvas'
 import AssetPanel from './AssetPanel'
 import { sanitizeCarData, sanitizeDeep, validateCar } from '../../lib/sanitize'
+import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
+import { loadAssetImage } from '../../shared/gifLoader'
 import { trackEvent } from '../../lib/analytics'
 import { useAuth } from '../../context/AuthContext'
 
@@ -90,17 +92,29 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     setEyedropperAssetId(assetId)
   }
 
-  const handleEyedropperPick = (assetId, hex) => {
-    updateAsset(assetId, {
-      colorRemap: {
-        ...car.assets.find(a => a.id === assetId)?.colorRemap,
-        sourceColor: hex,
-      }
-    })
+  const handleEyedropperPick = async (assetId, hex) => {
+    const asset = car.assets.find(a => a.id === assetId);
+    const {img: loadedImg, frames} = await loadAssetImage(asset, null)
+
+    if (asset) {
+      updateAsset(assetId, {
+        colorRemap: {
+          ...asset.colorRemap,
+          sourceColor: hex,
+        },
+        img: loadedImg,
+        remappedImg: remapImageColor(loadedImg, hex, getComplementaryColor(hex), asset.colorRemap.remapTolerance ?? 10)
+      })
+    }
     setEyedropperAssetId(null)
   }
 
   const handleSelectAsset = (assetId) => {
+    if (!assetId) {
+      setSelectedId(null)
+      setDrawerOpen(false)
+      return
+    }
     setSelectedId(assetId)
     setDrawerOpen(true)
   }
@@ -112,24 +126,24 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
 
   return (
     <div 
-      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2"
-      onClick={() => handleDrawerClose()}
+      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2 touch-none"
+      onPointerDown={() => handleDrawerClose()}
     >
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              ← Back
-            </button>
+        <div className="flex items-center justify-between max-w-[100dvw] gap-x-4">
+          <button
+            onPointerDown={() => navigate('/dashboard')}
+            className="text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            ← Back
+          </button>
+          <div className="flex items-center gap-x-4 shrink grow flex-wrap">
             <input
               type="text"
               value={car.name}
               onChange={(e) => setCarName(e.target.value)}
-              className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-lg font-semibold text-white focus:outline-none focus:border-purple-500"
+              className="shrink min-w-0 w-fit rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-lg font-semibold text-white focus:outline-none focus:border-purple-500"
             />
             {username && (
               <span className="text-sm text-gray-400">for <span className="text-purple-400">{username}</span></span>
@@ -140,7 +154,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
                 <p className="text-sm text-red-400">{saveError}</p>
             )}
             <button
-                onClick={handleSave}
+                onPointerDown={handleSave}
                 className="rounded-lg cursor-pointer bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
             >
                 Save Car
@@ -148,10 +162,9 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_280px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 touch-none">
           <div
-            className="h-fit"
-            onClick={(e) => e.stopPropagation()}
+            className="h-fit touch-none"
           >
             <CarCanvas
               assets={car.assets}
@@ -169,8 +182,19 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             />
           </div>
           <div 
-            className="flex flex-col gap-6 -mr-2 relative"
-            onClick={(e) => e.stopPropagation()}
+            className="flex flex-col gap-6 -mr-2 relative touch-none"
+            onPointerDown={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+            }}
+            onPointerMove={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+            }}
+            onPointerUp={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+            }}
           >
             <AssetPanel
               assets={car.assets}

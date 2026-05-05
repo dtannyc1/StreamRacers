@@ -228,8 +228,12 @@ const TrackCanvas = ({
   useEffect(() => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(convertToStyleSheet(track.styleSheet))
+    const sheet2 = new CSSStyleSheet();
+    sheet2.replaceSync(`
+      @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap');
+      `)
 
-    document.adoptedStyleSheets = [sheet]
+    document.adoptedStyleSheets = [sheet2, sheet]
   }, [track.styleSheet])
 
   // draw loop
@@ -393,13 +397,25 @@ const TrackCanvas = ({
     const rect = canvasRef.current.getBoundingClientRect()
     const scaleX = CANVAS_W / rect.width
     const scaleY = CANVAS_H / rect.height
+
+    let rawData = {};
+    if (e.touches && e.touches.length > 0) {
+      rawData = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      rawData =  { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+    }
+    rawData = { x: e.clientX, y: e.clientY }
+
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: (rawData.x - rect.left) * scaleX,
+      y: (rawData.y - rect.top) * scaleY,
     }
   }, [])
 
   const handleMouseDown = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
     const { x, y } = getCanvasPos(e)
     dragStartPos.current = { x, y }
     didDrag.current = false
@@ -441,6 +457,8 @@ const TrackCanvas = ({
   }, [getCanvasPos])
 
   const handleMouseMove = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
     if (!dragState.current) return
     const { x, y } = getCanvasPos(e)
 
@@ -467,6 +485,8 @@ const TrackCanvas = ({
   }, [getCanvasPos, onUpdateRacingLine, onUpdateModifier])
 
   const handleMouseUp = useCallback(() => {
+    e.stopPropagation()
+    e.preventDefault()
     dragState.current = null
     dragStartPos.current = null
     didDrag.current = false
@@ -494,11 +514,11 @@ const TrackCanvas = ({
         width={CANVAS_W}
         height={CANVAS_H}
         style={{ width: '100%', height: '100%' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className={`block ${isLineEditing ? 'cursor-crosshair' : ''}`}
+        onPointerDown={handleMouseDown}
+        onPointerMove={handleMouseMove}
+        onPointerUp={handleMouseUp}
+        onPointerLeave={handleMouseUp}
+        className={`block touch-none ${isLineEditing ? 'cursor-crosshair' : ''}`}
       />
 
       {
