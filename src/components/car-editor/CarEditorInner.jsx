@@ -95,6 +95,11 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
   }
 
   const handleSelectAsset = (assetId) => {
+    if (!assetId) {
+      setSelectedId(null)
+      setDrawerOpen(false)
+      return
+    }
     setSelectedId(assetId)
     setDrawerOpen(true)
   }
