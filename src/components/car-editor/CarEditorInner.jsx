@@ -123,7 +123,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
           >
             ← Back
           </button>
-          <div className="flex items-center gap-x-4 shrink flex-wrap">
+          <div className="flex items-center gap-x-4 shrink grow flex-wrap">
             <input
               type="text"
               value={car.name}
