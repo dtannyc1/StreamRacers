@@ -387,6 +387,7 @@ const CarCanvas = ({
                   max-h-[calc(100dvh-1rem-42px-1.5rem)]
                   sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
                   xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]
+                  touch-none
                   ${eyedropperAssetId ? 'cursor-crosshair' : ''}`}
     />
   )

@@ -508,7 +508,7 @@ const TrackCanvas = ({
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
         onPointerLeave={handleMouseUp}
-        className={`block ${isLineEditing ? 'cursor-crosshair' : ''}`}
+        className={`block touch-none ${isLineEditing ? 'cursor-crosshair' : ''}`}
       />
 
       {
