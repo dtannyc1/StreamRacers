@@ -383,7 +383,7 @@ const CarCanvas = ({
       onTouchMove={handleMouseMove}
       onTouchEnd={handleMouseUp}
       className={`w-full h-auto rounded-lg border border-gray-700
-                  max-w-full object-contain touch-action-none
+                  max-w-full object-contain
                   max-h-[calc(100dvh-1rem-42px-1.5rem)]
                   sm:max-h-[calc(100dvh-2rem-42px-1.5rem)] 
                   xl:max-h-[calc(100dvh-4rem-42px-1.5rem)]

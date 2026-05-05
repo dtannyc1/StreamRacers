@@ -106,7 +106,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
 
   return (
     <div 
-      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2 touch-action-none"
+      className="min-h-screen bg-gray-900 text-white xl:p-8 sm:p-4 p-2 touch-none"
       onPointerDown={() => handleDrawerClose()}
     >
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
@@ -142,21 +142,9 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 touch-action-none">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 touch-none">
           <div
-            className="h-fit touch-action-none"
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-            }}
-            onPointerMove={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-            }}
-            onPointerUp={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-            }}
+            className="h-fit touch-none"
           >
             <CarCanvas
               assets={car.assets}
@@ -174,7 +162,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             />
           </div>
           <div 
-            className="flex flex-col gap-6 -mr-2 relative touch-action-none"
+            className="flex flex-col gap-6 -mr-2 relative touch-none"
             onPointerDown={(e) => {
               e.stopPropagation()
               e.preventDefault()

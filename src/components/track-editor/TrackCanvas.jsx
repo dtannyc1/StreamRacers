@@ -410,6 +410,8 @@ const TrackCanvas = ({
   }, [])
 
   const handleMouseDown = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
     const { x, y } = getCanvasPos(e)
     dragStartPos.current = { x, y }
     didDrag.current = false
@@ -451,6 +453,8 @@ const TrackCanvas = ({
   }, [getCanvasPos])
 
   const handleMouseMove = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
     if (!dragState.current) return
     const { x, y } = getCanvasPos(e)
 
@@ -477,6 +481,8 @@ const TrackCanvas = ({
   }, [getCanvasPos, onUpdateRacingLine, onUpdateModifier])
 
   const handleMouseUp = useCallback(() => {
+    e.stopPropagation()
+    e.preventDefault()
     dragState.current = null
     dragStartPos.current = null
     didDrag.current = false
