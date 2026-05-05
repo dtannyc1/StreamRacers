@@ -100,9 +100,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
-## Leaderboard
-- Import fonts when necessary!
-
 ## Racer Editor
 - Add drag and drop to change layer position
 
@@ -121,6 +118,7 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - make sure Game wraps this function in a try/catch
   - ensure that even converting it into a function is wrapped in a try/catch
   - ensure that this feature is behind a feature flag for devs only
+  
 - Add way to quickly enable/disable specific cars
 
 ## Track Editor

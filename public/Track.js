@@ -223,6 +223,12 @@ export default class Track {
       }
     }
 
+    if (this.activeBackgrounds.length <= 2) {
+      for (let k = 0; k < 3; k++) {
+        this._addBackgroundItem(false, cameraLoc, canvasWidth)
+      }
+    }
+
     const fgRemove = this.activeForegrounds
       .map((item, i) => item.x + cameraLoc[0] < (-Math.abs(item.w ?? 400) - 100) ? i : -1)
       .filter(i => i >= 0)
