@@ -111,19 +111,19 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     >
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onPointerDown={() => navigate('/dashboard')}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              ← Back
-            </button>
+        <div className="flex items-center justify-between max-w-[100dvw] gap-x-4">
+          <button
+            onPointerDown={() => navigate('/dashboard')}
+            className="text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            ← Back
+          </button>
+          <div className="flex items-center gap-x-4 shrink flex-wrap">
             <input
               type="text"
               value={car.name}
               onChange={(e) => setCarName(e.target.value)}
-              className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-lg font-semibold text-white focus:outline-none focus:border-purple-500"
+              className="shrink min-w-0 w-fit rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-lg font-semibold text-white focus:outline-none focus:border-purple-500"
             />
             {username && (
               <span className="text-sm text-gray-400">for <span className="text-purple-400">{username}</span></span>

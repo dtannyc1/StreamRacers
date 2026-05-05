@@ -30,7 +30,7 @@ const AssetDrawer = ({ isOpen, onClose, title, children }) => {
                   transform transition-transform duration-300 ease-in-out 
                   ${(isOpen && isFullyOpened) ? 'translate-x-0' : 'translate-x-full'}`}
         /* stopPropagation prevents clicks inside the drawer from triggering background elements */
-        onClick={(e) => {
+        onPointerDown={(e) => {
           if (isRendered) e.stopPropagation()
         }}
       >
@@ -39,7 +39,7 @@ const AssetDrawer = ({ isOpen, onClose, title, children }) => {
           {/* Header */}
           <div className="flex items-center p-2 border-b border-purple-600 bg-purple-900/30">
             <button 
-              onClick={onClose}
+              onPointerDown={onClose}
               className="mr-2 p-1 hover:bg-white/10 rounded-full transition-colors"
               aria-label="Back"
             >

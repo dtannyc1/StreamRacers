@@ -9,7 +9,7 @@ const ChannelProfile = ({ channel, onClear }) => {
     <div className="w-full flex justify-between items-center">
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate('/')}
+          onPointerDown={() => navigate('/')}
           className="text-sm text-white h-fit cursor-pointer hover:text-green-400 hover:bg-gray-700 transition-colors rounded-lg bg-gray-800 border border-gray-700 px-4 py-3"
         >
           ← Home
@@ -33,7 +33,7 @@ const ChannelProfile = ({ channel, onClear }) => {
       <div className="flex items-center gap-4">
         <BuyMeACoffee py={3} px={4}/>
         <button
-          onClick={onClear}
+          onPointerDown={onClear}
           className="text-sm text-white h-fit cursor-pointer hover:text-red-400 hover:bg-gray-700 transition-colors rounded-lg bg-gray-800 border border-gray-700 px-4 py-3"
         >
           Logout

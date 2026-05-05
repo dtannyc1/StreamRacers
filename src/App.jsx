@@ -30,7 +30,7 @@ const AppRoutes = () => {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center gap-4">
       <p className="text-sm text-gray-400">Loading...</p>
       <button
-        onClick={clearToken}
+        onPointerDown={clearToken}
         className="text-xs text-red-400 hover:text-red-300 transition-colors"
       >
         Logout

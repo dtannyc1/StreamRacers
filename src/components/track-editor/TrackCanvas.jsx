@@ -393,9 +393,19 @@ const TrackCanvas = ({
     const rect = canvasRef.current.getBoundingClientRect()
     const scaleX = CANVAS_W / rect.width
     const scaleY = CANVAS_H / rect.height
+
+    let rawData = {};
+    if (e.touches && e.touches.length > 0) {
+      rawData = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      rawData =  { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+    }
+    rawData = { x: e.clientX, y: e.clientY }
+
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: (rawData.x - rect.left) * scaleX,
+      y: (rawData.y - rect.top) * scaleY,
     }
   }, [])
 
@@ -494,10 +504,10 @@ const TrackCanvas = ({
         width={CANVAS_W}
         height={CANVAS_H}
         style={{ width: '100%', height: '100%' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onPointerDown={handleMouseDown}
+        onPointerMove={handleMouseMove}
+        onPointerUp={handleMouseUp}
+        onPointerLeave={handleMouseUp}
         className={`block ${isLineEditing ? 'cursor-crosshair' : ''}`}
       />
 
