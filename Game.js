@@ -132,7 +132,7 @@ class Game {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(convertToStyleSheet(this.track.styleSheet))
 
-      document.adoptedStyleSheets = [sheet]
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
     }
 
     const settings = await SE_API.store.get('raceSettings').catch(() => null)
@@ -163,6 +163,8 @@ class Game {
 
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(`
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap');
+
         .leaderboard {
           opacity: 0;
           position: absolute;
