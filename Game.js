@@ -160,11 +160,13 @@ class Game {
   }
 
   _addLeaderboardHTML() {
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap';
+    document.head.appendChild(fontLink);
 
     const sheet = new CSSStyleSheet();
-    sheet.replace(`
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap');
-
+    sheet.replaceSync(`
         .leaderboard {
           opacity: 0;
           position: absolute;
@@ -190,11 +192,7 @@ class Game {
         }
         .finished { color: cyan; }
         .hidden { display: none; }
-    `).then(() => {
-        console.log('Styles and fonts loaded successfully');
-    }).catch(err => {
-        console.error('Failed to load styles:', err);
-    })
+    `)
 
     document.adoptedStyleSheets = [sheet]
 
