@@ -162,7 +162,7 @@ class Game {
   _addLeaderboardHTML() {
 
     const sheet = new CSSStyleSheet();
-    sheet.replaceSync(`
+    sheet.replace(`
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap');
 
         .leaderboard {
@@ -190,7 +190,11 @@ class Game {
         }
         .finished { color: cyan; }
         .hidden { display: none; }
-    `)
+    `).then(() => {
+        console.log('Styles and fonts loaded successfully');
+    }).catch(err => {
+        console.error('Failed to load styles:', err);
+    })
 
     document.adoptedStyleSheets = [sheet]
 
