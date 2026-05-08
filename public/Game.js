@@ -160,11 +160,13 @@ class Game {
   }
 
   _addLeaderboardHTML() {
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap';
+    document.head.appendChild(fontLink);
 
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(`
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald&family=Roboto&display=swap');
-
         .leaderboard {
           opacity: 0;
           position: absolute;
