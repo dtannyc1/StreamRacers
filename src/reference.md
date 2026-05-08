@@ -100,10 +100,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
-## Game Changes
-- Import fonts where necessary. CSS import isn't working 
-  - Need to import the font directly in the game itself? how does drawing on canvas get fonts?
-
 ## Leaderboard Changes
 - Add setting to suppress your own name from leaderboards
   - Would need to adjust scoring behavior? Points would be modified if streamer is in top 10
