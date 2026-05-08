@@ -23,7 +23,16 @@ export const drawAsset = (ctx, asset, drawable) => {
 
   ctx.save()
 
-  if (asset.type === 'avatar') {
+  if (asset.type === 'custom') {
+    if (typeof asset.draw === 'function' && asset.isBroken !== true) {
+      try {
+        asset.draw(ctx, asset, drawable)
+      } catch (err) {
+        console.error("Custom draw function failed. Disabling for this asset.", err)
+        asset.isBroken = true 
+      }
+    }
+  } else if (asset.type === 'avatar') {
     if (angle !== 0) {
       ctx.translate(x + w / 2, y + h / 2)
       ctx.rotate(angle)

@@ -26,7 +26,16 @@ export const incrementCarAssetAngles = (car, dt, speed) => {
   car.assets.forEach(asset => {
     const radius = asset.radius ?? 1
 
-    if (asset.type === 'rotating') {
+    if (asset.type === 'custom') {
+      if (typeof asset.update === 'function' && asset.isBroken !== true) {
+        try {
+          asset.update(asset, dt, speed)
+        } catch (err) {
+          console.error("Custom update function failed. Disabling for this asset.", err)
+          asset.isBroken = true 
+        }
+      }
+    } else if (asset.type === 'rotating') {
       asset.theta = ((asset.theta ?? 0) + (speed / radius) * dt) % (2 * Math.PI)
 
     } else if (asset.type === 'oscillating') {

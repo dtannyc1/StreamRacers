@@ -15,4 +15,6 @@ export const CAR_ASSET_SCHEMA = {
   radius: 0,
   handleAngle: 0,
   colorRemap: { enabled: false, sourceColor: '#FF001A', remapTolerance: 10 },
+  draw: null,
+  update: null,
 }
