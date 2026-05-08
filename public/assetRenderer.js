@@ -6,6 +6,22 @@ export const isReady = (drawable) => {
   return !!drawable.naturalWidth
 }
 
+export const hydrateAsset = (asset) => {
+  if (asset.type !== 'custom' || !asset.drawCode || !asset.updateCode) return asset;
+  try {
+    return {
+      ...asset,
+      // Compile strings into executable functions
+      draw: new Function('ctx', 'asset', 'drawable', asset.drawCode),
+      update: new Function('asset', 'dt', 'speed', asset.updateCode),
+      error: null,
+      isBroken: false,
+    };
+  } catch (err) {
+    return { ...asset, error: `Compile Error: ${err.message}`, isBroken: true };
+  }
+}
+
 export const resolveDrawable = (asset, now) => {
   if (asset.frames) return getCurrentFrame(asset, now)
   if (asset.colorRemap?.enabled && asset.remappedImg) return asset.remappedImg
@@ -23,7 +39,16 @@ export const drawAsset = (ctx, asset, drawable) => {
 
   ctx.save()
 
-  if (asset.type === 'avatar') {
+  if (asset.type === 'custom') {
+    if (typeof asset.draw === 'function' && asset.isBroken !== true) {
+      try {
+        asset.draw(ctx, asset, drawable)
+      } catch (err) {
+        console.error("Custom draw function failed. Disabling for this asset.", err)
+        asset.isBroken = true 
+      }
+    }
+  } else if (asset.type === 'avatar') {
     if (angle !== 0) {
       ctx.translate(x + w / 2, y + h / 2)
       ctx.rotate(angle)

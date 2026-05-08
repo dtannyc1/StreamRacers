@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import UploadButton from '../UploadButton'
 import { loadAssetImage } from '../../shared/gifLoader'
 import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
+import { useKVStore } from '../../context/KVStoreContext'
 
 const DebouncedUrlInput = ({ value, onChange, disabled }) => {
   const [local, setLocal] = useState(value)
@@ -67,7 +68,13 @@ const Row = ({ children }) => (
   <div className="grid grid-cols-2 gap-2">{children}</div>
 )
 
-const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDefaultCar, onEyedropperActivate }) => {
+const AssetForm = ({ 
+  asset, onUpdate, onSpriteUrlChange, toggleAspectLock, 
+  isDefaultCar, onEyedropperActivate, isLogicEditorOpen, setIsLogicEditorOpen
+}) => {
+
+  const {raceSettings} = useKVStore()
+
   if (!asset) return (
     <p className="text-xs text-gray-500 text-center py-4">Select an asset to edit it.</p>
   )
@@ -112,6 +119,8 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
       patch.phase = 0
       patch.theta_dot = 1
     }
+
+    if (newType === 'custom') setIsLogicEditorOpen(true);
 
     u(patch)
   }
@@ -179,6 +188,7 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
           <option value="static">Static</option>
           <option value="rotating">Rotating</option>
           <option value="oscillating">Oscillating</option>
+          {!!raceSettings.dev_mode && <option value="custom">Custom (Dev Mode)</option>}
         </select>
       </label>
 
@@ -410,6 +420,18 @@ const AssetForm = ({ asset, onUpdate, onSpriteUrlChange, toggleAspectLock, isDef
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {asset.type === 'custom' && (
+        <div className="mt-2">
+          {asset.error && <p className="text-red-500 text-xs font-mono mb-2">{asset.error}</p>}
+          <button 
+            onPointerDown={() => setIsLogicEditorOpen(true)}
+            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded"
+          >
+            {asset.error ? "Fix Code Error" : "Edit Custom Logic"}
+          </button>
         </div>
       )}
 

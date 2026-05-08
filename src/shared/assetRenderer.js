@@ -6,6 +6,22 @@ export const isReady = (drawable) => {
   return !!drawable.naturalWidth
 }
 
+export const hydrateAsset = (asset) => {
+  if (asset.type !== 'custom' || !asset.drawCode || !asset.updateCode) return asset;
+  try {
+    return {
+      ...asset,
+      // Compile strings into executable functions
+      draw: new Function('ctx', 'asset', 'drawable', asset.drawCode),
+      update: new Function('asset', 'dt', 'speed', asset.updateCode),
+      error: null,
+      isBroken: false,
+    };
+  } catch (err) {
+    return { ...asset, error: `Compile Error: ${err.message}`, isBroken: true };
+  }
+}
+
 export const resolveDrawable = (asset, now) => {
   if (asset.frames) return getCurrentFrame(asset, now)
   if (asset.colorRemap?.enabled && asset.remappedImg) return asset.remappedImg
