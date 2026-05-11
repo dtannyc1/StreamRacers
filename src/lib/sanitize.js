@@ -51,7 +51,10 @@ const stripToSchema = (rawData, schema) => {
 }
 
 export const sanitizeCarData = (rawCarData) => {
-  const cleanCarData = { ...rawCarData, assets: [] }
+  const cleanCarData = { name: '', assets: [] }
+  if (typeof rawCarData.name === 'string') {
+    cleanCarData.name = sanitizeString(rawCarData.name)
+  }
   if (Array.isArray(rawCarData.assets)) {
     cleanCarData.assets = rawCarData.assets.map(asset => stripToSchema(asset, CAR_ASSET_SCHEMA))
   } 

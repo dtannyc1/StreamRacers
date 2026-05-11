@@ -132,6 +132,10 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - ensure that even converting it into a function is wrapped in a try/catch
   - ensure that this feature is behind a feature flag for devs only
   - Consider editing interface when dev mode is enabled so it's clear that it's on
+  - Ensure that all variables are changed back after draw/update functions
+    - dupe asset, then splat and resave afterwards
+    - make sure to note that the existing vars are immutable
+    - also add suggestion that users can create their own keys
   
 - Add dev export function
   - See the json for specific cars

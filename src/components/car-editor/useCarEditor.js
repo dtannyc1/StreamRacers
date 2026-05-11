@@ -1,10 +1,31 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createDefaultCar } from '../../lib/carDefaults'
 import { resolveImageUrl } from '../../lib/utils'
+import { hydrateAsset } from '../../shared/assetRenderer'
 
 export const useCarEditor = (initialCar = null) => {
-  const [car, setCar] = useState(() => initialCar ?? createDefaultCar())
+  const [car, setCar] = useState(() => {
+    let basicCar = initialCar ?? createDefaultCar()
+    basicCar = {...basicCar, 
+                XY: [0, 0], 
+                vel: [200, 0],
+                acc: [6,0],
+                time: Date.now(),
+                showBoost: false,
+                lastBoost: null,
+              }
+    return basicCar
+  })
   const [selectedId, setSelectedId] = useState(null)
+
+  useEffect(() => {
+    for (let ii = 0; ii < car.assets.length; ii++) {
+      let asset = car.assets[ii]
+      if (asset.type === 'custom' && !asset.draw && !asset.error) { 
+        car.assets[ii] = hydrateAsset(asset)
+      }
+    }
+  }, [car])
 
   const selectedAsset = car.assets.find(a => a.id === selectedId) ?? null
 
