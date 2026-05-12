@@ -6,6 +6,48 @@ export const isReady = (drawable) => {
   return !!drawable.naturalWidth
 }
 
+export const hydrateAsset = (asset) => {
+  if (asset.type !== 'custom' || !asset.drawCode || !asset.updateCode) return asset;
+  try {
+    return {
+      ...asset,
+      // Compile strings into executable functions
+      draw: new Function('ctx', 'asset', 'drawable', asset.drawCode),
+      update: new Function('asset', 'dt', 'speed', asset.updateCode),
+      error: null,
+      isBroken: false,
+    };
+  } catch (err) {
+    return { ...asset, error: `Compile Error: ${err.message}`, isBroken: true };
+  }
+}
+
+export const phaseCorrection = (asset, elapsedTime) => {
+  let correctedTheta, correctedThetaDot;
+  if (asset.type === 'oscillating') {
+    const radius = asset.radius ?? 1
+    const speed = 200
+    const dt = elapsedTime
+    const slope = (speed / radius) 
+    const min = asset.minTheta ?? 0
+    const max = asset.maxTheta ?? 0
+    const amplitude = (max - min) / 2
+    const period = (4 * amplitude) / slope
+    const center = (max + min) / 2
+    const xshift = (asset.phase ?? 0) * period / (2 * Math.PI)
+
+    const timeWithPhase = (dt + xshift) % period
+    const triangle = Math.abs((timeWithPhase / period) * 4 - 2) - 1
+    
+    const thetad = Math.cos(2 * Math.PI * (dt + xshift) / period)
+    const theta_dot = thetad > 0 ? 1 : -1
+
+    correctedTheta = center + amplitude * triangle
+    correctedThetaDot = theta_dot
+  }
+  return { correctedTheta, correctedThetaDot }
+}
+
 export const resolveDrawable = (asset, now) => {
   if (asset.frames) return getCurrentFrame(asset, now)
   if (asset.colorRemap?.enabled && asset.remappedImg) return asset.remappedImg
@@ -19,11 +61,20 @@ export const drawAsset = (ctx, asset, drawable) => {
 
   const [x, y] = asset.tl
   const [w, h] = asset.dim
-  let angle = asset.theta ?? 0
+  let angle = asset.theta_0 ?? 0
 
   ctx.save()
 
-  if (asset.type === 'avatar') {
+  if (asset.type === 'custom') {
+    if (typeof asset.draw === 'function' && asset.isBroken !== true) {
+      try {
+        asset.draw(ctx, asset, drawable)
+      } catch (err) {
+        console.error("Custom draw function failed. Disabling for this asset.", err)
+        asset.isBroken = true 
+      }
+    }
+  } else if (asset.type === 'avatar') {
     if (angle !== 0) {
       ctx.translate(x + w / 2, y + h / 2)
       ctx.rotate(angle)
@@ -43,7 +94,7 @@ export const drawAsset = (ctx, asset, drawable) => {
     ctx.drawImage(drawable, x, y, w, h)
 
   } else if (asset.type === 'rotating' || asset.type === 'oscillating') {
-    angle = (asset.cur_theta ?? 0) + angle
+    angle = (asset.theta ?? 0)
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
     ctx.translate(cx, cy)
     ctx.rotate(angle)

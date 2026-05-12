@@ -167,7 +167,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             className="h-fit touch-none"
           >
             <CarCanvas
-              assets={car.assets}
+              car={car}
               selectedId={selectedId}
               selectedAsset={selectedAsset}
               avatarUrl={avatarUrl}
@@ -197,7 +197,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             }}
           >
             <AssetPanel
-              assets={car.assets}
+              car={car}
               selectedId={selectedId}
               onSelect={handleSelectAsset}
               onDeselect={handleDrawerClose}

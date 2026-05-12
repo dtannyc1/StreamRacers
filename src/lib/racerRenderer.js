@@ -30,33 +30,34 @@ export const drawRacer = (ctx, racer, now) => {
   ctx.restore()
 }
 
+// DEPRECATED
 // for use only in React car editor
 // Assumes speed has not changed at all from 200
 // This does not work for general race
-export const resetAssetAngles = (asset, initTime, timestamp) => {
-  const radius = asset.radius ?? 1
-  const speed = 200
-  const dt = (timestamp - initTime) / 1000
+// export const resetAssetAngles = (asset, initTime, timestamp) => {
+//   const radius = asset.radius ?? 1
+//   const speed = 200
+//   const dt = (timestamp - initTime) / 1000
 
-  if (asset.type === 'rotating') {
-    asset.cur_theta = (speed / radius) * dt % (2 * Math.PI)
+//   if (asset.type === 'rotating') {
+//     asset.theta = (speed / radius) * dt % (2 * Math.PI)
 
-  } else if (asset.type === 'oscillating') {
-    const slope = (speed / radius) 
-    const min = asset.minTheta ?? 0
-    const max = asset.maxTheta ?? 0
-    const amplitude = (max - min) / 2
-    const period = (4 * amplitude) / slope
-    const center = (max + min) / 2
-    const xshift = (asset.phase ?? 0) * period / (2 * Math.PI)
+//   } else if (asset.type === 'oscillating') {
+//     const slope = (speed / radius) 
+//     const min = asset.minTheta ?? 0
+//     const max = asset.maxTheta ?? 0
+//     const amplitude = (max - min) / 2
+//     const period = (4 * amplitude) / slope
+//     const center = (max + min) / 2
+//     const xshift = (asset.phase ?? 0) * period / (2 * Math.PI)
 
-    const timeWithPhase = (dt + xshift) % period
-    let triangle = Math.abs((timeWithPhase / period) * 4 - 2) - 1
+//     const timeWithPhase = (dt + xshift) % period
+//     let triangle = Math.abs((timeWithPhase / period) * 4 - 2) - 1
     
-    let thetad = Math.cos(2 * Math.PI * (dt + xshift) / period)
-    let theta_dot = thetad > 0 ? 1 : -1
+//     let thetad = Math.cos(2 * Math.PI * (dt + xshift) / period)
+//     let theta_dot = thetad > 0 ? 1 : -1
 
-    asset.cur_theta = center + amplitude * triangle
-    asset.theta_dot = theta_dot
-  }
-}
+//     asset.theta = center + amplitude * triangle
+//     asset.theta_dot = theta_dot
+//   }
+// }

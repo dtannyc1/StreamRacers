@@ -1,8 +1,11 @@
+import { useState } from "react";
 import AssetDrawer from "../AssetDrawer"
 import AssetForm from "./AssetForm"
+import { hydrateAsset } from "../../shared/assetRenderer";
+import CustomCodeEditor from "../CustomCodeEditor";
 
 const AssetPanel = ({ 
-  assets, 
+  car, 
   selectedId, 
   drawerOpen,
   onSelect, 
@@ -18,6 +21,30 @@ const AssetPanel = ({
   isDefaultCar,
   onEyedropperActivate
 }) => {
+  const assets = car.assets;
+  const [isLogicEditorOpen, setIsLogicEditorOpen] = useState(false);
+
+  const u = (patch) => onUpdate(asset.id, patch)
+  const handleSaveCustomLogic = (drawCode, updateCode) => {
+    const updated = hydrateAsset({
+      ...asset,
+      type: 'custom',
+      drawCode,
+      updateCode
+    });
+    
+    const patch = {
+      draw: updated.draw,
+      update: updated.update,
+      error: updated.error,
+      isBroken: updated.isBroken,
+      drawCode,
+      updateCode,
+    }
+
+    u(patch)
+    setIsLogicEditorOpen(false);
+  };
 
   return (
     <div className={`flex flex-col gap-2 h-full custom-scrollbar rounded-lg pr-1
@@ -93,14 +120,31 @@ const AssetPanel = ({
         title={asset?.name ? ('Edit ' + asset.name) : 'Edit Asset'}
       >
         <AssetForm 
+          car={car}
           asset={asset} 
           onUpdate={onUpdate} 
           onSpriteUrlChange={onSpriteUrlChange}
           toggleAspectLock={toggleAspectLock}
           isDefaultCar={isDefaultCar}
           onEyedropperActivate={onEyedropperActivate}
+          isLogicEditorOpen={isLogicEditorOpen}
+          setIsLogicEditorOpen={setIsLogicEditorOpen}
         />
       </AssetDrawer>
+      
+      {isLogicEditorOpen && (
+        <div
+          className="select-text"
+        >
+          <CustomCodeEditor
+            asset={asset} 
+            onSave={handleSaveCustomLogic} 
+            onClose={() => setIsLogicEditorOpen(false)} 
+            className="h-full outline-none"
+            textareaId="draw-editor-area"  
+          />
+        </div>
+      )}
     </div>
   )
 }

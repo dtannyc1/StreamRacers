@@ -1,11 +1,12 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
-import { drawAsset, resolveDrawable } from '../../shared/assetRenderer'
-import { preloadCarImages, resetAssetAngles } from '../../lib/racerRenderer'
+import { drawAsset, phaseCorrection, resolveDrawable } from '../../shared/assetRenderer'
+import { preloadCarImages } from '../../lib/racerRenderer'
+import { updateRacerPos } from '../../shared/racerLogic'
 
-export const CANVAS_W = 600
-export const CANVAS_H = 400
-export const ORIGIN = [CANVAS_W - 50, CANVAS_H - 50]
+const CANVAS_W = 600
+const CANVAS_H = 400
+const ORIGIN = [CANVAS_W - 50, CANVAS_H - 50]
 
 const BOTTOM_EDGE_Y = 0
 const FRONT_EDGE_X = 0
@@ -156,7 +157,7 @@ const hitTestCorner = (mx, my, asset) => {
 }
 
 const CarCanvas = ({
-  assets,
+  car,
   selectedId,
   selectedAsset,
   avatarUrl,
@@ -177,6 +178,8 @@ const CarCanvas = ({
   const draggingCR = useRef(false)
   const draggingRadius = useRef(false)
   const prevSelectedAsset = useRef(null)
+  const startTime = useRef(Date.now())
+  const assets = car?.assets || []
 
   useEffect(() => {
     async function loadCarImages() {
@@ -188,6 +191,24 @@ const CarCanvas = ({
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
+
+    // create a copy of car that keeps track of time
+    // prevents constant rerendering as time is changed in racer and not car
+    let racer = {
+      assets,
+      XY: [0, 0],
+      vel: [200, 0],
+      time: car?.initTime ?? performance.now(),
+    }
+
+    // reset temp racer oscillating assets
+    racer.assets.forEach(asset => {
+      if (asset.type === 'oscillating') {
+        const { correctedTheta, correctedThetaDot } = phaseCorrection(asset, 0)
+        asset.theta = correctedTheta
+        asset.theta_dot = correctedThetaDot
+      }
+    })
 
     const draw = (timestamp) => {
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
@@ -213,16 +234,18 @@ const CarCanvas = ({
 
       drawAlignmentLines(ctx)
 
-      assets.forEach(asset => {
+      updateRacerPos(racer, timestamp, false, 1)
+
+      racer.assets.forEach(asset => {
         if (!assetsRef.current[asset.id]) return // image not loaded yet
         const isSelected = asset.id === selectedId
-        resetAssetAngles(asset, assetsRef.current[asset.id].initialLoadTime, timestamp)
+        
         const curAsset = assetsRef.current[asset.id]
         const drawable = resolveDrawable(
           {...curAsset, 
             remappedImg: (asset.remapEnabled && !eyedropperAssetId) ? asset.remappedImg : null
           }, timestamp)
-        drawAsset(ctx, {...asset, cur_theta: (isSelected && !asset.animationEnabled) ? 0 : (asset.cur_theta ?? 0)}, drawable)
+        drawAsset(ctx, {...asset, theta: (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)}, drawable)
 
         if (isSelected) {
           // draw selection outline

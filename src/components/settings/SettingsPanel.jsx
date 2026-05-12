@@ -5,6 +5,8 @@ import { getTwitchUser } from '../../lib/twitch'
 import ErrorNewUser from '../ErrorNewUser'
 import UploadButton from '../UploadButton'
 
+const DEV_MODE = import.meta.env.VITE_ENABLE_DEV_MODE === 'true'
+
 const resolveUsername = async (input) => {
   try {
     const user = await getTwitchUser(input.trim())
@@ -399,6 +401,23 @@ const SettingsPanel = () => {
             />
         </CollapsibleSection>
       </CollapsibleSection>
+
+      {
+        DEV_MODE && (
+          <CollapsibleSection title="Developer Mode" defaultCollapsed={true}>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.dev_mode}
+                onChange={(e) => update({ dev_mode: e.target.checked })}
+                className="w-4 h-4 accent-purple-500"
+              />
+              <span className="text-sm text-white">Enable developer mode</span>
+              <span className="text-xs text-gray-500">(only enable if you know what you're doing)</span>
+            </label>
+          </CollapsibleSection>
+        )
+      }
 
       <CollapsibleSection title="Join Commands">
         <p className="text-xs text-gray-500">Chat messages that allows a user to join the race.</p>
