@@ -96,6 +96,7 @@ const CustomCodeEditor = ({ asset, onSave, onClose }) => {
                   <p>The listed properties of the asset object are the currently existing ones, but the values are not changed without your input.</p>
                   <p>Feel free to create your own keys within the asset object. They will persist and be accessible to use within both the update and draw functions.</p>
                   <p>ctx.save and ctx.restore are already done in the code, so there's no need to call them manually.</p>
+                  <p>asset.update function is not called while the car is waiting at the start line.</p>
                 </div>
               </section>
             </div>
