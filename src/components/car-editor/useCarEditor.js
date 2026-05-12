@@ -1,10 +1,49 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createDefaultCar } from '../../lib/carDefaults'
 import { resolveImageUrl } from '../../lib/utils'
+import { hydrateAsset, phaseCorrection } from '../../shared/assetRenderer'
 
 export const useCarEditor = (initialCar = null) => {
-  const [car, setCar] = useState(() => initialCar ?? createDefaultCar())
+  const [car, setCar] = useState(() => {
+    let basicCar = initialCar ?? createDefaultCar()
+    basicCar = {...basicCar, 
+                XY: [0, 0], 
+                vel: [200, 0],
+                acc: [6,0],
+                time: Date.now(),
+                showBoost: false,
+                lastBoost: null,
+                initTime: performance.now(),
+              }
+    return basicCar
+  })
   const [selectedId, setSelectedId] = useState(null)
+
+  useEffect(() => {
+    for (let ii = 0; ii < car.assets.length; ii++) {
+      let asset = car.assets[ii]
+      if (asset.type === 'custom' && !asset.draw && !asset.error) { 
+        car.assets[ii] = hydrateAsset(asset)
+      }
+      if (asset.theta_0 === undefined) {
+        asset.theta_0 = asset.theta ?? 0
+      }
+      if (asset.theta_dot === undefined) {
+        asset.theta_dot = 1
+      }
+      if (asset.initTime === undefined) {
+        asset.initTime = car.initTime
+        if (asset.type === 'oscillating') {
+          const { correctedTheta, correctedThetaDot } = phaseCorrection(asset, performance.now() - (car.initTime ?? performance.now())  )
+          asset.theta = correctedTheta
+          asset.theta_dot = correctedThetaDot
+        }
+      }
+      if (asset.animationEnabled === undefined) {
+        asset.animationEnabled = true
+      }
+    }
+  }, [car])
 
   const selectedAsset = car.assets.find(a => a.id === selectedId) ?? null
 
@@ -110,7 +149,7 @@ export const useCarEditor = (initialCar = null) => {
 
     if (mode === 'cr') {
       const { startCR } = dragState.current
-      updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy], cur_theta: 0 })
+      updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy], theta: 0 })
     } else if (mode === 'asset') {
       const { startTL, startCR } = dragState.current
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }

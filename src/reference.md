@@ -100,29 +100,61 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 # Notes for next changes:
 
+## Leaderboard Changes
+- Add setting to suppress your own name from leaderboards
+  - Would need to adjust scoring behavior? Points would be modified if streamer is in top 10
+  - Need to filter out creator name from list if exists, but do it after the fact
+
+- Settings for Race history overlay appearance - fonts, colors, etc
+
 ## Racer Editor
 - Add drag and drop to change layer position
 
 - Add drag and drop for image assets
 
 - Add global vehicles
+  - Store in separate key
+  - CarManager should keep track of how many instances of each global vehicle there is
+  - Ensure that objects are fully deep duped before using them so all instances are different
   - Allows for some vehicles to be used for all users
     - Add limiting options for global vehicles (ie one user per race has this vehicle)
     - Add percentage chance of change
+  - Where does it go in the dashboard? Should it be its own tab?
 
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
 
 - Add support for custom code animations
+  - Should support both update and draw
+  - Need to modify update function in car editor to use the same exact logic
   - text box, user given access to ctx, asset, sample schema for asset
   - converts code into function for drawing a particular asset
   - make sure Game wraps this function in a try/catch
   - ensure that even converting it into a function is wrapped in a try/catch
   - ensure that this feature is behind a feature flag for devs only
+  - Consider editing interface when dev mode is enabled so it's clear that it's on
+  - Ensure that all variables are changed back after draw/update functions
+    - dupe asset, then splat and resave afterwards
+    - make sure to note that the existing vars are immutable
+    - also add suggestion that users can create their own keys
   
+- Add dev export function
+  - See the json for specific cars
+  - See track data json
+
+- Add dev import function (very low priority, likely wont be used)
+  - Allow direct editing of json?
+
 - Add way to quickly enable/disable specific cars
+
+- Add way to quickly duplicate cars
+  - consider creating a carTemplate key
+    - Clicking a button copies the entire car object into that dict
+  - Add a way to load from template to change everything
 
 ## Track Editor
 - Add drag and drop for image assets
+
+- Ensure that all fonts are loaded into Track Editor
 
 - Add toggle to enable/disable track scrolling
   - need to change how bg/fg assets are rendered on track editor
@@ -131,10 +163,50 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - Add randomized road assets
   - drawn under cars but scrolls like the scrolling layer
   - Note: can't add these to background assets with negative heights because of parallax speed
-  
-## Settings
-- Add more default settings
-  - Enable/disable boost functionality (behind feature flag for now)
 
 ## Home Page
 - Add animation to home page with sample cars. demo should swap between maps/cars randomly
+
+# Next steps:
+
+## Power-ups
+- Users should be able to collect powerups by watching streams
+  - Much like pokemon game, random timer to send message while stream is live
+  - List of powerups:
+    - Initial speed 
+      - dont change speed behavior, just use 300 for the speed for the first 2 seconds
+    - Cheat
+      - finishes first but disqualified from the race?
+      - "you cheated and you didnt win?"
+    - Bombs 
+      - blow up spot behind them, launching them forward and a few users back
+      - should it just launch users upwards?
+      - how are trajectories determined?
+    - Blue shell 
+      - travels at a set speed, hits first player, causes their speed to go to 0 or low number
+    - Swap place 
+      - name a user to swap xy position with. speed doesnt change
+      - prevent usage in last 1/3rd seconds of race to prevent steals
+  - Settings
+    - allow/disallow items
+    - settings to control how often messages go out
+    - how many users can claim specific items
+    - percentage chance of actually getting one of the items
+  - how are the items used?
+     - user chat command?
+       - Need a page to explain the powerups
+       - Need a list of commands on a page
+     - any chat message?
+     - random?
+  - how do users check what items they have?
+  - how to limit how many powerups a user can have?
+
+## Boost word
+- Word find boost game
+- Enable/disable boost functionality in Settings (behind feature flag for now)
+
+## Idea/feedback submission
+- Form to submit ideas for next changes
+  - Should include details of how it works
+  - how users interact with it
+  - how does the streamer interact with it?
