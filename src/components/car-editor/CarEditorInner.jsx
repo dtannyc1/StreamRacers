@@ -7,9 +7,12 @@ import AssetPanel from './AssetPanel'
 import { sanitizeCarData, sanitizeDeep, validateCar } from '../../lib/sanitize'
 import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
 import { loadAssetImage } from '../../shared/gifLoader'
+import { trackEvent } from '../../lib/analytics'
+import { useAuth } from '../../context/AuthContext'
 
 const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDefaultCar, onSaveDefault }) => {
   const { racers, updateRacers } = useKVStore()
+  const { channel } = useAuth()
   const [eyedropperAssetId, setEyedropperAssetId] = useState(null)
   const [ drawerOpen, setDrawerOpen ] = useState(false)
   const [saveError, setSaveError] = useState(null)
@@ -63,10 +66,22 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
 
     if (mode === 'new-user' || mode === 'new-car') {
       updated[username] = [...(racers[username] ?? []), sanitizedCar]
+      trackEvent('new-car', 
+        {
+          'viewer_username': username, 
+          'streamer_username': channel?.username,
+          'assets_length': sanitizedCar?.assets?.length
+        })
     } else if (mode === 'edit') {
       const cars = [...racers[username]]
       cars[parseInt(carIndex)] = sanitizedCar
       updated[username] = cars
+      trackEvent('updated-car', 
+        {
+          'viewer_username': username, 
+          'streamer_username': channel?.username,
+          'assets_length': sanitizedCar?.assets?.length
+        })
     }
 
     await updateRacers(updated)

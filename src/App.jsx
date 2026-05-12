@@ -67,7 +67,7 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <BrowserRouter basename="/StreamRacers">
+      <BrowserRouter>
         <KVStoreProvider>
           <AppRoutes />
         </KVStoreProvider>
