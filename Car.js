@@ -1,5 +1,5 @@
 import { loadAssetImage, pauseGIFs } from './gifLoader.js'
-import { drawAllAssets, remapImageColor, phaseCorrection } from './assetRenderer.js'
+import { drawAllAssets, remapImageColor, phaseCorrection, hydrateAsset } from './assetRenderer.js'
 import { updateRacerPos } from './racerLogic.js'
 
 export default class Car {
@@ -41,8 +41,10 @@ export default class Car {
       // account for phase if oscillator
       const { correctedTheta, correctedThetaDot } = phaseCorrection(asset, 0)
 
+      const updatedAsset = hydrateAsset(asset)
+
       return {
-        ...asset,
+        ...updatedAsset,
         img,
         frames,
         frameIndex: 0,
