@@ -8,7 +8,7 @@ export const CAR_ASSET_SCHEMA = {
   tl: [],
   dim: [],
   cr: [],
-  theta: 0,
+  theta_0: 0,
   minTheta: 0,
   maxTheta: 0,
   phase: 0,

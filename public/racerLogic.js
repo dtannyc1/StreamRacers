@@ -41,13 +41,21 @@ export const incrementCarAssetAngles = (car, dt, speed) => {
     } else if (asset.type === 'oscillating') {
       const min = asset.minTheta ?? -Math.PI / 6
       const max = asset.maxTheta ?? Math.PI / 6
-      asset.theta = (asset.theta ?? 0) + asset.theta_dot * (speed / radius) * dt
-      if (asset.theta_dot > 0 && asset.theta - asset.theta_0 > max) {
-        asset.theta = max + asset.theta_0
-        asset.theta_dot *= -1
-      } else if (asset.theta_dot < 0 && asset.theta - asset.theta_0 < min) {
-        asset.theta = min + asset.theta_0
-        asset.theta_dot *= -1
+      const range = max - min
+      const doubleRange = range * 2
+
+      let currentRel = ((asset.theta - asset.theta_0 - min) % doubleRange + doubleRange) % doubleRange;
+      if (asset.theta_dot < 0) currentRel = doubleRange - currentRel
+
+      const displacement = Math.abs(asset.theta_dot) * (speed / radius) * dt
+      const nextRel = (currentRel + displacement) % doubleRange
+
+      if (nextRel <= range) {
+        asset.theta = asset.theta_0 + min + nextRel
+        asset.theta_dot = Math.abs(asset.theta_dot)
+      } else {
+        asset.theta = asset.theta_0 + min + (doubleRange - nextRel)
+        asset.theta_dot = -Math.abs(asset.theta_dot)
       }
     }
   })

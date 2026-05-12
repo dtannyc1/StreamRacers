@@ -5,7 +5,7 @@ import { hydrateAsset } from "../../shared/assetRenderer";
 import CustomCodeEditor from "../CustomCodeEditor";
 
 const AssetPanel = ({ 
-  assets, 
+  car, 
   selectedId, 
   drawerOpen,
   onSelect, 
@@ -21,7 +21,7 @@ const AssetPanel = ({
   isDefaultCar,
   onEyedropperActivate
 }) => {
-
+  const assets = car.assets;
   const [isLogicEditorOpen, setIsLogicEditorOpen] = useState(false);
 
   const u = (patch) => onUpdate(asset.id, patch)
@@ -120,6 +120,7 @@ const AssetPanel = ({
         title={asset?.name ? ('Edit ' + asset.name) : 'Edit Asset'}
       >
         <AssetForm 
+          car={car}
           asset={asset} 
           onUpdate={onUpdate} 
           onSpriteUrlChange={onSpriteUrlChange}

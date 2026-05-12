@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createDefaultCar } from '../../lib/carDefaults'
 import { resolveImageUrl } from '../../lib/utils'
-import { hydrateAsset } from '../../shared/assetRenderer'
+import { hydrateAsset, phaseCorrection } from '../../shared/assetRenderer'
 
 export const useCarEditor = (initialCar = null) => {
   const [car, setCar] = useState(() => {
@@ -13,6 +13,7 @@ export const useCarEditor = (initialCar = null) => {
                 time: Date.now(),
                 showBoost: false,
                 lastBoost: null,
+                initTime: performance.now(),
               }
     return basicCar
   })
@@ -23,6 +24,20 @@ export const useCarEditor = (initialCar = null) => {
       let asset = car.assets[ii]
       if (asset.type === 'custom' && !asset.draw && !asset.error) { 
         car.assets[ii] = hydrateAsset(asset)
+      }
+      if (asset.theta_0 === undefined) {
+        asset.theta_0 = asset.theta ?? 0
+      }
+      if (asset.theta_dot === undefined) {
+        asset.theta_dot = 1
+      }
+      if (asset.initTime === undefined) {
+        asset.initTime = car.initTime
+        if (asset.type === 'oscillating') {
+          const { correctedTheta, correctedThetaDot } = phaseCorrection(asset, performance.now() - (car.initTime ?? performance.now())  )
+          asset.theta = correctedTheta
+          asset.theta_dot = correctedThetaDot
+        }
       }
     }
   }, [car])
@@ -131,7 +146,7 @@ export const useCarEditor = (initialCar = null) => {
 
     if (mode === 'cr') {
       const { startCR } = dragState.current
-      updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy], cur_theta: 0 })
+      updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy], theta: 0 })
     } else if (mode === 'asset') {
       const { startTL, startCR } = dragState.current
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }

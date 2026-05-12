@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import UploadButton from '../UploadButton'
 import { loadAssetImage } from '../../shared/gifLoader'
-import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
+import { getComplementaryColor, phaseCorrection, remapImageColor } from '../../shared/assetRenderer'
 import { useKVStore } from '../../context/KVStoreContext'
 
 const DebouncedUrlInput = ({ value, onChange, disabled }) => {
@@ -70,10 +70,24 @@ const Row = ({ children }) => (
 
 const AssetForm = ({ 
   asset, onUpdate, onSpriteUrlChange, toggleAspectLock, 
-  isDefaultCar, onEyedropperActivate, isLogicEditorOpen, setIsLogicEditorOpen
+  isDefaultCar, onEyedropperActivate, isLogicEditorOpen, setIsLogicEditorOpen, car
 }) => {
 
   const {raceSettings} = useKVStore()
+  const timer = useRef(null)
+  
+  useEffect(() => {
+    if (asset?.type === 'oscillating') {
+      clearTimeout(timer.current)
+      timer.current = setTimeout(() => {
+        const { correctedTheta, correctedThetaDot } = phaseCorrection(asset, (car.time ?? performance.now()) - asset.initTime)
+        asset.theta = correctedTheta
+        asset.theta_dot = correctedThetaDot
+      }, 1000)
+
+      return () => clearTimeout(timer.current)
+    }
+  }, [asset?.radius, asset?.speed, asset?.minTheta, asset?.maxTheta, asset?.phase])
 
   if (!asset) return (
     <p className="text-xs text-gray-500 text-center py-4">Select an asset to edit it.</p>
@@ -109,7 +123,7 @@ const AssetForm = ({
       // initialize CR to center of the asset
       patch.cr = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
       patch.radius = Math.min(asset.dim[0], asset.dim[1]) / 4
-      patch.theta = 0
+      patch.theta_0 = 0
       patch.handleAngle = 0
     }
 
@@ -250,10 +264,10 @@ const AssetForm = ({
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Rotation</p>
         <SliderInput
           label="Tilt (θ)"
-          value={toDeg(asset.theta ?? 0)}
+          value={toDeg(asset.theta_0 ?? 0)}
           min={-180}
           max={180}
-          onChange={(v) => u({ theta: toRad(v) })}
+          onChange={(v) => u({ theta_0: toRad(v) })}
         />
       </div>
 

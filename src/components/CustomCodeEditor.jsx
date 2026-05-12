@@ -94,8 +94,7 @@ const CUSTOM_TEMPLATES = {
   draw: `// 'ctx' = canvas, 'asset' = this object, 'drawable' = resolved image/frame to draw
     const [x, y] = asset.tl
     const [w, h] = asset.dim
-    let angle = asset.theta ?? 0
-    angle = (asset.cur_theta ?? 0) + angle
+    let angle = (asset.theta_0 ?? 0) + (asset.theta ?? 0)
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
     ctx.translate(cx, cy)
     ctx.rotate(angle)

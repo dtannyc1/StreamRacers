@@ -22,6 +22,32 @@ export const hydrateAsset = (asset) => {
   }
 }
 
+export const phaseCorrection = (asset, elapsedTime) => {
+  let correctedTheta, correctedThetaDot;
+  if (asset.type === 'oscillating') {
+    const radius = asset.radius ?? 1
+    const speed = 200
+    const dt = elapsedTime
+    const slope = (speed / radius) 
+    const min = asset.minTheta ?? 0
+    const max = asset.maxTheta ?? 0
+    const amplitude = (max - min) / 2
+    const period = (4 * amplitude) / slope
+    const center = (max + min) / 2
+    const xshift = (asset.phase ?? 0) * period / (2 * Math.PI)
+
+    const timeWithPhase = (dt + xshift) % period
+    const triangle = Math.abs((timeWithPhase / period) * 4 - 2) - 1
+    
+    const thetad = Math.cos(2 * Math.PI * (dt + xshift) / period)
+    const theta_dot = thetad > 0 ? 1 : -1
+
+    correctedTheta = center + amplitude * triangle
+    correctedThetaDot = theta_dot
+  }
+  return { correctedTheta, correctedThetaDot }
+}
+
 export const resolveDrawable = (asset, now) => {
   if (asset.frames) return getCurrentFrame(asset, now)
   if (asset.colorRemap?.enabled && asset.remappedImg) return asset.remappedImg
@@ -35,7 +61,7 @@ export const drawAsset = (ctx, asset, drawable) => {
 
   const [x, y] = asset.tl
   const [w, h] = asset.dim
-  let angle = asset.theta ?? 0
+  let angle = asset.theta_0 ?? 0
 
   ctx.save()
 
@@ -68,7 +94,7 @@ export const drawAsset = (ctx, asset, drawable) => {
     ctx.drawImage(drawable, x, y, w, h)
 
   } else if (asset.type === 'rotating' || asset.type === 'oscillating') {
-    angle = (asset.cur_theta ?? 0) + angle
+    angle = (asset.theta ?? 0)
     const [cx, cy] = asset.cr ?? [x + w / 2, y + h / 2]
     ctx.translate(cx, cy)
     ctx.rotate(angle)
