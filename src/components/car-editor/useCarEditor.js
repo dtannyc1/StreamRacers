@@ -39,6 +39,9 @@ export const useCarEditor = (initialCar = null) => {
           asset.theta_dot = correctedThetaDot
         }
       }
+      if (asset.animationEnabled === undefined) {
+        asset.animationEnabled = true
+      }
     }
   }, [car])
 
