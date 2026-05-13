@@ -12,6 +12,7 @@ import {
 
 let raceHistory = []
 let settings = {}
+let generalSettings = {}
 
 const getLatestRaceHistory = async () => {
   return SE_API.store.get('raceHistory')
@@ -23,9 +24,15 @@ const getLatestOverlaySettings = async () => {
     .then(data => settings = data ?? {})
 }
 
+const getLatestGeneralSettings = async () => {
+  return SE_API.store.get('raceSettings')
+    .then(data => generalSettings = data ?? {})
+}
+
 window.addEventListener('onWidgetLoad', async function (obj) {
   await getLatestRaceHistory()
   await getLatestOverlaySettings()
+  await getLatestGeneralSettings()
   render()
 })
 
@@ -144,7 +151,7 @@ function posBadgeClass(pos) {
 
 function renderPanel(mode, races, refDate, maxRows = 10) {
   const { raceSet, label, sub } = getPanelData(mode, races, refDate);
-  const stats   = buildStats(raceSet);
+  const stats   = buildStats(raceSet, generalSettings.removeUsers || []);
   const leaders = sortedLeaders(stats, maxRows);
 
   const panel = document.createElement('div');
