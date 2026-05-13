@@ -1,9 +1,11 @@
 import { useMemo } from "react"
 import { buildStats, sortedLeaders } from "../../shared/leaderboardFilters"
 import { RacerRow } from "./RacerRow"
+import { useKVStore } from "../../context/KVStoreContext"
 
 export default function LeaderPanel({ raceSet, label, sub, onNameClick, mode }) {
-  const stats   = useMemo(() => buildStats(raceSet), [raceSet])
+  const { raceSettings } = useKVStore()
+  const stats   = useMemo(() => buildStats(raceSet, (raceSettings?.removeUsers ?? [])), [raceSet])
   const leaders = useMemo(() => sortedLeaders(stats),  [stats])
 
   return (
