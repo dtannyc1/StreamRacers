@@ -130,8 +130,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - Export entire track data json
   - Allows users to contribute to art
 
-- Add way to quickly enable/disable specific cars
-
 - Add way to quickly duplicate cars
   - consider creating a carTemplate key
     - Clicking a button copies the entire car object into that dict
