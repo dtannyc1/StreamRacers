@@ -106,8 +106,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 ## Racer Editor
 - Add drag and drop to change layer position
 
-- Add drag and drop for image assets
-
 - Add global vehicles
   - Store in separate key
   - CarManager should keep track of how many instances of each global vehicle there is
@@ -136,8 +134,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - Add a way to load from template to change everything
 
 ## Track Editor
-- Add drag and drop for image assets
-
 - Ensure that all fonts are loaded into Track Editor
 
 - Add toggle to enable/disable track scrolling
