@@ -125,12 +125,10 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
     - dupe asset, then splat and resave afterwards
     - might not be useful. if user breaks the rendering for that asset, we shouldnt stop them
   
-- Add dev export function
-  - See the json for specific cars
-  - See track data json
-
-- Add dev import function (very low priority, likely wont be used)
-  - Allow direct editing of json?
+- Add import/export function to share cars
+  - Save car stuff as json
+  - Export entire track data json
+  - Allows users to contribute to art
 
 - Add way to quickly enable/disable specific cars
 
