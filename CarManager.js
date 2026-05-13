@@ -60,9 +60,10 @@ export default class CarManager {
 
     const avatar = await this.fetchAvatar(username)
 
-    const carList = this.customCarData[username]
-    const carData = (Array.isArray(carList) && carList.length > 0)
-      ? carList[Math.floor(Math.random() * carList.length)]
+    const carList = this.customCarData[username] ?? []
+    const filteredCarList = carList.filter((car) => !car.disabled)
+    const carData = (filteredCarList.length > 0)
+      ? filteredCarList[Math.floor(Math.random() * filteredCarList.length)]
       : this.defaultCarData
 
     const yMin = Math.min(racingLine.p1[1], racingLine.p2[1])
