@@ -40,10 +40,15 @@ export function filterRaces(races, mode, refDate) {
   })
 }
 
-export function buildStats(raceSet) {
+export function removeUsersFromStats(racers, removeUsers) {
+  return racers.filter((r) => !removeUsers.includes(r))
+}
+
+export function buildStats(raceSet, removeUsers = []) {
   const stats = {}
   raceSet.forEach((race) => {
-    race.racers.forEach((name, idx) => {
+    const filteredRacers = removeUsersFromStats(race.racers, removeUsers)
+    filteredRacers.forEach((name, idx) => {
       if (!stats[name]) {
         stats[name] = { wins: 0, podiums: 0, races: 0, points: 0, bestPos: Infinity }
       }
@@ -52,7 +57,7 @@ export function buildStats(raceSet) {
       if (pos < stats[name].bestPos) stats[name].bestPos = pos
       if (pos === 1) stats[name].wins++
       if (pos <= 3)  stats[name].podiums++
-      stats[name].points += calcPoints(pos, race.racers.length)
+      stats[name].points += calcPoints(pos, filteredRacers.length)
     })
   })
   return stats

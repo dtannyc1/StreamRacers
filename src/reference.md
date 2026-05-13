@@ -101,10 +101,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 # Notes for next changes:
 
 ## Leaderboard Changes
-- Add setting to suppress your own name from leaderboards
-  - Would need to adjust scoring behavior? Points would be modified if streamer is in top 10
-  - Need to filter out creator name from list if exists, but do it after the fact
-
 - Settings for Race history overlay appearance - fonts, colors, etc
 
 ## Racer Editor
@@ -124,18 +120,10 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - when editing or adding a car, an actual track should be used as the background so users can see how the car will look on the road.
 
 - Add support for custom code animations
-  - Should support both update and draw
-  - Need to modify update function in car editor to use the same exact logic
-  - text box, user given access to ctx, asset, sample schema for asset
-  - converts code into function for drawing a particular asset
-  - make sure Game wraps this function in a try/catch
-  - ensure that even converting it into a function is wrapped in a try/catch
-  - ensure that this feature is behind a feature flag for devs only
   - Consider editing interface when dev mode is enabled so it's clear that it's on
-  - Ensure that all variables are changed back after draw/update functions
+  - Consider - all variables are changed back after draw/update functions?
     - dupe asset, then splat and resave afterwards
-    - make sure to note that the existing vars are immutable
-    - also add suggestion that users can create their own keys
+    - might not be useful. if user breaks the rendering for that asset, we shouldnt stop them
   
 - Add dev export function
   - See the json for specific cars

@@ -378,6 +378,18 @@ const SettingsPanel = () => {
         />
       </CollapsibleSection>
 
+      <CollapsibleSection title="Race History Filters" defaultCollapsed={true}>
+        <CollapsibleSection title="Filtered Users">
+            <p className="text-xs text-gray-500">Users to exclude from the race history.</p>
+            <EditableList
+              items={settings.removeUsers}
+              onChange={(v) => update({ removeUsers: v })}
+              placeholder="username"
+              onResolve={resolveUsername}
+            />
+        </CollapsibleSection>
+      </CollapsibleSection>
+
       <CollapsibleSection title="Testing Mode" defaultCollapsed={true}>
         <label className="flex items-center gap-3 cursor-pointer">
           <input
