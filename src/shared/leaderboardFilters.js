@@ -65,8 +65,9 @@ export function buildStats(raceSet, removeUsers = []) {
 
 export function sortedLeaders(stats, limit = 15) {
   return Object.entries(stats)
-    .sort((a, b) => b[1].points - a[1].points)
-    .slice(0, limit)
+    .sort(([, a], [, b]) => 
+      (b.points - a.points) || (b.wins - a.wins) || (b.podiums - a.podiums) || (b.races - a.races)
+    ).slice(0, limit)
 }
 
 export function getAvailableDays(races) {

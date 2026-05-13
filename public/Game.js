@@ -13,6 +13,16 @@ class Game {
 
     this._addLeaderboardHTML()
 
+    let canvas2 = document.createElement("canvas")
+    canvas2.width = 1920
+    canvas2.height = 1080
+    canvas2.style.position = "absolute"
+    canvas2.style.top = "0"
+    canvas2.style.left = "0"
+    document.body.appendChild(canvas2)
+    this.canvas2 = canvas2
+    this.ctx2 = this.canvas2.getContext('2d')
+
     this.track = null
     this.carManager = null
 
@@ -450,6 +460,7 @@ class Game {
 
   _draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.ctx2.clearRect(0, 0, this.canvas2.width, this.canvas2.height)
     if (this.hidden) return
 
     this.track.drawBackground(this.ctx, this.cameraLoc, this.canvas.width, this.canvas.height)
@@ -465,39 +476,11 @@ class Game {
       // draw start line
       this.track._drawRacingLine(this.ctx, offsetCameraLoc, 0, true)
     }
-    
-    this.carManager.draw(this.ctx, this.cameraLoc, this.track.racingLine)
-    this.track.drawForeground(this.ctx, this.cameraLoc, this.canvas.width, this.finishX)
-    this._drawStandings()
-  }
 
-  _drawStandings() {
-    // if (!this.standings.length) return
-
-    // const topLeft = [1450, 360]
-    // this.ctx.font = '32px Oswald'
-    // this.ctx.letterSpacing = '1.5px'
-
-    // // background box
-    // this.ctx.fillStyle = 'rgba(0,0,0,1.0)'
-    // this.ctx.beginPath()
-    // this.ctx.roundRect(topLeft[0] - 25, topLeft[1] - 42, 480, 400, 30)
-    // this.ctx.fill()
-    // this.ctx.closePath()
-
-    // this.ctx.fillStyle = 'white'
-    // this.ctx.textAlign = 'left'
-    // this.ctx.fillText('Leaderboard', ...topLeft)
-
-    // for (let i = 0; i < Math.min(this.standings.length, 10); i++) {
-    //   const finished = i < this.leaderboard.length
-    //   this.ctx.fillStyle = finished ? 'cyan' : 'white'
-    //   const label = finished ? this.leaderboard[i] : this.standings[i]
-    //   this.ctx.fillText(`${i + 1}. ${label}`, topLeft[0], topLeft[1] + 34 * (i + 1))
-    // }
-
-    // this.ctx.resetTransform()
     this._updateStandings()
+    
+    this.carManager.draw(this.ctx2, this.cameraLoc, this.track.racingLine)
+    this.track.drawForeground(this.ctx2, this.cameraLoc, this.canvas2.width, this.finishX)
   }
 
   _updateStandings() {

@@ -106,8 +106,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 ## Racer Editor
 - Add drag and drop to change layer position
 
-- Add drag and drop for image assets
-
 - Add global vehicles
   - Store in separate key
   - CarManager should keep track of how many instances of each global vehicle there is
@@ -125,14 +123,10 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
     - dupe asset, then splat and resave afterwards
     - might not be useful. if user breaks the rendering for that asset, we shouldnt stop them
   
-- Add dev export function
-  - See the json for specific cars
-  - See track data json
-
-- Add dev import function (very low priority, likely wont be used)
-  - Allow direct editing of json?
-
-- Add way to quickly enable/disable specific cars
+- Add import/export function to share cars
+  - Save car stuff as json
+  - Export entire track data json
+  - Allows users to contribute to art
 
 - Add way to quickly duplicate cars
   - consider creating a carTemplate key
@@ -140,8 +134,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - Add a way to load from template to change everything
 
 ## Track Editor
-- Add drag and drop for image assets
-
 - Ensure that all fonts are loaded into Track Editor
 
 - Add toggle to enable/disable track scrolling
