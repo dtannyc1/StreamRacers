@@ -16,7 +16,7 @@ export const preloadCarImages = async (car, avatarUrl, assetListRef) => {
       frameIndex: 0,
       lastFrameTime: performance.now(),
       initialLoadTime: initTime,
-      theta_0: asset.theta ?? 0,
+      theta_0: asset.theta ?? asset.theta_0 ?? 0,
       theta_dot: asset.theta_dot ?? 1,
     }
   }))

@@ -14,7 +14,16 @@ const CarCard = ({ car, index, username }) => {
     async function loadCarImages() {
       let avatarUrl = assets.find(a => a.type === 'avatar')?.spriteUrl
       await preloadCarImages({ assets }, avatarUrl, assetsRef)
-      setLoadedAssets(Object.values(assetsRef.current))
+      let loaded = []
+      for (const oldAsset of assets) {
+        let id = oldAsset.id
+        let asset = assetsRef.current[id]
+        loaded.push({
+          ...asset,
+          theta: asset.theta_0 + ((asset.minTheta ?? 0) + (asset.maxTheta ?? 0)) / 2,
+        })
+      }
+      setLoadedAssets(loaded)
     }
     loadCarImages()
   }, [car.assets])
