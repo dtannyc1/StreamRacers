@@ -124,8 +124,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 - Car preview image
 
 ## Racer Editor
-- Asset preview image
-
 - Add y-animation / x-animation to car in general
   - Bounce logic
   - Sinusoid

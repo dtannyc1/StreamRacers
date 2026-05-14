@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
 import { drawAsset, phaseCorrection, resolveDrawable } from '../../shared/assetRenderer'
 import { preloadCarImages } from '../../lib/racerRenderer'
@@ -180,15 +180,19 @@ const CarCanvas = ({
   const prevSelectedAsset = useRef(null)
   const startTime = useRef(Date.now())
   const assets = car?.assets || []
+  const [ isLoading, setIsLoading ] = useState(false)
 
   useEffect(() => {
     async function loadCarImages() {
+      setIsLoading(true)
       await preloadCarImages({ assets }, avatarUrl, assetsRef)
+      setIsLoading(false)
     }
     loadCarImages()
   }, [assets.map(a => resolveImageUrl(a.type === 'avatar' ? avatarUrl : a.spriteUrl)).join(','), avatarUrl])
 
   useEffect(() => {
+    if (isLoading) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
 
@@ -241,10 +245,12 @@ const CarCanvas = ({
         const isSelected = asset.id === selectedId
         
         const curAsset = assetsRef.current[asset.id]
-        const drawable = resolveDrawable(
-          {...curAsset, 
-            remappedImg: (asset.remapEnabled && !eyedropperAssetId) ? asset.remappedImg : null
-          }, timestamp)
+        if ((asset.remapEnabled && !eyedropperAssetId)) {
+          curAsset.remappedImg ||= asset.remappedImg
+        } else {
+          curAsset.remappedImg = null
+        }
+        const drawable = resolveDrawable(curAsset, timestamp)
         drawAsset(ctx, {...asset, theta: (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)}, drawable)
 
         if (isSelected) {
@@ -280,7 +286,7 @@ const CarCanvas = ({
 
     animRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(animRef.current)
-  }, [assets, selectedId, selectedAsset, eyedropperAssetId])
+  }, [assets, selectedId, selectedAsset, eyedropperAssetId, isLoading])
 
   const getClientCoords = (e) => {
     if (e.touches && e.touches.length > 0) {
