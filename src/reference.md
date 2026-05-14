@@ -99,9 +99,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 
 # Notes for next changes:
-- Bug: Gifs aren't running anymore? 
-  - Observed in car editor
-
 - Chat commands
   - List my cars
     - Enable/disable command? or leave blank to ignore.

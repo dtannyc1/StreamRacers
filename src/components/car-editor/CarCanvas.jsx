@@ -158,6 +158,7 @@ const hitTestCorner = (mx, my, asset) => {
 
 const CarCanvas = ({
   car,
+  onUpdate,
   selectedId,
   selectedAsset,
   avatarUrl,
@@ -196,10 +197,12 @@ const CarCanvas = ({
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
 
-    // create a copy of car that keeps track of time
-    // prevents constant rerendering as time is changed in racer and not car
+    let assetsCopy = []
+    for (const asset of assets) {
+      assetsCopy.push({ ...asset })
+    }
     let racer = {
-      assets,
+      assets: assetsCopy,
       XY: [0, 0],
       vel: [200, 0],
       time: car?.initTime ?? performance.now(),
@@ -251,7 +254,8 @@ const CarCanvas = ({
           curAsset.remappedImg = null
         }
         const drawable = resolveDrawable(curAsset, timestamp)
-        drawAsset(ctx, {...asset, theta: (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)}, drawable)
+        asset.theta = (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)
+        drawAsset(ctx, asset, drawable)
 
         if (isSelected) {
           // draw selection outline
@@ -264,6 +268,9 @@ const CarCanvas = ({
           ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
           ctx.restore()
         }
+        if (asset.error && !car.assets.find(a => a.id === asset.id)?.isBroken) {
+          onUpdate(asset.id, { error: asset.error, isBroken: true })
+        } 
       })
 
       if (selectedAsset) {
@@ -279,6 +286,7 @@ const CarCanvas = ({
       }
 
       ctx.restore()
+
       animRef.current = requestAnimationFrame(draw)
     }
 
