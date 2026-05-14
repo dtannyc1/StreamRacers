@@ -89,7 +89,7 @@ const AssetPanel = ({
                         <img 
                           src={asset.spriteUrl}
                           alt={asset.name}
-                          className="w-8 h-8 object-contain mb-1"
+                          className="w-8 h-8 object-contain"
                         />
                       )
 
