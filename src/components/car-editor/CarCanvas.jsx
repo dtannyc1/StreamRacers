@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../lib/utils'
 import { drawAsset, phaseCorrection, resolveDrawable } from '../../shared/assetRenderer'
 import { preloadCarImages } from '../../lib/racerRenderer'
@@ -158,6 +158,7 @@ const hitTestCorner = (mx, my, asset) => {
 
 const CarCanvas = ({
   car,
+  onUpdate,
   selectedId,
   selectedAsset,
   avatarUrl,
@@ -180,22 +181,28 @@ const CarCanvas = ({
   const prevSelectedAsset = useRef(null)
   const startTime = useRef(Date.now())
   const assets = car?.assets || []
+  const [ isLoading, setIsLoading ] = useState(false)
 
   useEffect(() => {
     async function loadCarImages() {
+      setIsLoading(true)
       await preloadCarImages({ assets }, avatarUrl, assetsRef)
+      setIsLoading(false)
     }
     loadCarImages()
   }, [assets.map(a => resolveImageUrl(a.type === 'avatar' ? avatarUrl : a.spriteUrl)).join(','), avatarUrl])
 
   useEffect(() => {
+    if (isLoading) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
 
-    // create a copy of car that keeps track of time
-    // prevents constant rerendering as time is changed in racer and not car
+    let assetsCopy = []
+    for (const asset of assets) {
+      assetsCopy.push({ ...asset })
+    }
     let racer = {
-      assets,
+      assets: assetsCopy,
       XY: [0, 0],
       vel: [200, 0],
       time: car?.initTime ?? performance.now(),
@@ -241,11 +248,14 @@ const CarCanvas = ({
         const isSelected = asset.id === selectedId
         
         const curAsset = assetsRef.current[asset.id]
-        const drawable = resolveDrawable(
-          {...curAsset, 
-            remappedImg: (asset.remapEnabled && !eyedropperAssetId) ? asset.remappedImg : null
-          }, timestamp)
-        drawAsset(ctx, {...asset, theta: (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)}, drawable)
+        if ((asset.remapEnabled && !eyedropperAssetId)) {
+          curAsset.remappedImg ||= asset.remappedImg
+        } else {
+          curAsset.remappedImg = null
+        }
+        const drawable = resolveDrawable(curAsset, timestamp)
+        asset.theta = (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)
+        drawAsset(ctx, asset, drawable)
 
         if (isSelected) {
           // draw selection outline
@@ -258,6 +268,9 @@ const CarCanvas = ({
           ctx.strokeRect(x - 2, y - 2, w + 4, h + 4)
           ctx.restore()
         }
+        if (asset.error && !car.assets.find(a => a.id === asset.id)?.isBroken) {
+          onUpdate(asset.id, { error: asset.error, isBroken: true })
+        } 
       })
 
       if (selectedAsset) {
@@ -273,6 +286,7 @@ const CarCanvas = ({
       }
 
       ctx.restore()
+
       animRef.current = requestAnimationFrame(draw)
     }
 
@@ -280,7 +294,7 @@ const CarCanvas = ({
 
     animRef.current = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(animRef.current)
-  }, [assets, selectedId, selectedAsset, eyedropperAssetId])
+  }, [assets, selectedId, selectedAsset, eyedropperAssetId, isLoading])
 
   const getClientCoords = (e) => {
     if (e.touches && e.touches.length > 0) {

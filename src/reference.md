@@ -99,11 +99,36 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 
 
 # Notes for next changes:
+- Chat commands
+  - List my cars
+    - Enable/disable command? or leave blank to ignore.
+  - Switch my car (!switch car_name)
+  - Join with specific car (!join car_name)
 
 ## Leaderboard Changes
 - Settings for Race history overlay appearance - fonts, colors, etc
 
+- Custom point setup
+  - Allows streamers to change point distribution
+  - What does the interface look like?
+
+## Settings
+- Force all users to have one car
+  - Big dropdown of all cars with usernames shown?
+  - Quick enable/disable button, default disabled
+
+## Racer List
+- Car preview image
+
 ## Racer Editor
+- Add y-animation / x-animation to car in general
+  - Bounce logic
+  - Sinusoid
+  - Sawtooth
+  - Ensure quick stop/start checkbox, stop should reset it to 0 y-height
+  - just ctx.save, translate entire car and ctx.restore at end
+  - Store as dXY instead of modifying XY
+
 - Add drag and drop to change layer position
 
 - Add global vehicles
@@ -122,6 +147,8 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - Consider - all variables are changed back after draw/update functions?
     - dupe asset, then splat and resave afterwards
     - might not be useful. if user breaks the rendering for that asset, we shouldnt stop them
+  - Add universal var for cars in general so custom assets can be synchronized
+    - Need to pass in var to all assets
   
 - Add import/export function to share cars
   - Save car stuff as json
