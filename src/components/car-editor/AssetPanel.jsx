@@ -82,9 +82,23 @@ const AssetPanel = ({
                     : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
                 }`}
               >
-                <div>
-                  <p className="text-sm text-white">{asset.name || `Asset ${index + 1}`}</p>
-                  <p className="text-xs text-gray-400 capitalize">{asset.type}</p>
+                <div className="flex gap-3 items-center">
+                  <div>
+                    {
+                      !!asset.spriteUrl && (
+                        <img 
+                          src={asset.spriteUrl}
+                          alt={asset.name}
+                          className="w-8 h-8 object-contain"
+                        />
+                      )
+
+                    }
+                  </div>
+                  <div>
+                    <p className="text-sm text-white">{asset.name || `Asset ${index + 1}`}</p>
+                    <p className="text-xs text-gray-400 capitalize">{asset.type}</p>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <button

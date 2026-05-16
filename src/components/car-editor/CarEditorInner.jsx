@@ -168,6 +168,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
           >
             <CarCanvas
               car={car}
+              onUpdate={updateAsset} 
               selectedId={selectedId}
               selectedAsset={selectedAsset}
               avatarUrl={avatarUrl}

@@ -81,16 +81,21 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
                           : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
                       }`}
                     >
-                      <div>
-                        <p className="text-sm text-white">{asset.name || `Asset ${index + 1}`}</p>
-                        {/*
-                        <p className="text-xs text-gray-400 truncate max-w-[160px]">
-                          {asset.url
-                            ? (() => { try { return new URL(asset.url).hostname } catch { return asset.url } })()
-                            : 'No URL'
+                      <div className="flex gap-3 items-center">
+                        <div>
+                          {
+                            !!asset.url && (
+                              <img 
+                                src={asset.url}
+                                alt={asset.name}
+                                className="w-8 h-8 object-contain"
+                              />
+                            )
                           }
-                        </p>
-                        */}
+                        </div>
+                        <div>
+                          <p className="text-sm text-white">{asset.name || `Asset ${index + 1}`}</p>
+                        </div>
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); onRemove(listKey, asset.id) }}

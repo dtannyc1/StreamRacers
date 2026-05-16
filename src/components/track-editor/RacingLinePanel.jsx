@@ -112,14 +112,21 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
                       : 'bg-gray-800 border border-gray-700 hover:border-gray-500'
                   }`}
                 >
+                  <div className="flex gap-3 items-center">
+                    <div>
+                      {
+                        !!mod.url && (
+                          <img 
+                            src={mod.url}
+                            alt={mod.name}
+                            className="w-8 h-8 object-contain"
+                          />
+                        )
+                      }
+                    </div>
                   <div>
                     <p className="text-sm text-white">{mod.name || `Modifier ${index + 1}`}</p>
-                    <p className="text-xs text-gray-400 truncate max-w-[160px]">
-                      {mod.url
-                        ? (() => { try { return new URL(mod.url).hostname } catch { return mod.url } })()
-                        : 'No URL'
-                      }
-                    </p>
+                  </div>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRemove(modifierKey, mod.id) }}

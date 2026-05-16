@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { createDefaultCar } from '../../lib/carDefaults'
 import { resolveImageUrl } from '../../lib/utils'
 import { hydrateAsset, phaseCorrection } from '../../shared/assetRenderer'
@@ -45,7 +45,10 @@ export const useCarEditor = (initialCar = null) => {
     }
   }, [car])
 
-  const selectedAsset = car.assets.find(a => a.id === selectedId) ?? null
+  const selectedAsset = useMemo(() => {
+    let asset = car.assets.find(a => a.id === selectedId) ?? null
+    return asset;
+  }, [car, car.assets, selectedId]);
 
   const setCarName = (name) => setCar(prev => ({ ...prev, name }))
 
@@ -54,7 +57,7 @@ export const useCarEditor = (initialCar = null) => {
       ...prev,
       assets: prev.assets.map(a => a.id === id ? { ...a, ...patch } : a),
     }))
-  }, [])
+  }, [car])
 
   const addAsset = () => {
     const newAsset = {
