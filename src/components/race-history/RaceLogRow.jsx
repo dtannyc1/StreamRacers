@@ -1,8 +1,10 @@
+import { useKVStore } from "../../context/KVStoreContext"
 import { parseDate, calcPoints, formatShortDate } from "../../shared/leaderboardFilters"
 
 export default function RaceLogRow({ race, username }) {
+  const { raceSettings } = useKVStore()
   const pos = race.racers.findIndex((n) => n.toLowerCase() === username.toLowerCase()) + 1
-  const pts = calcPoints(pos, race.racers.length)
+  const pts = calcPoints(pos, race.racers.length, (raceSettings?.pointsConfig ?? {}))
   const d   = parseDate(race.date)
 
   return (

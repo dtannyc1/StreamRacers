@@ -151,7 +151,7 @@ function posBadgeClass(pos) {
 
 function renderPanel(mode, races, refDate, maxRows = 10) {
   const { raceSet, label, sub } = getPanelData(mode, races, refDate);
-  const stats   = buildStats(raceSet, generalSettings.removeUsers || []);
+  const stats   = buildStats(raceSet, (generalSettings.removeUsers || []), (generalSettings.pointsConfig || {}));
   const leaders = sortedLeaders(stats, maxRows);
 
   const panel = document.createElement('div');

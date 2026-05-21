@@ -24,10 +24,44 @@ export function formatShortDate(d) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
 
-export function calcPoints(pos, totalRacers) {
-  const maxPts = Math.min(totalRacers, 10);
-  const pts    = maxPts - (pos - 1);
-  return Math.max(0, pts);
+export function calcPoints(pos, totalRacers, config = {}) {
+  const { 
+    maxPointsCap = 10, 
+    specialPositions = {
+      1:  { base: "max", modifier: 0 },  
+      2:  { base: "max", modifier: -1 },  
+      3:  { base: "max", modifier: -2 },  
+      4:  { base: "max", modifier: -3 },  
+      5:  { base: "max", modifier: -4 },
+      6:  { base: "max", modifier: -5 },
+      7:  { base: "max", modifier: -6 },
+      8:  { base: "max", modifier: -7 },
+      9:  { base: "max", modifier: -8 },
+      10: { base: "max", modifier: -9 }
+    }, 
+    minPointsCap = 0,
+    defaultPoints = 0 
+  } = config;
+
+  const dynamicMax = Math.min(totalRacers, maxPointsCap);
+
+  let rule = specialPositions[pos];
+  if (pos === totalRacers && specialPositions["last"] !== undefined) {
+    rule = specialPositions["last"];
+  }
+
+  if (rule !== undefined) {
+    if (typeof rule === 'number') return rule;
+
+    if (rule.base === 'max') {
+      return Math.max(minPointsCap, dynamicMax + (rule.modifier || 0));
+    }
+    if (rule.base === 'flat') {
+      return rule.value;
+    }
+  }
+
+  return defaultPoints;
 }
 
 export function filterRaces(races, mode, refDate) {

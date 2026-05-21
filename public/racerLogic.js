@@ -33,6 +33,7 @@ export const incrementCarAssetAngles = (car, dt, speed) => {
         } catch (err) {
           console.error("Custom update function failed. Disabling for this asset.", err)
           asset.isBroken = true 
+          asset.error = `Update Error: ${err.message}`
         }
       }
     } else if (asset.type === 'rotating') {
