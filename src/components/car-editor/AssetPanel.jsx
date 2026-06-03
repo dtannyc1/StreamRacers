@@ -3,7 +3,7 @@ import AssetDrawer from "../AssetDrawer"
 import AssetForm from "./AssetForm"
 import { hydrateAsset } from "../../shared/assetRenderer";
 import CustomCodeEditor from "../CustomCodeEditor";
-import { resolveImageUrl } from "../../lib/utils";
+import { resolveImageUrl } from "../../shared/gifLoader";
 
 const AssetPanel = ({ 
   car, 

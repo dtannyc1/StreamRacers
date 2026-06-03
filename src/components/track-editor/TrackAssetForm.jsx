@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import UploadButton from '../UploadButton'
 
 const NumInput = ({ label, value, onChange, step = 1, min }) => (

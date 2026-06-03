@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import { drawRacer } from '../../lib/racerRenderer'
 import { incrementCarAssetAngles } from '../../shared/racerLogic'
 import "./TrackCanvas.css"
