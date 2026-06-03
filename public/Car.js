@@ -19,7 +19,14 @@ export default class Car {
 
   static async create({ name, avatar, displayColor, xy, carData }) {
     const car = new Car({ name, avatar, displayColor, xy })
-    car.assets = await car._loadAllAssets(carData)
+    car.assets = [] 
+    car._loadAllAssets(carData)
+        .then(loadedAssets => {
+            car.assets = loadedAssets; 
+        })
+        .catch(err => {
+            console.error("Failed to load car assets background:", err);
+        });
     return car
   }
 
