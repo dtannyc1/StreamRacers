@@ -88,6 +88,7 @@ const TrackAssetList = ({ track, selectedAssetId, selectedListKey, onSelect, onA
                               <img 
                                 src={asset.url}
                                 alt={asset.name}
+                                crossOrigin="anonymous"
                                 className="w-8 h-8 object-contain"
                               />
                             )

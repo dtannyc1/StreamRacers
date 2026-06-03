@@ -100,6 +100,7 @@ const AddRacerModal = ({ onClose }) => {
               <img
                 src={twitchUser.profile_image_url}
                 alt={twitchUser.display_name}
+                crossOrigin="anonymous"
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div>

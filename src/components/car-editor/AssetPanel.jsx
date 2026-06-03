@@ -90,6 +90,7 @@ const AssetPanel = ({
                         <img 
                           src={resolveImageUrl(asset.spriteUrl)}
                           alt={asset.name}
+                          crossOrigin="anonymous"
                           className="w-8 h-8 object-contain"
                         />
                       )
