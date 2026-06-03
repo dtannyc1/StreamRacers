@@ -108,17 +108,10 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 ## Leaderboard Changes
 - Settings for Race history overlay appearance - fonts, colors, etc
 
-- Custom point setup
-  - Allows streamers to change point distribution
-  - What does the interface look like?
-
 ## Settings
 - Force all users to have one car
   - Big dropdown of all cars with usernames shown?
   - Quick enable/disable button, default disabled
-
-## Racer List
-- Car preview image
 
 ## Racer Editor
 - Add y-animation / x-animation to car in general
