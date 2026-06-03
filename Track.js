@@ -99,8 +99,8 @@ export default class Track {
     if (url.includes('dropbox.com')) {
       return url
         .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
-        .replace('?dl=0', '')
-        .replace('&dl=0', '')
+        .replace('?dl=0', '?raw=1')
+        .replace('&dl=0', '&raw=1')
     }
 
     return url
