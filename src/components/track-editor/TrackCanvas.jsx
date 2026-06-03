@@ -482,15 +482,16 @@ const TrackCanvas = ({
         y: Math.round(ds.startY + y - ds.mouseY),
       })
     }
+    
   }, [getCanvasPos, onUpdateRacingLine, onUpdateModifier])
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e) => {
     e.stopPropagation()
     e.preventDefault()
     dragState.current = null
     dragStartPos.current = null
     didDrag.current = false
-  }, [])
+  }, [getCanvasPos, onUpdateRacingLine, onUpdateModifier])
 
   const isLineEditing = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
 

@@ -71,8 +71,17 @@ export const drawAsset = (ctx, asset, drawable) => {
         asset.draw(ctx, asset, drawable)
       } catch (err) {
         console.error("Custom draw function failed. Disabling for this asset.", err)
-        asset.isBroken = true 
+        asset.isBroken = true
+        asset.error = `Draw Error: ${err.message}` 
       }
+    } else if (asset.isBroken !== true) {
+      // at least draw the image
+      if (angle !== 0) {
+        ctx.translate(x + w / 2, y + h / 2)
+        ctx.rotate(angle)
+        ctx.translate(-(x + w / 2), -(y + h / 2))
+      }
+      ctx.drawImage(drawable, x, y, w, h)
     }
   } else if (asset.type === 'avatar') {
     if (angle !== 0) {
