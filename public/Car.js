@@ -1,4 +1,4 @@
-import { loadAssetImage, pauseGIFs } from './gifLoader.js'
+import { loadAssetImage, pauseGIFs, resolveImageUrl } from './gifLoader.js'
 import { drawAllAssets, remapImageColor, phaseCorrection, hydrateAsset } from './assetRenderer.js'
 import { updateRacerPos } from './racerLogic.js'
 
@@ -19,7 +19,14 @@ export default class Car {
 
   static async create({ name, avatar, displayColor, xy, carData }) {
     const car = new Car({ name, avatar, displayColor, xy })
-    car.assets = await car._loadAllAssets(carData)
+    car.assets = [] 
+    car._loadAllAssets(carData)
+        .then(loadedAssets => {
+            car.assets = loadedAssets; 
+        })
+        .catch(err => {
+            console.error("Failed to load car assets background:", err);
+        });
     return car
   }
 
@@ -57,19 +64,7 @@ export default class Car {
     }))
   }
 
-  _resolveImageUrl = (url) => {
-    if (!url) return url
-
-    // convert Dropbox share links to direct download links
-    if (url.includes('dropbox.com')) {
-      return url
-        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
-        .replace('?dl=0', '')
-        .replace('&dl=0', '')
-    }
-
-    return url
-  }
+  _resolveImageUrl = resolveImageUrl
 
   applyColorRemaps(displayColor) {
     if (!displayColor) return

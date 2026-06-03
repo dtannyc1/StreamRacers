@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import Tooltip from '../ToolTip'
 import RacingLineForm from './RacingLineForm'
 import UploadButton from '../UploadButton'
@@ -119,6 +119,7 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
                           <img 
                             src={mod.url}
                             alt={mod.name}
+                            crossOrigin="anonymous"
                             className="w-8 h-8 object-contain"
                           />
                         )

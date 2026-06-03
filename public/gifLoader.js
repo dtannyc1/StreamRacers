@@ -24,7 +24,6 @@ export const loadGIF = async (url) => {
   // Diagnostic: If this is 0, the issue is the source file or the parser
   if (!gif.frames || gif.frames.length === 0) {
     console.error("GIF parsed but found 0 frames. Check if the URL is a valid GIF.", url);
-    console.log("Parsed GIF object:", gif);
     return [];
   }
 
@@ -111,32 +110,57 @@ export const pauseGIFs = (assets, now) => {
 }
 
 export const loadAssetImage = async (asset, avatar) => {
-  if (asset.type === 'avatar') return { img: avatar, frames: null }
+  if (asset.type === 'avatar') {
+    if (!avatar.complete) {
+      await new Promise((res) => { avatar.onload = res; avatar.onerror = res; });
+    }
+    return { img: avatar, frames: null };
+  }
+
   if (isGifUrl(asset.spriteUrl)) {
     try {
-      const frames = await loadGIF(asset.spriteUrl)
-      return { img: null, frames }
+      const frames = await loadGIF(asset.spriteUrl);
+      return { img: null, frames };
     } catch (err) {
-      console.warn(`Failed to load GIF ${asset.spriteUrl}:`, err)
-      return { img: null, frames: null }
+      console.warn(`Failed to load GIF ${asset.spriteUrl}:`, err);
+      return { img: null, frames: null };
     }
   }
-  const img = new Image()
-  img.crossOrigin = 'anonymous'
-  img.src = resolveImageUrl(asset.spriteUrl)
-  return { img, frames: null }
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  const loadPromise = new Promise((resolve) => {
+    img.onload = () => resolve({ img, frames: null });
+    img.onerror = () => {
+      console.error(`Failed to load image: ${resolveImageUrl(asset.spriteUrl)}`);
+      resolve({ img: null, frames: null }); 
+    };
+  });
+  
+  img.src = resolveImageUrl(asset.spriteUrl);
+  return loadPromise;
+};
+
+export const resolveImageUrl = (url) => {
+  if (!url) return url;
+
+  if (url.includes('dropbox.com')) {
+    try {
+      const urlObj = new URL(url);
+      // Switch to the direct download subdomain
+      if (urlObj.hostname === 'www.dropbox.com') {
+        urlObj.hostname = 'dl.dropboxusercontent.com';
+      }
+      // Strip out the view-only share parameters entirely
+      urlObj.searchParams.delete('dl');
+      urlObj.searchParams.delete('st');
+      
+      return urlObj.toString();
+    } catch (e) {
+      // Fallback if URL parsing fails for some reason
+      return url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    }
+  }
+
+  return url;
 }
-
-const resolveImageUrl = (url) => {
-    if (!url) return url
-
-    // convert Dropbox share links to direct download links
-    if (url.includes('dropbox.com')) {
-      return url
-        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
-        .replace('?dl=0', '')
-        .replace('&dl=0', '')
-    }
-
-    return url
-  }
