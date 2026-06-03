@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useKVStore } from '../../context/KVStoreContext'
 import { useRef, useEffect, useState } from 'react'
 import { drawRacer, preloadCarImages } from '../../lib/racerRenderer'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 
 const CarCard = ({ car, index, username }) => {
   const canvasRef = useRef(null)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import Tooltip from '../ToolTip'
 import RacingLineForm from './RacingLineForm'
 import UploadButton from '../UploadButton'
