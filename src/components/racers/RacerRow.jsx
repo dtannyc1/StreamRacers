@@ -145,6 +145,7 @@ const RacerRow = ({ username, cars = [] }) => {
             <img
               src={twitchUser.profile_image_url}
               alt={twitchUser.display_name}
+              crossOrigin="anonymous"
               className="w-8 h-8 rounded-full object-cover flex-shrink-0"
             />
             <div>

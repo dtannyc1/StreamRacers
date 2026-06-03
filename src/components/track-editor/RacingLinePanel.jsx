@@ -119,6 +119,7 @@ const ModifierList = ({ modifiers, modifierKey, selection, onSelect, onAdd, onRe
                           <img 
                             src={mod.url}
                             alt={mod.name}
+                            crossOrigin="anonymous"
                             className="w-8 h-8 object-contain"
                           />
                         )
