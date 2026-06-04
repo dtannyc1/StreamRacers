@@ -3,6 +3,7 @@ import AssetDrawer from "../AssetDrawer"
 import AssetForm from "./AssetForm"
 import { hydrateAsset } from "../../shared/assetRenderer";
 import CustomCodeEditor from "../CustomCodeEditor";
+import { resolveImageUrl } from "../../shared/gifLoader";
 
 const AssetPanel = ({ 
   car, 
@@ -87,8 +88,9 @@ const AssetPanel = ({
                     {
                       !!asset.spriteUrl && (
                         <img 
-                          src={asset.spriteUrl}
+                          src={resolveImageUrl(asset.spriteUrl)}
                           alt={asset.name}
+                          crossOrigin="anonymous"
                           className="w-8 h-8 object-contain"
                         />
                       )

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import { drawAsset, phaseCorrection, resolveDrawable } from '../../shared/assetRenderer'
 import { preloadCarImages } from '../../lib/racerRenderer'
 import { updateRacerPos } from '../../shared/racerLogic'

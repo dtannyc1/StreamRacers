@@ -27,6 +27,14 @@ export default class CarManager {
       this.defaultCarData = raceSettings?.defaultRacer ?? DEFAULT_CAR_DATA
       console.log('Custom car data loaded:', this.customCarData)
       console.log('Default car data loaded:', this.defaultCarData ? 'yes' : 'no')
+      if (raceSettings?.carOverride && raceSettings.carOverride.enabled) {
+        if (raceSettings.carOverride.userName && raceSettings.carOverride.carName) {
+          this.carOverride = this.customCarData[raceSettings.carOverride.userName]?.find(car => car.name === raceSettings.carOverride.carName) || null
+          if (this.carOverride) {
+            console.log('Car override loaded:', this.carOverride.name)
+          } 
+        }
+      }
     } catch (err) {
       console.warn('Failed to load car data:', err)
       this.customCarData = {}
@@ -62,9 +70,9 @@ export default class CarManager {
 
     const carList = this.customCarData[username] ?? []
     const filteredCarList = carList.filter((car) => !car.disabled)
-    const carData = (filteredCarList.length > 0)
+    const carData = this.carOverride || ((filteredCarList.length > 0)
       ? filteredCarList[Math.floor(Math.random() * filteredCarList.length)]
-      : this.defaultCarData
+      : this.defaultCarData)
 
     const yMin = Math.min(racingLine.p1[1], racingLine.p2[1])
     const yMax = Math.max(racingLine.p1[1], racingLine.p2[1])

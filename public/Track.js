@@ -1,3 +1,5 @@
+import { resolveImageUrl } from './gifLoader.js'
+
 export default class Track {
   constructor(trackData) {
     this.name = trackData.name
@@ -92,19 +94,7 @@ export default class Track {
     this.foregroundAssets.forEach(a => this._loadImage(a.url))
   }
 
-  _resolveImageUrl = (url) => {
-    if (!url) return url
-
-    // convert Dropbox share links to direct download links
-    if (url.includes('dropbox.com')) {
-      return url
-        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
-        .replace('?dl=0', '')
-        .replace('&dl=0', '')
-    }
-
-    return url
-  }
+  _resolveImageUrl = resolveImageUrl
 
   // ── Scattered asset management ─────────────────────────────────────────────
 

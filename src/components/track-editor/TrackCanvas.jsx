@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import { drawRacer } from '../../lib/racerRenderer'
 import { incrementCarAssetAngles } from '../../shared/racerLogic'
 import "./TrackCanvas.css"
@@ -482,15 +482,16 @@ const TrackCanvas = ({
         y: Math.round(ds.startY + y - ds.mouseY),
       })
     }
+    
   }, [getCanvasPos, onUpdateRacingLine, onUpdateModifier])
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e) => {
     e.stopPropagation()
     e.preventDefault()
     dragState.current = null
     dragStartPos.current = null
     didDrag.current = false
-  }, [])
+  }, [getCanvasPos, onUpdateRacingLine, onUpdateModifier])
 
   const isLineEditing = (visibleModifierKeyRef.current === 'Image' || visibleModifierKeyRef.current === 'Line Segment')
 

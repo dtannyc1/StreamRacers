@@ -20,6 +20,7 @@ const ChannelProfile = ({ channel, onClear }) => {
               <img
                   src={avatar}
                   alt={displayName ?? username}
+                  crossOrigin="anonymous"
                   className="w-10 h-10 rounded-full object-cover"
               />
               )}

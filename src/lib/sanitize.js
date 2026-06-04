@@ -63,3 +63,21 @@ export const sanitizeCarData = (rawCarData) => {
   }
   return cleanCarData
 }
+
+export const downloadCarAsJSON = (rawCarData) => {
+  try {
+    const cleanCarData = sanitizeCarData(rawCarData)
+    const jsonStr = JSON.stringify(cleanCarData, null, 2)
+    const blob = new Blob([jsonStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${cleanCarData.name || 'car'}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error("Failed to export car data:", err)
+  }
+}

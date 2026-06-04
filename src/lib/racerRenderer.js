@@ -3,11 +3,11 @@ import { loadAssetImage } from '../shared/gifLoader'
 
 export const preloadCarImages = async (car, avatarUrl, assetListRef) => {
   const initTime = performance.now()
+  const avatarImg = new Image()
+  avatarImg.crossOrigin = 'anonymous'
+  avatarImg.src = avatarUrl
   // assetList is the mutable array to populate
   await Promise.all(car.assets.map(async (asset, i) => {
-    const avatarImg = new Image()
-    avatarImg.crossOrigin = 'anonymous'
-    avatarImg.src = avatarUrl
     const { img: loadedImg, frames } = await loadAssetImage(asset, avatarImg)
     assetListRef.current[asset.id] = {
       ...asset,

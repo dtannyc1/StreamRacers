@@ -289,7 +289,7 @@ const DebouncedUrlInput = ({ value, onChange }) => {
 }
 
 const SettingsPanel = () => {
-  const { raceSettings, updateRaceSettings, tracks, error: kvStoreError } = useKVStore()
+  const { racers, raceSettings, updateRaceSettings, tracks, error: kvStoreError } = useKVStore()
   const [local, setLocal] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -378,18 +378,6 @@ const SettingsPanel = () => {
           onChange={(v) => update({ raceDuration: v })}
           step={5}
         />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Race History Filters" defaultCollapsed={true}>
-        <CollapsibleSection title="Filtered Users">
-            <p className="text-xs text-gray-500">Users to exclude from the race history.</p>
-            <EditableList
-              items={settings.removeUsers}
-              onChange={(v) => update({ removeUsers: v })}
-              placeholder="username"
-              onResolve={resolveUsername}
-            />
-        </CollapsibleSection>
       </CollapsibleSection>
 
       <CollapsibleSection title="Testing Mode" defaultCollapsed={true}>
@@ -553,47 +541,42 @@ const SettingsPanel = () => {
         </div>  
       </CollapsibleSection>
 
-      {
-        DEV_MODE && (
-          <CollapsibleSection title="Developer Mode" defaultCollapsed={true}>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.dev_mode}
-                onChange={(e) => update({ dev_mode: e.target.checked })}
-                className="w-4 h-4 accent-purple-500"
-              />
-              <span className="text-sm text-white">Enable developer mode</span>
-              <span className="text-xs text-gray-500">(only enable if you know what you're doing)</span>
-            </label>
-          </CollapsibleSection>
-        )
-      }
+      <CollapsibleSection title="Chat Commands" defaultCollapsed={true}>
+        <CollapsibleSection title="Join Commands">
+          <p className="text-xs text-gray-500">Chat messages that allows a user to join the race.</p>
+          <EditableList
+            items={settings.joinCommands}
+            onChange={(v) => update({ joinCommands: v })}
+            placeholder="!join"
+          />
+        </CollapsibleSection>
 
-      <CollapsibleSection title="Join Commands">
-        <p className="text-xs text-gray-500">Chat messages that allows a user to join the race.</p>
-        <EditableList
-          items={settings.joinCommands}
-          onChange={(v) => update({ joinCommands: v })}
-          placeholder="!join"
-        />
+        <CollapsibleSection title="Go Commands">
+          <p className="text-xs text-gray-500">Broadcaster commands that start the race.</p>
+          <EditableList
+            items={settings.goCommands}
+            onChange={(v) => update({ goCommands: v })}
+            placeholder="!go"
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Reset Commands">
+          <p className="text-xs text-gray-500">Moderator commands that restart the race.</p>
+          <EditableList
+            items={settings.resetCommands}
+            onChange={(v) => update({ resetCommands: v })}
+            placeholder="!reset"
+          />
+        </CollapsibleSection>
       </CollapsibleSection>
-
-      <CollapsibleSection title="Go Commands">
-        <p className="text-xs text-gray-500">Broadcaster commands that start the race.</p>
+      
+      <CollapsibleSection title="Race History Filters" defaultCollapsed={true}>
+        <p className="text-xs text-gray-500">Users to exclude from the race history.</p>
         <EditableList
-          items={settings.goCommands}
-          onChange={(v) => update({ goCommands: v })}
-          placeholder="!go"
-        />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Reset Commands">
-        <p className="text-xs text-gray-500">Moderator commands that restart the race.</p>
-        <EditableList
-          items={settings.resetCommands}
-          onChange={(v) => update({ resetCommands: v })}
-          placeholder="!reset"
+          items={settings.removeUsers}
+          onChange={(v) => update({ removeUsers: v })}
+          placeholder="username"
+          onResolve={resolveUsername}
         />
       </CollapsibleSection>
 
@@ -654,6 +637,29 @@ const SettingsPanel = () => {
             onChange={(v) => update({ wordBank: v })}
           />
         </CollapsibleSection>
+      }
+
+      {
+        DEV_MODE && (
+          <CollapsibleSection title="Developer Mode" defaultCollapsed={true}>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.dev_mode}
+                onChange={(e) => update({ dev_mode: e.target.checked })}
+                className="w-4 h-4 accent-purple-500"
+              />
+              <span className="text-sm text-white">Enable developer mode</span>
+              <span className="text-xs text-gray-500">(only enable if you know what you're doing)</span>
+            </label>
+            <p className="text-sm text-gray-500">
+              Feature(s) behind this flag are experimental and may change or be removed in future versions.
+            </p>
+            <p className="text-xs text-gray-500">
+              - Custom draw and update functions for car assets
+            </p>
+          </CollapsibleSection>
+        )
       }
 
     </div>

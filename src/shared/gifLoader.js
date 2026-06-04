@@ -132,7 +132,7 @@ export const loadAssetImage = async (asset, avatar) => {
   const loadPromise = new Promise((resolve) => {
     img.onload = () => resolve({ img, frames: null });
     img.onerror = () => {
-      console.error(`Failed to load image: ${asset.spriteUrl}`);
+      console.error(`Failed to load image: ${resolveImageUrl(asset.spriteUrl)}`);
       resolve({ img: null, frames: null }); 
     };
   });
@@ -141,16 +141,26 @@ export const loadAssetImage = async (asset, avatar) => {
   return loadPromise;
 };
 
-const resolveImageUrl = (url) => {
-    if (!url) return url
+export const resolveImageUrl = (url) => {
+  if (!url) return url;
 
-    // convert Dropbox share links to direct download links
-    if (url.includes('dropbox.com')) {
-      return url
-        .replace('www.dropbox.com', 'dl.dropboxusercontent.com')
-        .replace('?dl=0', '')
-        .replace('&dl=0', '')
+  if (url.includes('dropbox.com')) {
+    try {
+      const urlObj = new URL(url);
+      // Switch to the direct download subdomain
+      if (urlObj.hostname === 'www.dropbox.com') {
+        urlObj.hostname = 'dl.dropboxusercontent.com';
+      }
+      // Strip out the view-only share parameters entirely
+      urlObj.searchParams.delete('dl');
+      urlObj.searchParams.delete('st');
+      
+      return urlObj.toString();
+    } catch (e) {
+      // Fallback if URL parsing fails for some reason
+      return url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
     }
-
-    return url
   }
+
+  return url;
+}

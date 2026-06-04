@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { createDefaultCar } from '../../lib/carDefaults'
-import { resolveImageUrl } from '../../lib/utils'
+import { resolveImageUrl } from '../../shared/gifLoader'
 import { hydrateAsset, phaseCorrection } from '../../shared/assetRenderer'
 
 export const useCarEditor = (initialCar = null) => {
@@ -262,6 +262,7 @@ export const useCarEditor = (initialCar = null) => {
     car,
     selectedId,
     selectedAsset,
+    setCar,
     setSelectedId,
     setCarName,
     updateAsset,

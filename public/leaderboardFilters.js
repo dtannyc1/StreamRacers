@@ -24,29 +24,39 @@ export function formatShortDate(d) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
 
+export const DEFAULT_POINTS_CONFIG = { 
+  maxPointsCap: 10, 
+  specialPositions: {
+    1:  { base: "max", modifier: 0 },  
+    2:  { base: "max", modifier: -1 },  
+    3:  { base: "max", modifier: -2 },  
+    4:  { base: "max", modifier: -3 },  
+    5:  { base: "max", modifier: -4 },
+    6:  { base: "max", modifier: -5 },
+    7:  { base: "max", modifier: -6 },
+    8:  { base: "max", modifier: -7 },
+    9:  { base: "max", modifier: -8 },
+    10: { base: "max", modifier: -9 },
+    last: { base: "flat", modifier: 0 },
+  }, 
+  minPointsCap: 0,
+  defaultPoints: 0,
+  enforceLastPositionRule: false
+}
+
 export function calcPoints(pos, totalRacers, config = {}) {
   const { 
-    maxPointsCap = 10, 
-    specialPositions = {
-      1:  { base: "max", modifier: 0 },  
-      2:  { base: "max", modifier: -1 },  
-      3:  { base: "max", modifier: -2 },  
-      4:  { base: "max", modifier: -3 },  
-      5:  { base: "max", modifier: -4 },
-      6:  { base: "max", modifier: -5 },
-      7:  { base: "max", modifier: -6 },
-      8:  { base: "max", modifier: -7 },
-      9:  { base: "max", modifier: -8 },
-      10: { base: "max", modifier: -9 }
-    }, 
-    minPointsCap = 0,
-    defaultPoints = 0 
+    maxPointsCap = DEFAULT_POINTS_CONFIG.maxPointsCap,
+    specialPositions = DEFAULT_POINTS_CONFIG.specialPositions, 
+    minPointsCap = DEFAULT_POINTS_CONFIG.minPointsCap,
+    defaultPoints = DEFAULT_POINTS_CONFIG.defaultPoints,
+    enforceLastPositionRule = DEFAULT_POINTS_CONFIG.enforceLastPositionRule,
   } = config;
 
-  const dynamicMax = Math.min(totalRacers, maxPointsCap);
+  const dynamicMax = maxPointsCap - 10 + Math.min(totalRacers, 10);
 
   let rule = specialPositions[pos];
-  if (pos === totalRacers && specialPositions["last"] !== undefined) {
+  if (pos === totalRacers && specialPositions["last"] !== undefined && rule?.base !== "flat" && config.enforceLastPositionRule) {
     rule = specialPositions["last"];
   }
 
@@ -57,7 +67,7 @@ export function calcPoints(pos, totalRacers, config = {}) {
       return Math.max(minPointsCap, dynamicMax + (rule.modifier || 0));
     }
     if (rule.base === 'flat') {
-      return rule.value;
+      return rule.modifier;
     }
   }
 
@@ -78,7 +88,7 @@ export function removeUsersFromStats(racers, removeUsers) {
   return racers.filter((r) => !removeUsers.includes(r))
 }
 
-export function buildStats(raceSet, removeUsers = []) {
+export function buildStats(raceSet, removeUsers = [], pointsConfig = {}) {
   const stats = {}
   raceSet.forEach((race) => {
     const filteredRacers = removeUsersFromStats(race.racers, removeUsers)
@@ -91,7 +101,7 @@ export function buildStats(raceSet, removeUsers = []) {
       if (pos < stats[name].bestPos) stats[name].bestPos = pos
       if (pos === 1) stats[name].wins++
       if (pos <= 3)  stats[name].podiums++
-      stats[name].points += calcPoints(pos, filteredRacers.length)
+      stats[name].points += calcPoints(pos, filteredRacers.length, pointsConfig)
     })
   })
   return stats
