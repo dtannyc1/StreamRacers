@@ -159,6 +159,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
                         return
                       }
                       cleanData.assets.forEach(asset => {
+                        asset.id = crypto.randomUUID()
                         if (asset.type === 'avatar' && asset.spriteUrl) {
                           asset.spriteUrl = car.assets.find(a => a.type === 'avatar')?.spriteUrl || asset.spriteUrl
                         }

@@ -39,6 +39,9 @@ const AddRacerModal = ({ onClose, carData = null }) => {
     onClose()
     if (carData?.assets?.length) {
       carData.assets.find(a => a.type === 'avatar').spriteUrl = twitchUser.profile_image_url
+      carData.assets.forEach(asset => {
+        asset.id = crypto.randomUUID()
+      })
     }
     navigate(`/racer/${twitchUser.display_name}/car/new`, { state: { carData } })
   }
