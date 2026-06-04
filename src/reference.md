@@ -112,11 +112,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
   - Allows streamers to change point distribution
   - What does the interface look like?
 
-## Settings
-- Force all users to have one car
-  - Big dropdown of all cars with usernames shown?
-  - Quick enable/disable button, default disabled
-
 ## Racer List
 - Car preview image
 
@@ -149,16 +144,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
     - might not be useful. if user breaks the rendering for that asset, we shouldnt stop them
   - Add universal var for cars in general so custom assets can be synchronized
     - Need to pass in var to all assets
-  
-- Add import/export function to share cars
-  - Save car stuff as json
-  - Export entire track data json
-  - Allows users to contribute to art
-
-- Add way to quickly duplicate cars
-  - consider creating a carTemplate key
-    - Clicking a button copies the entire car object into that dict
-  - Add a way to load from template to change everything
 
 ## Track Editor
 - Ensure that all fonts are loaded into Track Editor
