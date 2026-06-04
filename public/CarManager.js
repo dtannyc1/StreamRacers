@@ -70,9 +70,9 @@ export default class CarManager {
 
     const carList = this.customCarData[username] ?? []
     const filteredCarList = carList.filter((car) => !car.disabled)
-    const carData = this.carOverride || (filteredCarList.length > 0)
+    const carData = this.carOverride || ((filteredCarList.length > 0)
       ? filteredCarList[Math.floor(Math.random() * filteredCarList.length)]
-      : this.defaultCarData
+      : this.defaultCarData)
 
     const yMin = Math.min(racingLine.p1[1], racingLine.p2[1])
     const yMax = Math.max(racingLine.p1[1], racingLine.p2[1])
