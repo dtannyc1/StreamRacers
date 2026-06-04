@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useKVStore } from '../../context/KVStoreContext'
 import { useRef, useEffect, useState } from 'react'
 import { drawRacer, preloadCarImages } from '../../lib/racerRenderer'
+import { sanitizeCarData } from '../../lib/sanitize'
 import { resolveImageUrl } from '../../shared/gifLoader'
 
 const CarCard = ({ car, index, username, onDuplicateCar }) => {
@@ -95,7 +96,7 @@ const CarCard = ({ car, index, username, onDuplicateCar }) => {
           {car.disabled ? 'Enable' : 'Disable'}
         </button>
         <button
-          onClick={() => onDuplicateCar(car)}
+          onClick={() => onDuplicateCar(sanitizeCarData(car))}
           className="text-xs cursor-pointer text-purple-400 hover:text-purple-300 transition-colors"
         >
           Duplicate
