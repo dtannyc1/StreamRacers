@@ -9,6 +9,7 @@ const RacerList = () => {
   const { racers, loading, error, raceSettings } = useKVStore()
   const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
+  const [duplicatedCarData, setDuplicatedCarData] = useState(null)
 
   if (loading) return <p className="text-sm text-gray-400">Loading racers...</p>
   if (error === 'Failed to list kvstore keys (404)' ) return <ErrorNewUser error={error}/>
@@ -58,12 +59,28 @@ const RacerList = () => {
 
         <div className="flex flex-col gap-2">
           {usernames.map(username => (
-            <RacerRow key={username} username={username} cars={racers[username]} />
+            <RacerRow 
+              key={username} 
+              username={username} 
+              cars={racers[username]} 
+              onDuplicateCar={(carData) => {
+                setDuplicatedCarData(carData)
+                setShowModal(true)
+              }}
+            />
           ))}
         </div>
       </div>
 
-      {showModal && <AddRacerModal onClose={() => setShowModal(false)} />}
+      {showModal && 
+        <AddRacerModal 
+          onClose={() => {
+            setShowModal(false); 
+            setDuplicatedCarData(null)
+          }} 
+          carData={duplicatedCarData} 
+        />
+      }
     </>
   )
 }

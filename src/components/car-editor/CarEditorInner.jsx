@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 import { useCarEditor } from './useCarEditor'
@@ -14,6 +14,9 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
   const [ drawerOpen, setDrawerOpen ] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const existingCarData = location.state?.carData
 
   const {
     car,
@@ -32,7 +35,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     onCanvasMouseUp,
     onSpriteUrlChange,
     toggleAspectLock,
-  } = useCarEditor(initialCar)
+  } = useCarEditor(existingCarData || initialCar)
 
   const handleSave = async () => {
     const avatarCount = car.assets.filter(a => a.type === 'avatar').length

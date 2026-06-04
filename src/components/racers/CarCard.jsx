@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import { drawRacer, preloadCarImages } from '../../lib/racerRenderer'
 import { resolveImageUrl } from '../../shared/gifLoader'
 
-const CarCard = ({ car, index, username }) => {
+const CarCard = ({ car, index, username, onDuplicateCar }) => {
   const canvasRef = useRef(null)
   const assetsRef = useRef({})
   const assets = car?.assets || []
@@ -93,6 +93,12 @@ const CarCard = ({ car, index, username }) => {
           className={`text-xs cursor-pointer ${car.disabled ? 'text-green-400' : 'text-red-400'} hover:text-purple-300 transition-colors`}
         >
           {car.disabled ? 'Enable' : 'Disable'}
+        </button>
+        <button
+          onClick={() => onDuplicateCar(car)}
+          className="text-xs cursor-pointer text-purple-400 hover:text-purple-300 transition-colors"
+        >
+          Duplicate
         </button>
         <button
           onClick={() => navigate(`/racer/${username}/car/${index}/edit`)}
