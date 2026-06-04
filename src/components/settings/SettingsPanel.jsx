@@ -720,4 +720,4 @@ const SettingsPanel = () => {
   )
 }
 
-export default SettingsPanel;
+export default SettingsPanel
