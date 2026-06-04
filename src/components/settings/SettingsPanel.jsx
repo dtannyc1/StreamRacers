@@ -430,7 +430,11 @@ const SettingsPanel = () => {
         </label>
         
         <select
-          value={settings.carOverride?.carName ? `${settings.carOverride.userName}::${settings.carOverride.carName}` : ''}
+          value={
+            settings.carOverride?.carName 
+              ? JSON.stringify({ username: settings.carOverride.userName, carName: settings.carOverride.carName }) 
+              : ''
+          }
           onChange={(e) => {
             const val = e.target.value;
             if (!val) {
@@ -438,7 +442,7 @@ const SettingsPanel = () => {
               return
             }
 
-            const [username, carName] = val.split('::')
+            const { username, carName } = JSON.parse(val)
             update({ 
               carOverride: { 
                 ...settings.carOverride, 
@@ -448,19 +452,19 @@ const SettingsPanel = () => {
             })
           }}
           className="rounded bg-gray-700 border border-gray-600 px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
-        >
-            <option value="">-- None --</option>
-            {Object.entries(racers ?? {}).flatMap(([username, cars]) => 
-              cars.map(car => (
-                <option 
-                  key={`${username}-${car.name}`} 
-                  value={`${username}::${car.name}`} 
-                >
-                  {car.name} ({username})
-                </option>
-              ))
-            )}
-        </select>
+      >
+          <option value="">-- Disable Override --</option>
+          {Object.entries(racers ?? {}).flatMap(([username, cars]) => 
+            cars.map(car => (
+              <option 
+                key={`${username}-${car.name}`} 
+                value={JSON.stringify({ username, carName: car.name })} 
+              >
+                {car.name} ({username})
+              </option>
+            ))
+          )}
+      </select>
 
       </CollapsibleSection>
 
