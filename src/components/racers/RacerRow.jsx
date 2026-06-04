@@ -4,7 +4,7 @@ import { useKVStore } from '../../context/KVStoreContext'
 import { getTwitchUser } from '../../lib/twitch'
 import CarCard from './CarCard'
 
-const RacerRow = ({ username, cars = [] }) => {
+const RacerRow = ({ username, onDuplicateCar, cars = [] }) => {
   const [expanded, setExpanded] = useState(false)
   const [editing, setEditing] = useState(false)
   const [newUsername, setNewUsername] = useState(username)
@@ -178,7 +178,7 @@ const RacerRow = ({ username, cars = [] }) => {
             <p className="text-sm text-gray-500">No cars yet.</p>
           )}
           {cars.map((car, index) => (
-            <CarCard key={index} car={car} index={index} username={username} />
+            <CarCard key={index} car={car} index={index} username={username} onDuplicateCar={onDuplicateCar} />
           ))}
           <button
             onClick={() => navigate(`/racer/${username}/car/new`)}

@@ -287,7 +287,7 @@ const DebouncedUrlInput = ({ value, onChange }) => {
 }
 
 const SettingsPanel = () => {
-  const { raceSettings, updateRaceSettings, tracks, error: kvStoreError } = useKVStore()
+  const { racers, raceSettings, updateRaceSettings, tracks, error: kvStoreError } = useKVStore()
   const [local, setLocal] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -412,6 +412,56 @@ const SettingsPanel = () => {
               onResolve={resolveUsername}
             />
         </CollapsibleSection>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Car Override" defaultCollapsed={true}>
+        <p className="text-xs text-gray-500">
+          Choose a car to override for ALL users
+        </p>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={settings.carOverride?.enabled || false}
+            onChange={(e) => update({ carOverride: { ...settings.carOverride, enabled: e.target.checked } })}
+            className="w-4 h-4 accent-purple-500"
+          />
+          <span className="text-sm text-white">Enable car override</span>
+          <span className="text-xs text-gray-500">(overrides all user cars)</span>
+        </label>
+        
+        <select
+          value={settings.carOverride?.carName ? `${settings.carOverride.userName}::${settings.carOverride.carName}` : ''}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (!val) {
+              update({ carOverride: { ...settings.carOverride, carName: null, userName: null } })
+              return
+            }
+
+            const [username, carName] = val.split('::')
+            update({ 
+              carOverride: { 
+                ...settings.carOverride, 
+                carName: carName, 
+                userName: username 
+              } 
+            })
+          }}
+          className="rounded bg-gray-700 border border-gray-600 px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
+        >
+            <option value="">-- None --</option>
+            {Object.entries(racers ?? {}).flatMap(([username, cars]) => 
+              cars.map(car => (
+                <option 
+                  key={`${username}-${car.name}`} 
+                  value={`${username}::${car.name}`} 
+                >
+                  {car.name} ({username})
+                </option>
+              ))
+            )}
+        </select>
+
       </CollapsibleSection>
 
       {

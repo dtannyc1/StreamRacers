@@ -3,13 +3,13 @@ import { getTwitchUser } from '../../lib/twitch'
 import { useKVStore } from '../../context/KVStoreContext'
 import { useNavigate } from 'react-router-dom'
 
-const STEPS = { INPUT: 'input', CONFIRM: 'confirm' }
+const STEPS = { INPUT: 'input', CONFIRM: 'confirm', DUPLICATE: 'duplicate' }
 
-const AddRacerModal = ({ onClose }) => {
+const AddRacerModal = ({ onClose, carData = null }) => {
   const { racers, updateRacers } = useKVStore()
   const navigate = useNavigate()
 
-  const [step, setStep] = useState(STEPS.INPUT)
+  const [step, setStep] = useState(carData ? STEPS.DUPLICATE : STEPS.INPUT)
   const [username, setUsername] = useState('')
   const [twitchUser, setTwitchUser] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -20,19 +20,10 @@ const AddRacerModal = ({ onClose }) => {
     const trimmed = username.trim()
     if (!trimmed) return
 
-    if (racers?.[trimmed]) {
-      setError(`"${trimmed}" is already in your racer list.`)
-      return
-    }
-
     setLoading(true)
     setError(null)
     try {
       const user = await getTwitchUser(trimmed)
-      if (racers?.[user.display_name]) {
-        setError(`"${user.display_name}" is already in your racer list.`)
-        return
-      }
       setTwitchUser(user)
       setStep(STEPS.CONFIRM)
     } catch (err) {
@@ -43,10 +34,16 @@ const AddRacerModal = ({ onClose }) => {
   }
 
   const handleConfirm = async () => {
-    const updatedRacers = { ...racers, [twitchUser.display_name]: [] }
+    const updatedRacers = {  [twitchUser.display_name]: [], ...racers }
     await updateRacers(updatedRacers)
     onClose()
-    navigate(`/racer/${twitchUser.display_name}/car/new`)
+    if (carData?.assets?.length) {
+      carData.assets.find(a => a.type === 'avatar').spriteUrl = twitchUser.profile_image_url
+      carData.assets.forEach(asset => {
+        asset.id = crypto.randomUUID()
+      })
+    }
+    navigate(`/racer/${twitchUser.display_name}/car/new`, { state: { carData } })
   }
 
   const handleBack = () => {
@@ -59,9 +56,21 @@ const AddRacerModal = ({ onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-xl bg-gray-800 border border-gray-700 p-6 flex flex-col gap-5 shadow-xl">
 
-        {step === STEPS.INPUT && (
+        {(step === STEPS.INPUT || step === STEPS.DUPLICATE) && (
           <>
-            <h2 className="text-lg font-semibold text-white">Add Racer</h2>
+            <div
+              className="flex gap-1 flex-col"
+            >
+            <h2 className="text-lg font-semibold text-white">
+              {carData ? 'Duplicate Car for User' : 'Add Racer'}
+            </h2>
+            <p className="text-sm text-gray-400">
+              {carData 
+                ? `You're about to duplicate a car - ${carData.name}. Please enter the Twitch username of the racer you want to duplicate the car for.`
+                : `To add a new racer, please enter their Twitch username. This will allow us to fetch their profile picture as the avatar for their car.`
+              }
+            </p>
+            </div>
             <form onSubmit={handleLookup} className="flex flex-col gap-3">
               <label className="text-sm font-medium text-gray-300">Twitch Username</label>
               <input
@@ -120,7 +129,7 @@ const AddRacerModal = ({ onClose }) => {
                 onClick={handleConfirm}
                 className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
               >
-                Yes, add racer
+                {carData ? 'Yes, duplicate car' : 'Yes, create car'}
               </button>
             </div>
           </>
