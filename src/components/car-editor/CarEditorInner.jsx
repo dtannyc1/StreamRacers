@@ -1,10 +1,10 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { useKVStore } from '../../context/KVStoreContext'
 import { useCarEditor } from './useCarEditor'
 import CarCanvas from './CarCanvas'
 import AssetPanel from './AssetPanel'
-import { sanitizeCarData, sanitizeDeep, validateCar } from '../../lib/sanitize'
+import { sanitizeCarData, sanitizeDeep, validateCar, downloadCarAsJSON } from '../../lib/sanitize'
 import { getComplementaryColor, remapImageColor } from '../../shared/assetRenderer'
 import { loadAssetImage } from '../../shared/gifLoader'
 import { trackEvent } from '../../lib/analytics'
@@ -17,11 +17,15 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
   const [ drawerOpen, setDrawerOpen ] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const existingCarData = location.state?.carData
 
   const {
     car,
     selectedId,
     selectedAsset,
+    setCar,
     setSelectedId,
     setCarName,
     updateAsset,
@@ -34,7 +38,7 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
     onCanvasMouseUp,
     onSpriteUrlChange,
     toggleAspectLock,
-  } = useCarEditor(initialCar)
+  } = useCarEditor(existingCarData || initialCar)
 
   const handleSave = async () => {
     const avatarCount = car.assets.filter(a => a.type === 'avatar').length
@@ -150,6 +154,50 @@ const CarEditorInner = ({ mode, username, carIndex, initialCar, avatarUrl, isDef
             )}
           </div>
           <div className="flex items-center gap-4">
+            <button
+              className="rounded-lg cursor-pointer bg-gray-700 px-5 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
+              onPointerDown={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = 'application/json'
+                input.onchange = (e) => {
+                  const file = e.target.files[0]
+                  if (!file) return
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    try {
+                      const json = JSON.parse(event.target.result)
+                      const cleanData = sanitizeCarData(sanitizeDeep(json))
+                      const carError = validateCar(cleanData)
+                      if (carError) {
+                        setSaveError(`Invalid car data: ${carError}`)
+                        return
+                      }
+                      cleanData.assets.forEach(asset => {
+                        asset.id = crypto.randomUUID()
+                        if (asset.type === 'avatar' && asset.spriteUrl) {
+                          asset.spriteUrl = car.assets.find(a => a.type === 'avatar')?.spriteUrl || asset.spriteUrl
+                        }
+                      })
+                      setCar(cleanData)
+                      setSaveError(null)
+                    } catch (err) {
+                      setSaveError('Failed to parse JSON file. Please ensure it is a valid car export.')
+                    }
+                  }
+                  reader.readAsText(file)
+                }
+                input.click() 
+              }}
+            >
+              Import
+            </button>
+            <button
+              onPointerDown={() => downloadCarAsJSON(car)}
+              className="rounded-lg cursor-pointer bg-gray-700 px-5 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
+            >
+              Export
+            </button>
             {saveError && (
                 <p className="text-sm text-red-400">{saveError}</p>
             )}

@@ -262,6 +262,7 @@ export const useCarEditor = (initialCar = null) => {
     car,
     selectedId,
     selectedAsset,
+    setCar,
     setSelectedId,
     setCarName,
     updateAsset,
