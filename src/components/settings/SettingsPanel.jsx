@@ -404,6 +404,60 @@ const SettingsPanel = () => {
         </CollapsibleSection>
       </CollapsibleSection>
 
+      <CollapsibleSection title="Global Car Override" defaultCollapsed={true}>
+        <p className="text-xs text-gray-500">
+          Choose a car to use for ALL users. 
+        </p>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={settings.carOverride?.enabled || false}
+            onChange={(e) => update({ carOverride: { ...settings.carOverride, enabled: e.target.checked } })}
+            className="w-4 h-4 accent-purple-500"
+          />
+          <span className="text-sm text-white">Enable car override</span>
+          <span className="text-xs text-gray-500">(overrides all user cars)</span>
+        </label>
+        
+        <select
+          value={
+            settings.carOverride?.carName 
+              ? JSON.stringify({ username: settings.carOverride.userName, carName: settings.carOverride.carName }) 
+              : ''
+          }
+          onChange={(e) => {
+            const val = e.target.value;
+            if (!val) {
+              update({ carOverride: { ...settings.carOverride, carName: null, userName: null } })
+              return
+            }
+
+            const { username, carName } = JSON.parse(val)
+            update({ 
+              carOverride: { 
+                ...settings.carOverride, 
+                carName: carName, 
+                userName: username 
+              } 
+            })
+          }}
+          className="rounded bg-gray-700 border border-gray-600 px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
+      >
+          <option value="">-- Disable Override --</option>
+          {Object.entries(racers ?? {}).flatMap(([username, cars]) => 
+            cars.map(car => (
+              <option 
+                key={`${username}-${car.name}`} 
+                value={JSON.stringify({ username, carName: car.name })} 
+              >
+                {car.name} ({username})
+              </option>
+            ))
+          )}
+      </select>
+
+      </CollapsibleSection>
+
       <CollapsibleSection title="Leaderboard Point Distribution" defaultCollapsed={true}>
         <p className="text-sm text-gray-500">
           Configure how many points racers earn based on their finishing position. 
