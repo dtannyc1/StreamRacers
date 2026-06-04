@@ -414,7 +414,7 @@ const SettingsPanel = () => {
         </CollapsibleSection>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Car Override" defaultCollapsed={true}>
+      <CollapsibleSection title="Global Car Override" defaultCollapsed={true}>
         <p className="text-xs text-gray-500">
           Choose a car to override for ALL users
         </p>
