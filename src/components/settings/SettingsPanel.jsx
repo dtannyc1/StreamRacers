@@ -301,7 +301,7 @@ const SettingsPanel = () => {
   }
 
   const updateMessages = (patch) => {
-    update({ messages: { ...settings.messages, ...patch } })
+    update({ messages: { ...settings?.messages, ...patch } })
   }
 
   const handleSave = async () => {
@@ -350,7 +350,7 @@ const SettingsPanel = () => {
             The track loaded when the widget starts. If unset, a random track is chosen.
         </p>
         <select
-            value={settings.defaultTrack ?? ''}
+            value={settings?.defaultTrack ?? ''}
             onChange={(e) => update({ defaultTrack: e.target.value || null })}
             className="rounded bg-gray-700 border border-gray-600 px-2 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
         >
@@ -359,9 +359,9 @@ const SettingsPanel = () => {
               <option key={name} value={name}>{name}</option>
             ))}
         </select>
-        {settings.defaultTrack && !tracks?.[settings.defaultTrack] && (
+        {settings?.defaultTrack && !tracks?.[settings?.defaultTrack] && (
             <p className="text-xs text-red-400">
-            "{settings.defaultTrack}" no longer exists — it will fall back to random.
+            "{settings?.defaultTrack}" no longer exists — it will fall back to random.
             </p>
         )}
       </CollapsibleSection>
@@ -372,7 +372,7 @@ const SettingsPanel = () => {
         </p>
         <NumInput
           label="Race Duration (seconds)"
-          value={settings.raceDuration}
+          value={settings?.raceDuration}
           onChange={(v) => update({ raceDuration: v })}
           step={5}
         />
@@ -382,7 +382,7 @@ const SettingsPanel = () => {
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={settings.testing}
+            checked={settings?.testing}
             onChange={(e) => update({ testing: e.target.checked })}
             className="w-4 h-4 accent-purple-500"
           />
@@ -394,7 +394,7 @@ const SettingsPanel = () => {
         <CollapsibleSection title="Test Racers">
             <p className="text-xs text-gray-500">Racers added automatically when testing mode is on.</p>
             <EditableList
-              items={settings.testRacers}
+              items={settings?.testRacers}
               onChange={(v) => update({ testRacers: v })}
               placeholder="username"
               onResolve={resolveUsername}
@@ -409,8 +409,8 @@ const SettingsPanel = () => {
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={settings.carOverride?.enabled || false}
-            onChange={(e) => update({ carOverride: { ...settings.carOverride, enabled: e.target.checked } })}
+            checked={settings?.carOverride?.enabled || false}
+            onChange={(e) => update({ carOverride: { ...settings?.carOverride, enabled: e.target.checked } })}
             className="w-4 h-4 accent-purple-500"
           />
           <span className="text-sm text-white">Enable car override</span>
@@ -419,21 +419,21 @@ const SettingsPanel = () => {
         
         <select
           value={
-            settings.carOverride?.carName 
-              ? JSON.stringify({ username: settings.carOverride.userName, carName: settings.carOverride.carName }) 
+            settings?.carOverride?.carName 
+              ? JSON.stringify({ username: settings?.carOverride?.userName, carName: settings?.carOverride?.carName }) 
               : ''
           }
           onChange={(e) => {
             const val = e.target.value;
             if (!val) {
-              update({ carOverride: { ...settings.carOverride, carName: null, userName: null } })
+              update({ carOverride: { ...settings?.carOverride, carName: null, userName: null } })
               return
             }
 
             const { username, carName } = JSON.parse(val)
             update({ 
               carOverride: { 
-                ...settings.carOverride, 
+                ...settings?.carOverride, 
                 carName: carName, 
                 userName: username 
               } 
@@ -444,12 +444,12 @@ const SettingsPanel = () => {
           <option value="">-- Disable Override --</option>
           {Object.entries(racers ?? {}).flatMap(([username, cars]) => 
             cars.map(car => (
-              <option 
+              !!car ? <option 
                 key={`${username}-${car.name}`} 
                 value={JSON.stringify({ username, carName: car.name })} 
               >
                 {car.name} ({username})
-              </option>
+              </option> : null  
             ))
           )}
       </select>
@@ -460,7 +460,7 @@ const SettingsPanel = () => {
         <CollapsibleSection title="Join Commands">
           <p className="text-xs text-gray-500">Chat messages that allows a user to join the race.</p>
           <EditableList
-            items={settings.joinCommands}
+            items={settings?.joinCommands}
             onChange={(v) => update({ joinCommands: v })}
             placeholder="!join"
           />
@@ -469,7 +469,7 @@ const SettingsPanel = () => {
         <CollapsibleSection title="Go Commands">
           <p className="text-xs text-gray-500">Broadcaster commands that start the race.</p>
           <EditableList
-            items={settings.goCommands}
+            items={settings?.goCommands}
             onChange={(v) => update({ goCommands: v })}
             placeholder="!go"
           />
@@ -478,7 +478,7 @@ const SettingsPanel = () => {
         <CollapsibleSection title="Reset Commands">
           <p className="text-xs text-gray-500">Moderator commands that restart the race.</p>
           <EditableList
-            items={settings.resetCommands}
+            items={settings?.resetCommands}
             onChange={(v) => update({ resetCommands: v })}
             placeholder="!reset"
           />
@@ -488,7 +488,7 @@ const SettingsPanel = () => {
       <CollapsibleSection title="Race History Filters" defaultCollapsed={true}>
         <p className="text-xs text-gray-500">Users to exclude from the race history.</p>
         <EditableList
-          items={settings.removeUsers}
+          items={settings?.removeUsers}
           onChange={(v) => update({ removeUsers: v })}
           placeholder="username"
           onResolve={resolveUsername}
@@ -512,20 +512,20 @@ const SettingsPanel = () => {
         <p className="text-xs text-gray-500">Messages that are sent during the race. These will be sent via the Streamelements chat bot. (Leave blank to disable)</p>
         <MessageInput
           label="Race started"
-          value={settings.messages.raceStarted}
+          value={settings?.messages?.raceStarted}
           onChange={(v) => updateMessages({ raceStarted: v })}
         />
-        {settings.enableBoostWords &&
+        {settings?.enableBoostWords &&
           <>
             <MessageInput
               label="Word boost found"
-              value={settings.messages.boostFound}
+              value={settings?.messages?.boostFound}
               onChange={(v) => updateMessages({ boostFound: v })}
               hint="{username}"
             />
             <MessageInput
               label="Word clue"
-              value={settings.messages.wordClue}
+              value={settings?.messages?.wordClue}
               onChange={(v) => updateMessages({ wordClue: v })}
               hint="{category}"
             />
@@ -533,22 +533,22 @@ const SettingsPanel = () => {
         }
         <MessageInput
           label="Winner reward message (skipped during testing mode)"
-          value={settings.messages.winner}
+          value={settings?.messages?.winner}
           onChange={(v) => updateMessages({ winner: v })}
           hint="{username}"
         />
         <MessageInput
           label="Race saved message (skipped during testing mode)"
-          value={settings.messages.raceSaved ?? "Race results saved!"}
+          value={settings?.messages?.raceSaved ?? "Race results saved!"}
           onChange={(v) => updateMessages({ raceSaved: v })}
         />
       </CollapsibleSection>
 
-      { settings.enableBoostWords &&
+      { settings?.enableBoostWords &&
         <CollapsibleSection title="Boost Word Bank">
           <p className="text-xs text-gray-500">Categories and words used for the boost word game. Click the arrow next to a category name to expand it.</p>
           <WordBankEditor
-            wordBank={settings.wordBank}
+            wordBank={settings?.wordBank}
             onChange={(v) => update({ wordBank: v })}
           />
         </CollapsibleSection>
@@ -560,7 +560,7 @@ const SettingsPanel = () => {
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.dev_mode}
+                checked={settings?.dev_mode}
                 onChange={(e) => update({ dev_mode: e.target.checked })}
                 className="w-4 h-4 accent-purple-500"
               />
