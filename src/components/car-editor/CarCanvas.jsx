@@ -68,6 +68,64 @@ const drawRadiusHandle = (ctx, cr, handleAngle, radius) => {
   ctx.restore()
 }
 
+const drawSliderHandle = (ctx, start, end) => {
+  const [cx, cy] = start
+  const [hx, hy] = end
+
+  ctx.save()
+  ctx.strokeStyle = '#1df916'
+  ctx.fillStyle = 'rgba(249, 115, 22, 0.2)'
+  ctx.lineWidth = 2
+  ctx.setLineDash([])
+
+  // circle
+  ctx.beginPath()
+  ctx.arc(cx, cy, CR_HANDLE_RADIUS, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.stroke()
+
+  // crosshair
+  ctx.beginPath()
+  ctx.moveTo(cx - CR_HANDLE_RADIUS - 4, cy)
+  ctx.lineTo(cx + CR_HANDLE_RADIUS + 4, cy)
+  ctx.moveTo(cx, cy - CR_HANDLE_RADIUS - 4)
+  ctx.lineTo(cx, cy + CR_HANDLE_RADIUS + 4)
+  ctx.stroke()
+
+  ctx.restore()
+
+  ctx.save()
+  ctx.setLineDash([])
+
+  // line from CR to handle
+  ctx.strokeStyle = '#38bdf8'
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(cx, cy)
+  ctx.lineTo(hx, hy)
+  ctx.stroke()
+
+  // handle circle
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.2)'
+  ctx.strokeStyle = '#fa125f'
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.arc(hx, hy, RADIUS_HANDLE_RADIUS, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.stroke()
+
+  
+  // crosshair
+  ctx.beginPath()
+  ctx.moveTo(hx - CR_HANDLE_RADIUS - 4, hy)
+  ctx.lineTo(hx + CR_HANDLE_RADIUS + 4, hy)
+  ctx.moveTo(hx, hy - CR_HANDLE_RADIUS - 4)
+  ctx.lineTo(hx, hy + CR_HANDLE_RADIUS + 4)
+  ctx.stroke()
+
+  ctx.restore()
+}
+
 const drawCornerHandles = (ctx, x, y, w, h) => {
   const corners = [
     { x: x - 2, y: y - 2 },           // tl
@@ -156,6 +214,22 @@ const hitTestCorner = (mx, my, asset) => {
   return null
 }
 
+const hitTestStart = (mx, my, asset) => {
+  if (!asset?.start || asset.type !== 'slider') return false
+  const [x, y] = asset.start
+  const dx = mx - x
+  const dy = my - y
+  return Math.sqrt(dx * dx + dy * dy) <= CR_HANDLE_RADIUS + 4
+}
+
+const hitTestEnd = (mx, my, asset) => {
+  if (!asset?.end || asset.type !== 'slider') return false
+  const [x, y] = asset.end
+  const dx = mx - x
+  const dy = my - y
+  return Math.sqrt(dx * dx + dy * dy) <= CR_HANDLE_RADIUS + 4
+}
+
 const CarCanvas = ({
   car,
   onUpdate,
@@ -178,6 +252,8 @@ const CarCanvas = ({
   const didDrag = useRef(false)
   const draggingCR = useRef(false)
   const draggingRadius = useRef(false)
+  const draggingStart = useRef(false)
+  const draggingEnd = useRef(false)
   const prevSelectedAsset = useRef(null)
   const startTime = useRef(Date.now())
   const assets = car?.assets || []
@@ -255,6 +331,8 @@ const CarCanvas = ({
         }
         const drawable = resolveDrawable(curAsset, timestamp)
         asset.theta = (isSelected && !asset.animationEnabled) ? (asset.theta_0 ?? 0) : (asset.theta ?? 0)
+        asset.dX = (isSelected && !asset.animationEnabled) ? 0 : (asset.dX ?? 0)
+        asset.dY = (isSelected && !asset.animationEnabled) ? 0 : (asset.dY ?? 0)
         drawAsset(ctx, asset, drawable)
 
         if (isSelected) {
@@ -283,6 +361,12 @@ const CarCanvas = ({
       if (selectedAsset?.cr && (selectedAsset.type === 'rotating' || selectedAsset.type === 'oscillating')) {
         drawRadiusHandle(ctx, selectedAsset.cr, selectedAsset.handleAngle ?? 0, selectedAsset.radius ?? 20)
         drawCRHandle(ctx, selectedAsset.cr[0], selectedAsset.cr[1])
+      }
+
+      if (selectedAsset?.type === 'slider') {
+        ctx.save()
+        drawSliderHandle(ctx, selectedAsset.start, selectedAsset.end)
+        ctx.restore()
       }
 
       ctx.restore()
@@ -331,11 +415,15 @@ const CarCanvas = ({
       const corner = hitTestCorner(mx, my, selectedAsset)
       const isCR = !corner && hitTestCR(mx, my, selectedAsset)
       const isRadius = !corner && !isCR && hitTestRadius(mx, my, selectedAsset)
+      const isStart = !corner && !isCR && !isRadius && hitTestStart(mx, my, selectedAsset)
+      const isEnd = !corner && !isCR && !isRadius && !isStart && hitTestEnd(mx, my, selectedAsset)
 
       draggingCR.current = isCR
       draggingRadius.current = isRadius
+      draggingStart.current = isStart
+      draggingEnd.current = isEnd
 
-      onMouseDown(clientX, clientY, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius)
+      onMouseDown(clientX, clientY, canvasRef.current.getBoundingClientRect(), scale, isCR, corner, isRadius, isStart, isEnd)
     }
   }, [onMouseDown, getCanvasPos, selectedAsset, eyedropperAssetId])
 

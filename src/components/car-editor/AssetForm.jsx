@@ -134,6 +134,15 @@ const AssetForm = ({
       patch.theta_dot = 1
     }
 
+    if (newType === 'slider' && !asset.start) {
+      patch.start = [asset.tl[0] + asset.dim[0] / 2, asset.tl[1] + asset.dim[1] / 2]
+      patch.end = [asset.tl[0] + asset.dim[0] / 2 + 50, asset.tl[1] + asset.dim[1] / 2]
+      patch.duration = 0.5
+      patch.speedDependent = false
+      patch.phase = asset.phase ?? 0
+      patch.behavior = 'loop'
+    }
+
     if (newType === 'custom') setIsLogicEditorOpen(true);
 
     u(patch)
@@ -202,6 +211,7 @@ const AssetForm = ({
           <option value="static">Static</option>
           <option value="rotating">Rotating</option>
           <option value="oscillating">Oscillating</option>
+          <option value="slider">Slider</option>
           {!!raceSettings.dev_mode && <option value="custom">Custom (Dev Mode)</option>}
         </select>
       </label>
@@ -347,6 +357,92 @@ const AssetForm = ({
             onChange={(v) => u({ phase: toRad(v) })}
           />
         </div>
+      )}
+
+      {asset.type === 'slider' && (
+        <>
+          <div className="flex flex-col gap-2">
+            <div className='flex items-center justify-between align-center'>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-gray-400">Slider Behavior</span>
+                <select
+                  value={asset.behavior}
+                  onChange={(v) => u({ behavior: v.target.value })}
+                  className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
+                >
+                  <option value="pingpong">Ping Pong</option>
+                  <option value="loop">Loop</option>
+                </select>
+              </label>
+              <div className='flex items-center gap-2'>
+                <input 
+                  type="checkbox"
+                  checked={asset.animationEnabled ?? false}
+                  onChange={(e) => u({animationEnabled: e.target.checked}) }
+                />
+                <label className="text-xs font-semibold text-gray-400">
+                  Animation?
+                </label>
+              </div>
+            </div>
+
+            <div className='flex justify-between align-center'>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Start and End Location
+              </p>
+            </div>
+            <Row>
+              <NumInput
+                label="Start X"
+                value={asset.start?.[0] ?? 0}
+                onChange={(v) => u({ start: [v, asset.start?.[1] ?? 0] })}
+              />
+              <NumInput
+                label="Start Y"
+                value={-(asset.start?.[1] ?? 0)}
+                onChange={(v) => u({ start: [asset.start?.[0] ?? 0, -v] })}
+              />
+            </Row>
+            <Row>
+              <NumInput
+                label="End X"
+                value={asset.end?.[0] ?? 0}
+                onChange={(v) => u({ end: [v, asset.end?.[1] ?? 0] })}
+              />
+              <NumInput
+                label="End Y"
+                value={-(asset.end?.[1] ?? 0)}
+                onChange={(v) => u({ end: [asset.end?.[0] ?? 0, -v] })}
+              />
+            </Row>
+          </div>
+          <Row>
+            <NumInput
+              label="Duration (seconds)"
+              value={asset.duration ?? 0.5}
+              step={0.1}
+              onChange={(v) => u({ duration: Math.abs(v) })}
+            />
+
+            <div className="height-full flex items-end">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={asset.speedDependent ?? false}
+                  onChange={(e) => u({  speedDependent: e.target.checked }) }
+                  className="w-4 h-4 accent-purple-500"
+                />
+                <span className="text-sm text-white">Speed dependent?</span>
+              </label>
+            </div>
+          </Row>
+
+          <SliderInput
+            label="Phase"
+            value={toDeg(asset.phase ?? 0)}
+            onChange={(v) => u({ phase: toRad(v) })}
+          />
+        </>
       )}
 
       {isDefaultCar && asset.type !== 'avatar' && (
