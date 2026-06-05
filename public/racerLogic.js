@@ -58,6 +58,53 @@ export const incrementCarAssetAngles = (car, dt, speed) => {
         asset.theta = asset.theta_0 + min + (doubleRange - nextRel)
         asset.theta_dot = -Math.abs(asset.theta_dot)
       }
+    } else if (asset.type === 'slider') {
+      let [startX, startY] = asset.start
+      let [endX, endY] = asset.end
+      let duration = asset.duration ?? 1000
+      if (asset.speedDependent) {
+        duration *= 200/speed
+      }
+      let newdX = asset.dX 
+      let newdY = asset.dY 
+      let dir = asset.dir ?? 1
+      if (!newdX) {
+        if (asset.behavior === 'pingpong') {
+          let phase = asset.phase ?? 0
+          if (asset.phase > Math.PI) {
+            phase = 2 * Math.PI - asset.phase
+            dir = -1
+          }
+          newdX = (endX - startX) * phase / (2 * Math.PI)
+          newdY = (endY - startY) * phase / (2 * Math.PI)
+        } else if (asset.behavior === 'loop') {
+          newdX = (endX - startX) * asset.phase / (2 * Math.PI)
+          newdY = (endY - startY) * asset.phase / (2 * Math.PI)
+        }
+      }
+
+      newdX += (endX - startX) * dt / duration * dir
+      newdY += (endY - startY) * dt / duration * dir
+
+      if (newdX > (endX - startX)){
+        if (asset.behavior === 'pingpong') {
+          asset.dX = endX
+          asset.dY = endY
+          asset.dir = -1
+        } else if (asset.behavior === 'loop') {
+          asset.dX = 0
+          asset.dY = 0
+        }
+      } else if (newdX < 0) {
+        if (asset.behavior === 'pingpong') {
+          asset.dX = 0
+          asset.dY = 0
+          asset.dir = 1
+        }
+      }
     }
   })
 }
+
+// slider type
+// dX, dY, dir, start, end, duration, speedDependent, phase, behavior

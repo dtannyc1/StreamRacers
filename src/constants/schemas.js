@@ -17,4 +17,9 @@ export const CAR_ASSET_SCHEMA = {
   colorRemap: { enabled: false, sourceColor: '#FF001A', remapTolerance: 10 },
   drawCode: '',
   updateCode: '',
+  start: [0, 0],
+  end: [0, 0], 
+  duration: 1000,
+  speedDependent: false,
+  behavior: '',
 }

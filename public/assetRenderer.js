@@ -109,6 +109,11 @@ export const drawAsset = (ctx, asset, drawable) => {
     ctx.rotate(angle)
     ctx.translate(-cx, -cy)
     ctx.drawImage(drawable, x, y, w, h)
+  } else if (asset.type === 'slider') {
+    let dX = asset.dX ?? 0
+    let dY = asset.dY ?? 0
+    ctx.translate(dX, dY)
+    ctx.drawImage(drawable, x, y, w, h)
   }
 
   ctx.restore()

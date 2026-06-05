@@ -101,7 +101,7 @@ export const useCarEditor = (initialCar = null) => {
   // 'asset' | 'cr'
   const dragState = useRef(null)
 
-  const onCanvasMouseDown = useCallback((clientX, clientY, canvasRect, scale, draggingCR, resizeCorner, draggingRadius) => {
+  const onCanvasMouseDown = useCallback((clientX, clientY, canvasRect, scale, draggingCR, resizeCorner, draggingRadius, draggingStart, draggingEnd) => {
     if (!selectedAsset) return
     if (resizeCorner) {
       dragState.current = {
@@ -112,6 +112,8 @@ export const useCarEditor = (initialCar = null) => {
         startTL: [...selectedAsset.tl],
         startDIM: [...selectedAsset.dim],
         startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
+        startStart: selectedAsset.start ? [...selectedAsset.start] : null,
+        startEnd: selectedAsset.end ? [...selectedAsset.end] : null,
         startRadius: selectedAsset.radius ?? null,
         aspectLocked: selectedAsset.type === 'avatar' || (selectedAsset.aspectLocked ?? false ),
         scale,
@@ -132,6 +134,22 @@ export const useCarEditor = (initialCar = null) => {
         startCR: [...(selectedAsset.cr ?? [0, 0])],
         scale,
       }
+    } else if (draggingStart) {
+      dragState.current = {
+        mode: 'sliderStart',
+        startMouseX: clientX,
+        startMouseY: clientY,
+        startStart: [...(selectedAsset.start ?? [0, 0])],
+        scale,
+      }
+    } else if (draggingEnd) {
+      dragState.current = {
+        mode: 'sliderEnd',
+        startMouseX: clientX,
+        startMouseY: clientY,
+        startEnd: [...(selectedAsset.end ?? [0, 0])],
+        scale,
+      }
     } else {
       dragState.current = {
         mode: 'asset',
@@ -139,6 +157,8 @@ export const useCarEditor = (initialCar = null) => {
         startMouseY: clientY,
         startTL: [...selectedAsset.tl],
         startCR: selectedAsset.cr ? [...selectedAsset.cr] : null,
+        startStart: selectedAsset.start ? [...selectedAsset.start] : null,
+        startEnd: selectedAsset.end ? [...selectedAsset.end] : null,
         scale,
       }
     }
@@ -154,9 +174,11 @@ export const useCarEditor = (initialCar = null) => {
       const { startCR } = dragState.current
       updateAsset(selectedId, { cr: [startCR[0] + dx, startCR[1] + dy], theta: 0 })
     } else if (mode === 'asset') {
-      const { startTL, startCR } = dragState.current
+      const { startTL, startCR, startStart, startEnd } = dragState.current
       const patch = { tl: [startTL[0] + dx, startTL[1] + dy] }
       if (startCR) patch.cr = [startCR[0] + dx, startCR[1] + dy]
+      if (startStart) patch.start = [startStart[0] + dx, startStart[1] + dy]
+      if (startEnd) patch.end = [startEnd[0] + dx, startEnd[1] + dy]
       updateAsset(selectedId, patch)
     } else if (mode === 'radius') {
       const { startCR } = dragState.current
@@ -167,7 +189,7 @@ export const useCarEditor = (initialCar = null) => {
       const radius = Math.max(1, Math.sqrt(relX ** 2 + relY ** 2))
       updateAsset(selectedId, { radius, handleAngle })
     } else if (mode === 'resize') {
-      const { corner, startTL, startDIM } = dragState.current
+      const { corner, startTL, startDIM, startCR, startStart, startEnd } = dragState.current
       let [x, y] = startTL
       let [w, h] = startDIM
 
@@ -217,11 +239,24 @@ export const useCarEditor = (initialCar = null) => {
 
       const patch = { tl: [x, y], dim: [w, h] }
 
-      if (selectedAsset.cr) {
-        const startCR = dragState.current.startCR
+      if (startCR) {
         patch.cr = [
-          startCR[0] * (w / startDIM[0]),
-          startCR[1] * (h / startDIM[1]),
+          (startCR[0] - startTL[0]) * (w / startDIM[0]) + x,
+          (startCR[1] - startTL[1]) * (h / startDIM[1]) + y,
+        ]
+      }
+
+      if (startStart) {
+        patch.start = [
+          (startStart[0] - startTL[0]) * (w / startDIM[0]) + x,
+          (startStart[1] - startTL[1]) * (h / startDIM[1]) + y,
+        ]
+      }
+
+      if (startEnd) {
+        patch.end = [
+          (startEnd[0] - startTL[0]) * (w / startDIM[0]) + x,
+          (startEnd[1] - startTL[1]) * (h / startDIM[1]) + y,
         ]
       }
 
@@ -231,6 +266,12 @@ export const useCarEditor = (initialCar = null) => {
       }
 
       updateAsset(selectedId, patch)
+    } else if (mode === 'sliderStart') {
+      const { startStart } = dragState.current
+      updateAsset(selectedId, { start: [startStart[0] + dx, startStart[1] + dy] })
+    } else if (mode === 'sliderEnd') {
+      const { startEnd } = dragState.current
+      updateAsset(selectedId, { end: [startEnd[0] + dx, startEnd[1] + dy] })
     }
   }, [selectedId, updateAsset])
 
