@@ -101,7 +101,7 @@ export const useCarEditor = (initialCar = null) => {
   // 'asset' | 'cr'
   const dragState = useRef(null)
 
-  const onCanvasMouseDown = useCallback((clientX, clientY, canvasRect, scale, draggingCR, resizeCorner, draggingRadius) => {
+  const onCanvasMouseDown = useCallback((clientX, clientY, canvasRect, scale, draggingCR, resizeCorner, draggingRadius, draggingStart, draggingEnd) => {
     if (!selectedAsset) return
     if (resizeCorner) {
       dragState.current = {
@@ -130,6 +130,22 @@ export const useCarEditor = (initialCar = null) => {
         startMouseX: clientX,
         startMouseY: clientY,
         startCR: [...(selectedAsset.cr ?? [0, 0])],
+        scale,
+      }
+    } else if (draggingStart) {
+      dragState.current = {
+        mode: 'sliderStart',
+        startMouseX: clientX,
+        startMouseY: clientY,
+        startStart: [...(selectedAsset.start ?? [0, 0])],
+        scale,
+      }
+    } else if (draggingEnd) {
+      dragState.current = {
+        mode: 'sliderEnd',
+        startMouseX: clientX,
+        startMouseY: clientY,
+        startEnd: [...(selectedAsset.end ?? [0, 0])],
         scale,
       }
     } else {
@@ -231,6 +247,12 @@ export const useCarEditor = (initialCar = null) => {
       }
 
       updateAsset(selectedId, patch)
+    } else if (mode === 'sliderStart') {
+      const { startStart } = dragState.current
+      updateAsset(selectedId, { start: [startStart[0] + dx, startStart[1] + dy] })
+    } else if (mode === 'sliderEnd') {
+      const { startEnd } = dragState.current
+      updateAsset(selectedId, { end: [startEnd[0] + dx, startEnd[1] + dy] })
     }
   }, [selectedId, updateAsset])
 
