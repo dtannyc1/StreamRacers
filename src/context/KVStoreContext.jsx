@@ -50,7 +50,7 @@ export const KVStoreProvider = ({ children }) => {
         }
         setRacersState(racers)
         setTracksState(tracks)
-        setRaceSettingsState(settings ?? DEFAULT_RACE_SETTINGS)
+        setRaceSettingsState({...DEFAULT_RACE_SETTINGS, ...settings})
         setRaceHistorySettingsState(raceHistorySettings ?? {})
       } catch (err) {
         setError(err.message)
@@ -261,6 +261,10 @@ export const DEFAULT_RACE_SETTINGS = {
       },
     ],
     name: 'Default Car',
+    carOverride: { enabled: false, username: '', carName: '' },
+    removeUsers: [],
+    alignmentImage: null,
+    dev_mode: false,
   },
   raceDuration: 30,
 }
