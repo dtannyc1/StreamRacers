@@ -127,15 +127,19 @@ export default class CarManager {
         data = car.update(curTime, true, 5)
 
       } else {
-        car.vel[0] += (Math.random() - 1 / 3) * car.acc[0]
-        car.vel[1] += (Math.random() - 1 / 3) * car.acc[1]
-        if (car.vel[0] < 0) car.vel[0] = 0
-        if (finishX && car.XY[0] > finishX) car.vel[0] = finishingVel
+        // car.vel[0] += (Math.random() - 1 / 3) * car.acc[0]
+        // car.vel[1] += car.acc[1] * (curTime - car.time) / 1000
+        // if (car.vel[0] < 0) car.vel[0] = 0
+        // if (finishX && car.XY[0] > finishX) car.vel[0] = finishingVel
         // check if car just crossed the finish line
-        if (finishX && car.XY[0] + car.vel[0] * (curTime - car.time) / 1000 > finishX && car.XY[0] <= finishX) {
+        let prevXY = car.XY.slice()
+        // if (finishX && car.XY[0] + car.vel[0] * (curTime - car.time) / 1000 > finishX && car.XY[0] <= finishX) {
+        //   this.finishers.push(car.name)
+        // }
+        data = car.update(curTime, false, 1)
+        if (finishX && prevXY[0] <= finishX && car.XY[0] > finishX) {
           this.finishers.push(car.name)
         }
-        data = car.update(curTime, false, 1)
       }
 
       if (data && Array.isArray(data) && data[0][0] > maxXPos) {
