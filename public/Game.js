@@ -315,6 +315,10 @@ class Game {
           }
         }
       }
+
+      if (message.startsWith('!jump')) {
+        this.carManager.getRacer(name)?.jump()
+      }
     }
   }
 

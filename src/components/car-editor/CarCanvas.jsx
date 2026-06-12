@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import { resolveImageUrl } from '../../shared/gifLoader'
 import { drawAsset, phaseCorrection, resolveDrawable } from '../../shared/assetRenderer'
 import { preloadCarImages } from '../../lib/racerRenderer'
-import { updateRacerPos } from '../../shared/racerLogic'
+import { updateRacerPos, updateRacerTime } from '../../shared/racerLogic'
 
 const CANVAS_W = 600
 const CANVAS_H = 400
@@ -318,6 +318,7 @@ const CarCanvas = ({
       drawAlignmentLines(ctx)
 
       updateRacerPos(racer, timestamp, false, 1)
+      updateRacerTime(racer, timestamp)
 
       racer.assets.forEach(asset => {
         if (!assetsRef.current[asset.id]) return // image not loaded yet

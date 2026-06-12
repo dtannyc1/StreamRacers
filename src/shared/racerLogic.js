@@ -16,10 +16,29 @@ export const updateRacerPos = (racer, curTime, clampToStart = false, speedMultip
     incrementCarAssetAngles(racer, dt, speed)
   }
 
-  racer.time = curTime
+  // racer.time = curTime
   racer.distanceTravelled ||= 0
   racer.distanceTravelled = racer.distanceTravelled + racer.vel[0] * dt
   return [racer.XY, racer.vel]
+}
+
+export const updateRacerVel = (racer, curTime, randomizeX = false) => {
+  const dt = (curTime - racer.time) / 1000
+  if (dt <= 0) return racer.vel
+
+  if (randomizeX) {
+    racer.vel[0] += (Math.random() - 1/3) * racer.acc[0] * dt * 10
+  } else {
+    racer.vel[0] += racer.acc[0] * dt
+  }
+  racer.vel[1] += racer.acc[1] * dt
+  if (racer.vel[0] < 0) racer.vel[0] = 0
+
+  return racer.vel
+}
+
+export const updateRacerTime = (racer, curTime) => {
+  racer.time = curTime
 }
 
 export const incrementCarAssetAngles = (car, dt, speed) => {

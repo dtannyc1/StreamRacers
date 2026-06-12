@@ -16,10 +16,29 @@ export const updateRacerPos = (racer, curTime, clampToStart = false, speedMultip
     incrementCarAssetAngles(racer, dt, speed)
   }
 
-  racer.time = curTime
+  // racer.time = curTime
   racer.distanceTravelled ||= 0
   racer.distanceTravelled = racer.distanceTravelled + racer.vel[0] * dt
   return [racer.XY, racer.vel]
+}
+
+export const updateRacerVel = (racer, curTime, randomizeX = false) => {
+  const dt = (curTime - racer.time) / 1000
+  if (dt <= 0) return racer.vel
+
+  if (randomizeX) {
+    racer.vel[0] += (Math.random() - 1/3) * racer.acc[0] * dt * 10
+  } else {
+    racer.vel[0] += racer.acc[0] * dt
+  }
+  racer.vel[1] += racer.acc[1] * dt
+  if (racer.vel[0] < 0) racer.vel[0] = 0
+
+  return racer.vel
+}
+
+export const updateRacerTime = (racer, curTime) => {
+  racer.time = curTime
 }
 
 export const incrementCarAssetAngles = (car, dt, speed) => {
@@ -61,7 +80,9 @@ export const incrementCarAssetAngles = (car, dt, speed) => {
     } else if (asset.type === 'slider') {
       let [startX, startY] = asset.start
       let [endX, endY] = asset.end
-      let duration = asset.duration ?? 1000
+      let distX = (endX - startX) * (asset.behavior === 'pingpong' ? 2 : 1)
+      let distY = (endY - startY) * (asset.behavior === 'pingpong' ? 2 : 1)
+      let duration = (asset.duration ?? 1)
       if (asset.speedDependent) {
         duration *= 200/speed
       }
@@ -83,19 +104,22 @@ export const incrementCarAssetAngles = (car, dt, speed) => {
         }
       }
 
-      newdX += (endX - startX) * dt / duration * dir
-      newdY += (endY - startY) * dt / duration * dir
+      newdX += distX * dt / duration * dir
+      newdY += distY * dt / duration * dir
 
-      if (newdX > (endX - startX)){
+      asset.dX = newdX
+      asset.dY = newdY
+
+      if (Math.abs(newdX) > Math.abs(endX - startX)){
         if (asset.behavior === 'pingpong') {
-          asset.dX = endX
-          asset.dY = endY
+          asset.dX = endX - startX
+          asset.dY = endY - startY
           asset.dir = -1
         } else if (asset.behavior === 'loop') {
           asset.dX = 0
           asset.dY = 0
         }
-      } else if (newdX < 0) {
+      } else if (newdX * (endX - startX) / Math.abs(endX - startX) < 0) {
         if (asset.behavior === 'pingpong') {
           asset.dX = 0
           asset.dY = 0
