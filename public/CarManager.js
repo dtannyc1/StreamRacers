@@ -170,6 +170,10 @@ export default class CarManager {
 
   // ── Race state queries ─────────────────────────────────────────────────────
 
+  getRacer(name) {
+    return this.cars[name]
+  }
+
   getMaxPosition() {
     return { maxXPos: this.maxXPos, maxXVel: this.maxXVel }
   }

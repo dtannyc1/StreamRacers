@@ -2,6 +2,8 @@ import { loadAssetImage, pauseGIFs, resolveImageUrl } from './gifLoader.js'
 import { drawAllAssets, remapImageColor, phaseCorrection, hydrateAsset } from './assetRenderer.js'
 import { updateRacerPos, updateRacerVel, updateRacerTime } from './racerLogic.js'
 
+const GRAVITY = 0.5
+
 export default class Car {
   constructor({ name, avatar, displayColor, xy }) {
     this.name = name
@@ -16,6 +18,7 @@ export default class Car {
     this.showBoost = false
     this.lastBoost = null
     this.startY = xy[1]
+    this.jumping = false
   }
 
   static async create({ name, avatar, displayColor, xy, carData }) {
@@ -90,6 +93,14 @@ export default class Car {
     }
     let output = updateRacerPos(this, curTime, clampToStart, speedMultiplier)
     updateRacerTime(this, curTime)
+    if (this.jumping) {
+      if (this.XY[1] >= this.startY) {
+        this.XY[1] = this.startY
+        this.vel[1] = 0
+        this.acc[1] = 0
+        this.jumping = false
+      }
+    }
     return output
   }
 
@@ -128,5 +139,15 @@ export default class Car {
       return true
     }
     return false
+  }
+
+  // ── Jump ──────────────────────────────────────────────────────────────────
+  
+  jump() {
+    if (!this.jumping) {
+      this.vel[1] = -10
+      this.acc[1] = GRAVITY
+      this.jumping = true
+    }
   }
 }
