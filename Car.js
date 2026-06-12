@@ -110,7 +110,7 @@ export default class Car {
 
     const midY = (pt1[1] + pt2[1]) / 2
     const midDx = (midY - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1])
-    const dX = (this.XY[1] - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midDx
+    const dX = (this.startY - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midDx
 
     ctx.translate(
         cameraLoc[0] + this.XY[0] + dX,
