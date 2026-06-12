@@ -92,8 +92,8 @@ export default class Car {
       updateRacerVel(this, curTime, true)
     }
     let output = updateRacerPos(this, curTime, clampToStart, speedMultiplier)
-    updateRacerTime(this, curTime)
     if (this.jumping) {
+      console.log('Jumping', this.XY[1], this.vel[1], this.acc[1], this.time - curTime)
       if (this.XY[1] >= this.startY) {
         this.XY[1] = this.startY
         this.vel[1] = 0
@@ -101,6 +101,7 @@ export default class Car {
         this.jumping = false
       }
     }
+    updateRacerTime(this, curTime)
     return output
   }
 
