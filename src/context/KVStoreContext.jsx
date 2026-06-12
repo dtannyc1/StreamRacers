@@ -193,6 +193,7 @@ export const DEFAULT_RACE_SETTINGS = {
   joinCommands: ['!join', '!start'],
   goCommands: ['!go', '!potato'],
   resetCommands: ['!reset'],
+  jumpCommands: ['!jump'],
   enableBoostWords: false,
   testRacers: [
     'pencils45', 'MamzelleRylo', 'TheComplements', 'AndyTheFrenchy', 'JoPlaysViolin', 'andrewcore', 

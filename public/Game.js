@@ -48,6 +48,7 @@ class Game {
     this.joinCommands = ['!join']
     this.goCommands = ['!go', '!potato']
     this.resetCommands = ['!reset']
+    this.jumpCommands = ['!jump']
     this.enableBoostWords = false
     this.messages = {
       "boostFound": "OUI! {username} FOUND IT!",
@@ -150,6 +151,7 @@ class Game {
       if (settings.joinCommands && Array.isArray(settings.joinCommands) && settings.joinCommands.length > 0) this.joinCommands = settings.joinCommands
       if (settings.goCommands && Array.isArray(settings.goCommands) && settings.goCommands.length > 0) this.goCommands = settings.goCommands
       if (settings.resetCommands && Array.isArray(settings.resetCommands) && settings.resetCommands.length > 0) this.resetCommands = settings.resetCommands
+      if (settings.jumpCommands && Array.isArray(settings.jumpCommands)) this.jumpCommands = settings.jumpCommands
       if (settings.messages) this.messages = { ...this.messages, ...settings.messages }
       if (settings.testRacers) this.testRacers = settings.testRacers
       if (settings.testing !== undefined) this.testing = settings.testing
@@ -316,7 +318,7 @@ class Game {
         }
       }
 
-      if (message.startsWith('!jump')) {
+      if (this.jumpCommands.some(cmd => message.startsWith(cmd.toLowerCase()))) {
         this.carManager.getRacer(name)?.jump(Math.random() * 50 + 75, Math.random() * 0.3 + 0.4)
       }
     }
