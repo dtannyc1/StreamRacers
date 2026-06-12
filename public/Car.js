@@ -2,7 +2,7 @@ import { loadAssetImage, pauseGIFs, resolveImageUrl } from './gifLoader.js'
 import { drawAllAssets, remapImageColor, phaseCorrection, hydrateAsset } from './assetRenderer.js'
 import { updateRacerPos, updateRacerVel, updateRacerTime } from './racerLogic.js'
 
-const GRAVITY = 20
+const GRAVITY = 20000
 
 export default class Car {
   constructor({ name, avatar, displayColor, xy }) {
