@@ -317,7 +317,7 @@ class Game {
       }
 
       if (message.startsWith('!jump')) {
-        this.carManager.getRacer(name)?.jump()
+        this.carManager.getRacer(name)?.jump(Math.random() * 50 + 75, Math.random() * 0.3 + 0.4)
       }
     }
   }
