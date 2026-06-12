@@ -6,9 +6,6 @@ import { updateRacerPos, updateRacerVel, updateRacerTime } from './racerLogic.js
 const JUMP_DURATION = 0.5 // seconds
 const JUMP_HEIGHT = 100 // px
 
-const JUMP_VELOCITY = - 4 * JUMP_HEIGHT / JUMP_DURATION  
-const GRAVITY = - JUMP_VELOCITY / (JUMP_DURATION / 2)
-
 export default class Car {
   constructor({ name, avatar, displayColor, xy }) {
     this.name = name
@@ -146,10 +143,10 @@ export default class Car {
 
   // ── Jump ──────────────────────────────────────────────────────────────────
   
-  jump() {
+  jump(jump_height = JUMP_HEIGHT, jump_duration = JUMP_DURATION) {
     if (!this.jumping) {
-      this.vel[1] = JUMP_VELOCITY
-      this.acc[1] = GRAVITY
+      this.vel[1] = - 4 * jump_height / jump_duration 
+      this.acc[1] = - this.vel[1] / (jump_duration / 2)
       this.jumping = true
     }
   }
