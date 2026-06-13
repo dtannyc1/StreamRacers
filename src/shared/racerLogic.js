@@ -28,7 +28,7 @@ export const updateRacerVel = (racer, curTime, clampToStart = false, randomizeX 
 
   if (!clampToStart) {
     if (randomizeX) {
-      racer.vel[0] += (Math.random() - 1/3) * racer.acc[0] * dt * 10
+      racer.vel[0] += (Math.random() - 1/3) * racer.acc[0] * dt * 50
     } else {
       racer.vel[0] += racer.acc[0] * dt
     }
