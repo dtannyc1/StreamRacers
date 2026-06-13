@@ -90,7 +90,7 @@ export default class Car {
   // ── Update ─────────────────────────────────────────────────────────────────
 
   update(curTime, clampToStart = false, speedMultiplier = 1) {
-    updateRacerVel(this, curTime, true)
+    updateRacerVel(this, curTime, clampToStart, true)
     let output = updateRacerPos(this, curTime, clampToStart, speedMultiplier)
     if (this.jumping) {
       if (this.XY[1] >= this.startY) {
