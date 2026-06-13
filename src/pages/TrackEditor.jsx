@@ -11,7 +11,7 @@ import { preloadCarImages } from '../lib/racerRenderer'
 import { getTwitchUser } from '../lib/twitch'
 import RoadDetailsPanel from '../components/track-editor/RoadDetailsPanel'
 import Tooltip from '../components/ToolTip'
-import { updateRacerPos } from '../shared/racerLogic'
+import { updateRacerPos, updateRacerTime } from '../shared/racerLogic'
 import LeaderboardSettings from '../components/track-editor/LeaderboardSettings'
 
 const TrackEditor = ({ mode }) => {
@@ -62,6 +62,7 @@ const TrackEditor = ({ mode }) => {
       setActiveRacers(racers => {
         racers.forEach(racer => {
           updateRacerPos(racer, t, false, 1)
+          updateRacerTime(racer, t)
         })
         // const updated = updateRacers(prev, dt)
         return racers.filter(r => !isRacerDone(r))

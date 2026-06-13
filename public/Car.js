@@ -1,6 +1,10 @@
 import { loadAssetImage, pauseGIFs, resolveImageUrl } from './gifLoader.js'
 import { drawAllAssets, remapImageColor, phaseCorrection, hydrateAsset } from './assetRenderer.js'
-import { updateRacerPos } from './racerLogic.js'
+import { updateRacerPos, updateRacerVel, updateRacerTime } from './racerLogic.js'
+
+// 
+const JUMP_DURATION = 0.5 // seconds
+const JUMP_HEIGHT = 100 // px
 
 export default class Car {
   constructor({ name, avatar, displayColor, xy }) {
@@ -15,6 +19,8 @@ export default class Car {
     this.time = Date.now()
     this.showBoost = false
     this.lastBoost = null
+    this.startY = xy[1]
+    this.jumping = false
   }
 
   static async create({ name, avatar, displayColor, xy, carData }) {
@@ -84,7 +90,18 @@ export default class Car {
   // ── Update ─────────────────────────────────────────────────────────────────
 
   update(curTime, clampToStart = false, speedMultiplier = 1) {
-    return updateRacerPos(this, curTime, clampToStart, speedMultiplier)
+    updateRacerVel(this, curTime, true)
+    let output = updateRacerPos(this, curTime, clampToStart, speedMultiplier)
+    if (this.jumping) {
+      if (this.XY[1] >= this.startY) {
+        this.XY[1] = this.startY
+        this.vel[1] = 0
+        this.acc[1] = 0
+        this.jumping = false
+      }
+    }
+    updateRacerTime(this, curTime)
+    return output
   }
 
   // ── Drawing ────────────────────────────────────────────────────────────────
@@ -95,7 +112,7 @@ export default class Car {
 
     const midY = (pt1[1] + pt2[1]) / 2
     const midDx = (midY - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1])
-    const dX = (this.XY[1] - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midDx
+    const dX = (this.startY - pt1[1]) * (pt2[0] - pt1[0]) / (pt2[1] - pt1[1]) - midDx
 
     ctx.translate(
         cameraLoc[0] + this.XY[0] + dX,
@@ -122,5 +139,15 @@ export default class Car {
       return true
     }
     return false
+  }
+
+  // ── Jump ──────────────────────────────────────────────────────────────────
+  
+  jump(jump_height = JUMP_HEIGHT, jump_duration = JUMP_DURATION) {
+    if (!this.jumping) {
+      this.vel[1] = - 4 * jump_height / jump_duration 
+      this.acc[1] = - this.vel[1] / (jump_duration / 2)
+      this.jumping = true
+    }
   }
 }

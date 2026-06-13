@@ -483,6 +483,15 @@ const SettingsPanel = () => {
             placeholder="!reset"
           />
         </CollapsibleSection>
+
+        <CollapsibleSection title="Jump Commands">
+          <p className="text-xs text-gray-500">Chat messages that makes the user's car jump.</p>
+          <EditableList
+            items={settings?.jumpCommands}
+            onChange={(v) => update({ jumpCommands: v })}
+            placeholder="!jump"
+          />
+        </CollapsibleSection>
       </CollapsibleSection>
       
       <CollapsibleSection title="Race History Filters" defaultCollapsed={true}>
