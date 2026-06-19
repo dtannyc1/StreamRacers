@@ -126,16 +126,12 @@ export default class CarManager {
       } else if (curTime - raceStartTime < setupDuration * 1000) {
         data = car.update(curTime, true, 5)
 
+      } else if (curTime - raceStartTime < (setupDuration + 0.1) * 1000) {
+        // Give all cars a boost at the start
+        car.vel[0] = 400
+        data = car.update(curTime, false, 1)
       } else {
-        // car.vel[0] += (Math.random() - 1 / 3) * car.acc[0]
-        // car.vel[1] += car.acc[1] * (curTime - car.time) / 1000
-        // if (car.vel[0] < 0) car.vel[0] = 0
-        // if (finishX && car.XY[0] > finishX) car.vel[0] = finishingVel
-        // check if car just crossed the finish line
         let prevXY = car.XY.slice()
-        // if (finishX && car.XY[0] + car.vel[0] * (curTime - car.time) / 1000 > finishX && car.XY[0] <= finishX) {
-        //   this.finishers.push(car.name)
-        // }
         data = car.update(curTime, false, 1)
         if (finishX && prevXY[0] <= finishX && car.XY[0] > finishX) {
           this.finishers.push(car.name)
