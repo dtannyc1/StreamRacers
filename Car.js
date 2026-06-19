@@ -15,7 +15,7 @@ export default class Car {
     // physics
     this.XY = xy
     this.vel = [200, 0]
-    this.acc = [200, 0]
+    this.acc = [175, 0]
     this.time = Date.now()
     this.showBoost = false
     this.lastBoost = null
