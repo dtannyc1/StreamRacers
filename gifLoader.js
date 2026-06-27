@@ -1,4 +1,4 @@
-import { parseGIF, decompressFrames } from 'https://cdn.jsdelivr.net/npm/gifuct-js/+esm'
+import { parseGIF, decompressFrames } from 'https://esm.sh/gifuct-js'
 
 export const isGifUrl = (url) =>
   url?.toLowerCase().endsWith('.gif')
