@@ -35,6 +35,10 @@ export default class CarManager {
           } 
         }
       }
+      // Override for Capybara Day (July 10th)
+      if (today.getMonth() === 6 && today.getDate() === 8) {
+        this.carOverride = CAPYCARA
+      }
     } catch (err) {
       console.warn('Failed to load car data:', err)
       this.customCarData = {}
@@ -275,4 +279,165 @@ const DEFAULT_CAR_DATA = {
         }
     ],
     "name": "Default Car"
+}
+
+const CAPYCARA = {
+  "name": "Capicara",
+  "assets": [
+    {
+      "id": "c130eab6-d57c-4530-a8f8-f0d9235ec244",
+      "name": "Avatar",
+      "spriteUrl": "https://static-cdn.jtvnw.net/jtv_user_pictures/2b2c6189-0ed0-496a-b7d1-850944989278-profile_image-300x300.png",
+      "type": "avatar",
+      "tl": [
+        -106.40566037735849,
+        -196.2048867924528
+      ],
+      "dim": [
+        80,
+        80
+      ],
+      "theta_0": 0,
+      "colorRemap": {
+        "enabled": false,
+        "sourceColor": "#FF001A"
+      }
+    },
+    {
+      "id": "3a017f71-8a17-47d6-9963-7f23b1b23e5a",
+      "name": "front1",
+      "spriteUrl": "https://cdn.streamelements.com/uploads/01knyjfmgws0vg2hx29fpmmhge.png",
+      "type": "oscillating",
+      "baseDim": [
+        200,
+        200
+      ],
+      "tl": [
+        -200.83102493074793,
+        -201.66204986149586
+      ],
+      "dim": [
+        200,
+        200
+      ],
+      "cr": [
+        -55.5480060628234,
+        -37.98280457847698
+      ],
+      "theta_0": 0.29670597283903605,
+      "minTheta": -0.5235987755982988,
+      "maxTheta": 0.5235987755982988,
+      "phase": 0.017453292519943295,
+      "radius": 33,
+      "handleAngle": 1.6072783699771453
+    },
+    {
+      "id": "a62a22ff-dbb5-4947-b45a-e1d0ffd49b6e",
+      "name": "back1",
+      "spriteUrl": "https://cdn.streamelements.com/uploads/01knyjj0kqawn58t8hdhkz4517.png",
+      "type": "oscillating",
+      "baseDim": [
+        200,
+        200
+      ],
+      "tl": [
+        -200.83102493074793,
+        -201.66204986149586
+      ],
+      "dim": [
+        200,
+        200
+      ],
+      "cr": [
+        -172.2932890816913,
+        -33.73752155960905
+      ],
+      "theta_0": -0.4537856055185257,
+      "minTheta": -0.5235987755982988,
+      "maxTheta": 0.5235987755982988,
+      "phase": 3.787364476827695,
+      "radius": 33,
+      "handleAngle": 2.0318433254336803
+    },
+    {
+      "id": "470cbe11-bb2b-45c2-bed1-bad2cca25215",
+      "name": "Vehicle",
+      "spriteUrl": "https://cdn.streamelements.com/uploads/01knyjcpyrjwp3bv7yw5dhnn0m.png",
+      "type": "static",
+      "baseDim": [
+        200,
+        200
+      ],
+      "tl": [
+        -197.16981132075472,
+        -197.87735849056602
+      ],
+      "dim": [
+        200,
+        200
+      ],
+      "theta_0": 0,
+      "colorRemap": {
+        "enabled": false,
+        "sourceColor": "#FF001A"
+      }
+    },
+    {
+      "id": "96a3db2a-1fec-4855-a0d0-2baaf742f82a",
+      "name": "back2",
+      "spriteUrl": "https://cdn.streamelements.com/uploads/01knyjdkn9v46gcdsfwayaa448.png",
+      "type": "oscillating",
+      "baseDim": [
+        200,
+        200
+      ],
+      "tl": [
+        -206.3679245283019,
+        -201.41509433962264
+      ],
+      "dim": [
+        200,
+        200
+      ],
+      "cr": [
+        -168.63207547169813,
+        -36.32075471698114
+      ],
+      "theta_0": 0.4886921905584123,
+      "minTheta": -0.5235987755982988,
+      "maxTheta": 0.5235987755982988,
+      "phase": 5.340707511102648,
+      "radius": 33,
+      "handleAngle": 1.1335069895441605
+    },
+    {
+      "id": "18a4a64a-ae8d-470a-a871-ddcaf07279c4",
+      "name": "front2",
+      "spriteUrl": "https://cdn.streamelements.com/uploads/01knyjgjgf5mhcpr3sq22sjc7j.png",
+      "type": "oscillating",
+      "baseDim": [
+        200,
+        200
+      ],
+      "tl": [
+        -196.4622641509434,
+        -202.03248314430567
+      ],
+      "dim": [
+        200,
+        200
+      ],
+      "cr": [
+        -59.66981132075472,
+        -33.400407672607535
+      ],
+      "theta_0": -0.5235987755982988,
+      "minTheta": -0.5235987755982988,
+      "maxTheta": 0.5235987755982988,
+      "phase": 2.844886680750757,
+      "radius": 33,
+      "handleAngle": 2.0719348969351774
+    }
+  ],
+  "disabled": false
 }
