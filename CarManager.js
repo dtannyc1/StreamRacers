@@ -37,7 +37,7 @@ export default class CarManager {
       }
       // Override for Capybara Day (July 10th)
       const today = new Date();
-      if (today.getMonth() === 6 && today.getDate() === 8) {
+      if (today.getMonth() === 6 && today.getDate() === 10) {
         this.carOverride = CAPYCARA
         console.log('Happy Capybara day! Car override loaded:', this.carOverride.name)
       }
