@@ -36,8 +36,10 @@ export default class CarManager {
         }
       }
       // Override for Capybara Day (July 10th)
+      const today = new Date();
       if (today.getMonth() === 6 && today.getDate() === 8) {
         this.carOverride = CAPYCARA
+        console.log('Happy Capybara day! Car override loaded:', this.carOverride.name)
       }
     } catch (err) {
       console.warn('Failed to load car data:', err)
