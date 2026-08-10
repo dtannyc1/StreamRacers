@@ -3,6 +3,7 @@ import { filterRaces, calcPoints, parseDate } from "../../shared/leaderboardFilt
 import StatCard from "./StatCard"
 import RaceLogRow from "./RaceLogRow"
 import TabBar from "./TabBar"
+import { useKVStore } from "../../context/KVStoreContext"
 
 const PERIOD_TABS = [
   { id: "day",     label: "Day" },
@@ -14,6 +15,7 @@ const PERIOD_TABS = [
 export default function PlayerLookup({ races, refDate, initialQuery = "", initialPeriod = "month" }) {
   const [query,  setQuery]  = useState(initialQuery)
   const [period, setPeriod] = useState(initialPeriod)
+  const { raceSettings } = useKVStore()
 
   const raceSet = useMemo(
     () => filterRaces(races, period, refDate),
@@ -49,7 +51,7 @@ export default function PlayerLookup({ races, refDate, initialQuery = "", initia
     const avgPos = (positions.reduce((a, b) => a + b, 0) / positions.length).toFixed(1)
     const points = userRaces.reduce((sum, r) => {
       const pos = r.racers.findIndex((n) => n.toLowerCase() === lc) + 1
-      return sum + calcPoints(pos, r.racers.length)
+      return sum + calcPoints(pos, r.racers.length, (raceSettings?.pointsConfig ?? {}))
     }, 0)
 
     return { wins, podiums, points, races: userRaces.length, avgPos }

@@ -5,7 +5,7 @@ import { useKVStore } from "../../context/KVStoreContext"
 
 export default function LeaderPanel({ raceSet, label, sub, onNameClick, mode }) {
   const { raceSettings } = useKVStore()
-  const stats   = useMemo(() => buildStats(raceSet, (raceSettings?.removeUsers ?? [])), [raceSet])
+  const stats   = useMemo(() => buildStats(raceSet, (raceSettings?.removeUsers ?? []), (raceSettings?.pointsConfig ?? {})), [raceSet])
   const leaders = useMemo(() => sortedLeaders(stats),  [stats])
 
   return (

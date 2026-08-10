@@ -108,13 +108,6 @@ Twitch badges: event.data.badges => Array of objects with {type: 'broadcaster' |
 ## Leaderboard Changes
 - Settings for Race history overlay appearance - fonts, colors, etc
 
-- Custom point setup
-  - Allows streamers to change point distribution
-  - What does the interface look like?
-
-## Racer List
-- Car preview image
-
 ## Racer Editor
 - Add y-animation / x-animation to car in general
   - Bounce logic

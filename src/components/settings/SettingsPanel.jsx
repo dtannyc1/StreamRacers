@@ -4,6 +4,7 @@ import { DEFAULT_RACE_SETTINGS } from '../../context/KVStoreContext'
 import { getTwitchUser } from '../../lib/twitch'
 import ErrorNewUser from '../ErrorNewUser'
 import UploadButton from '../UploadButton'
+import { calcPoints, DEFAULT_POINTS_CONFIG } from '../../shared/leaderboardFilters'
 
 const DEV_MODE = import.meta.env.VITE_ENABLE_DEV_MODE === 'true'
 
@@ -112,7 +113,7 @@ const MessageInput = ({ label, value, onChange, hint }) => (
   </label>
 )
 
-const NumInput = ({ label, value, onChange, step = 1 }) => (
+const NumInput = ({ label, value, onChange, step = 1, disabled = false }) => (
   <label className="flex flex-col gap-1">
     <span className="text-xs text-gray-400">{label}</span>
     <input
@@ -120,7 +121,8 @@ const NumInput = ({ label, value, onChange, step = 1 }) => (
       step={step}
       value={Math.round(value * 100) / 100}
       onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-      className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
+      className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500 w-full disabled:opacity-40"
+      disabled={disabled}
     />
   </label>
 )
@@ -454,6 +456,143 @@ const SettingsPanel = () => {
           )}
       </select>
 
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Leaderboard Point Distribution" defaultCollapsed={true}>
+        <p className="text-sm text-gray-500">
+          Configure how many points racers earn based on their finishing position. 
+          You can set a maximum points cap and specify special points for certain positions.
+        </p>
+        <p className="text-sm text-gray-500">
+          For relative points type, the points are calculated as (maxPointsCap + modifier), so you can set 
+          negative modifiers to give fewer points or positive modifiers to give more points. 
+          For fixed points type, the modifier is the exact number of points awarded regardless of the max points cap.
+        </p>
+        <NumInput
+          label="Max Points"
+          value={settings.pointsConfig?.maxPointsCap ?? DEFAULT_POINTS_CONFIG.maxPointsCap}
+          onChange={(v) => update({ pointsConfig: { ...(settings.pointsConfig ?? DEFAULT_POINTS_CONFIG), maxPointsCap: v } })}
+        />
+        <NumInput
+          label="Min Points"
+          value={settings.pointsConfig?.minPointsCap ?? DEFAULT_POINTS_CONFIG.minPointsCap}
+          onChange={(v) => update({ pointsConfig: { ...(settings.pointsConfig ?? DEFAULT_POINTS_CONFIG), minPointsCap: v } })}
+        />
+        <NumInput
+          label="Default Points for Other Positions"
+          value={settings.pointsConfig?.defaultPoints ?? DEFAULT_POINTS_CONFIG.defaultPoints}
+          onChange={(v) => update({ pointsConfig: { ...(settings.pointsConfig ?? DEFAULT_POINTS_CONFIG), defaultPoints: v } })}
+        />
+        <p className="text-sm text-gray-500">
+          The table below shows points awarded for each position based on the current settings, 
+          assuming different numbers of racers, R. The "last" position applies to the racer who finishes last, 
+          regardless of how many racers there are.
+        </p>
+        <div className="space-y-3">
+          {
+            Object.entries(settings.pointsConfig?.specialPositions || DEFAULT_POINTS_CONFIG.specialPositions).map(([pos, config]) => (
+              <div key={pos} className="flex items-end gap-2">
+                <div className="flex flex-col items-center">
+                  {pos === 'last' && <span className="text-sm text-gray-400 w-26 mb-9">Position 11...R-1</span>}
+                  <span className="text-sm text-gray-400 w-26 mb-2">Position {pos}</span>
+                </div>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Point Type</span>
+                  <select
+                    value={config.base}
+                    onChange={(e) => update({ pointsConfig: { 
+                      ...(settings.pointsConfig ?? DEFAULT_POINTS_CONFIG), 
+                      specialPositions: { 
+                        ...(settings.pointsConfig?.specialPositions ?? DEFAULT_POINTS_CONFIG.specialPositions), 
+                        [pos]: { ...config, base: e.target.value } 
+                      } 
+                    }})}
+                    className="rounded bg-gray-700 border border-gray-600 px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500 disabled:opacity-40"
+                    disabled={pos === 'last' && !(settings.pointsConfig?.enforceLastPositionRule ?? DEFAULT_POINTS_CONFIG.enforceLastPositionRule)}
+                  >
+                    <option value="max">Relative Points</option>
+                    <option value="flat">Fixed Points</option>
+                  </select>
+                </label>
+                {
+                  config.base === 'flat' && (
+                    <NumInput
+                      label="Points"
+                      value={config.modifier}
+                      onChange={(v) => update({ pointsConfig: { 
+                        ...(settings.pointsConfig ?? DEFAULT_POINTS_CONFIG), 
+                        specialPositions: { 
+                          ...(settings.pointsConfig?.specialPositions ?? DEFAULT_POINTS_CONFIG.specialPositions), 
+                          [pos]: { ...config, modifier: v } 
+                        } 
+                      }})}
+                      disabled={pos === 'last' && !(settings.pointsConfig?.enforceLastPositionRule ?? DEFAULT_POINTS_CONFIG.enforceLastPositionRule)}
+                    />
+                  )
+                }
+                {
+                  config.base === 'max' && (
+                    <NumInput
+                      label="Modifier"
+                      value={config.modifier}
+                      onChange={(v) => update({ pointsConfig: { 
+                        ...(settings.pointsConfig ?? DEFAULT_POINTS_CONFIG), 
+                        specialPositions: { 
+                          ...(settings.pointsConfig?.specialPositions ?? DEFAULT_POINTS_CONFIG.specialPositions), 
+                          [pos]: { ...config, modifier: v } 
+                        } 
+                      }})}
+                      disabled={pos === 'last' && !(settings.pointsConfig?.enforceLastPositionRule ?? DEFAULT_POINTS_CONFIG.enforceLastPositionRule)}
+                    />
+                  )
+                }
+                {
+                  [15,10,9,8,7,6,5].map((numRacers) => (
+                    <div key={numRacers} className="flex flex-col items-center w-5">
+                      {
+                        pos === '1' && (
+                          <span className="text-sm text-gray-100 mb-3">{numRacers > 10 ? '10R+' : `${numRacers}R`}</span>
+                        )
+                      }
+                      {
+                        (pos === 'last' && numRacers > 10) ?
+                          <div key={numRacers} className="flex flex-col items-center">
+                            <span className="text-sm text-gray-500 mb-10 mt-4">
+                              {calcPoints(11, numRacers, settings.pointsConfig ?? DEFAULT_POINTS_CONFIG)}
+                            </span>
+                            <span className="text-sm text-gray-500 mb-1.5">
+                              {calcPoints(numRacers, numRacers, settings.pointsConfig ?? DEFAULT_POINTS_CONFIG)}
+                            </span>
+                          </div> :
+                          (parseInt(pos) <= numRacers) ?
+                              <span key={numRacers} className="text-sm text-gray-500 mb-1.5">
+                                {calcPoints(parseInt(pos), numRacers, settings.pointsConfig ?? DEFAULT_POINTS_CONFIG)}
+                              </span> :
+                              <div key={numRacers} className="flex flex-col items-center">
+                                { (pos === 'last') && <span key={numRacers} className="text-xs text-gray-500 mb-11.5"> - </span>}
+                                <span key={numRacers} className="text-xs text-gray-500 mb-2"> - </span>
+                              </div>
+                      }
+                      
+                    </div>
+                  ))
+                }
+                {
+                  pos === 'last' && (
+                    <label className="flex items-center gap-3 cursor-pointer mb-0.5">
+                      <input
+                        type="checkbox"
+                        checked={settings.pointsConfig?.enforceLastPositionRule ?? DEFAULT_POINTS_CONFIG.enforceLastPositionRule}
+                        onChange={(e) => update({ pointsConfig: { ...settings.pointsConfig, enforceLastPositionRule: e.target.checked } })}
+                        className="w-4 h-4 accent-purple-500"
+                      />
+                      <span className="text-sm text-white hidden md:!inline">Enforce Last Position Rule</span>
+                    </label>
+                  )
+                }
+              </div>
+          ))}
+        </div>  
       </CollapsibleSection>
 
       <CollapsibleSection title="Chat Commands" defaultCollapsed={true}>
